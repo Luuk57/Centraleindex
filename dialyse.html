@@ -597,7 +597,7 @@
                     </div>
                 </div>
 
-                <!-- 2. UF BOX (AUTOMATISCH GEVULD MAAR AANPASBAAR) -->
+                <!-- 2. UF BOX -->
                 <div class="sub-section-box" id="ufBox">
                     <div class="form-group">
                         <label>Soort Dialyse</label>
@@ -780,7 +780,7 @@
         let beschikbareVerpleging = ["Jan Jansen", "Marie de Vries", "Ahmed el Amrani", "Lisa Bakker"];
         let geselecteerdeVerpleging = [];
 
-        // UF Simulatie & Timer variabelen
+        // UF Simulatie & Timer variabelen (met doorlopende timestamps)
         let isTimerRunning = false;
         let timerTargetTime = null;
         let isDoorgaanGekozen = false;
@@ -915,7 +915,7 @@
             document.getElementById('dispClockBp').innerText = `${toonText} (${laatste.hart} bpm)`;
         }
 
-        // Lokale opslag helper tijdens typen
+        // Lokale opslag inclusief timersharing voor herstel bij uitval of herstart
         function slaLokaalOp() {
             let data = {
                 duur: document.getElementById('valDuurUur').value,
@@ -935,7 +935,10 @@
                 geselecteerdeVerpleging: geselecteerdeVerpleging,
                 bloeddrukMetingen: bloeddrukMetingen,
                 soortDialyse: actieveSoortDialyse,
-                huidigUfGeweestMl: huidigUfGeweestMl
+                huidigUfGeweestMl: huidigUfGeweestMl,
+                isTimerRunning: isTimerRunning,
+                timerStartTimestamp: timerStartTimestamp,
+                timerTargetTime: timerTargetTime
             };
             localStorage.setItem('dialyse_form_concept', JSON.stringify(data));
         }
@@ -963,15 +966,22 @@
                 if (d.shuntCheck !== undefined) document.getElementById('checkShuntflow').checked = d.shuntCheck;
                 if (d.shuntVal) document.getElementById('valShuntflow').value = d.shuntVal;
                 if (d.notitie) document.getElementById('valNotitie').value = d.notitie;
-                if (d.huidigUfGeweestMl) huidigUfGeweestMl = d.huidigUfGeweestMl;
                 if (d.geselecteerdeVerpleging) geselecteerdeVerpleging = d.geselecteerdeVerpleging;
                 if (d.bloeddrukMetingen) {
                     bloeddrukMetingen = d.bloeddrukMetingen;
                     updateBloeddrukLijstEnScherm();
                 }
                 if (d.soortDialyse) setSoortDialyse(d.soortDialyse);
+                
                 berekenUF();
                 berekenWerkelijkeUF();
+
+                // Herstel lopende sessietimer na uitval / herstart
+                if (d.isTimerRunning && d.timerStartTimestamp && d.timerTargetTime) {
+                    isTimerRunning = true;
+                    timerStartTimestamp = d.timerStartTimestamp;
+                    timerTargetTime = d.timerTargetTime;
+                }
             } catch (e) {}
         }
 
@@ -979,6 +989,9 @@
             localStorage.removeItem('dialyse_form_concept');
             bloeddrukMetingen = [];
             huidigUfGeweestMl = 0;
+            isTimerRunning = false;
+            timerStartTimestamp = null;
+            timerTargetTime = null;
             updateBloeddrukLijstEnScherm();
         }
 
@@ -1151,7 +1164,6 @@
             document.getElementById('valStartTijd').value = formatDatetimeLocal(nu);
             berekenAutomatischeEindtijd();
             bepaalTotaalDoelVanIngesteld();
-            slaLokaalOp();
 
             let stopVal = document.getElementById('valStopTijd').value;
             if (stopVal) {
@@ -1161,6 +1173,7 @@
                 isDoorgaanGekozen = false;
                 document.getElementById('analogueClock').classList.remove('alarm-state');
                 document.getElementById('alarmModal').style.display = 'none';
+                slaLokaalOp();
             }
         }
 
@@ -1206,7 +1219,7 @@
 
             let countdownEl = document.getElementById('countdownDisplay');
 
-            if (isTimerRunning && timerTargetTime) {
+            if (isTimerRunning && timerTargetTime && timerStartTimestamp) {
                 let overms = timerTargetTime - nu.getTime();
 
                 let duurUur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
