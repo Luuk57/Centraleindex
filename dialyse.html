@@ -147,6 +147,7 @@
             display: flex; align-items: center; justify-content: center;
             transition: all 0.3s ease;
             margin-top: 4px;
+            overflow: hidden;
         }
 
         .dialysis-console.ponti-mode .center-clock-panel {
@@ -159,6 +160,19 @@
         .dialysis-console.ponti-mode .clock-center-digital {
             font-size: 28px;
             padding: 8px 18px;
+        }
+
+        /* TRANSARANTE BINNENSTE VOORTGANGSCIRKEL */
+        .clock-progress-circle {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: rgba(248, 231, 28, 0.35); /* Start geel doorzichtig */
+            transition: height 0.5s linear, background-color 0.5s linear;
+            z-index: 1;
+            pointer-events: none;
         }
 
         .analogue-clock.alarm-state {
@@ -177,6 +191,7 @@
             transform-origin: 50% 87px;
             border-radius: 1px;
             opacity: 0.8;
+            z-index: 2;
         }
         .ponti-mode .hour-mark {
             transform-origin: 50% 117px;
@@ -194,6 +209,7 @@
             border-radius: 6px;
             border: 1px solid rgba(255,255,255,0.2);
             letter-spacing: -0.5px;
+            z-index: 3;
         }
 
         .clock-action-row {
@@ -477,9 +493,10 @@
                     <div class="value" id="dispArt">---/---</div>
                 </div>
 
-                <!-- Midden: De grote ronde klok met countdown EN bloeddruk weergave -->
+                <!-- Midden: De grote ronde klok met countdown EN binnenste voortgangscirkel -->
                 <div class="center-clock-panel" id="clockPanel">
                     <div class="analogue-clock" id="analogueClock">
+                        <div class="clock-progress-circle" id="clockProgressCircle"></div>
                         <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
                     </div>
                     <div class="clock-action-row">
@@ -780,7 +797,7 @@
         let beschikbareVerpleging = ["Jan Jansen", "Marie de Vries", "Ahmed el Amrani", "Lisa Bakker"];
         let geselecteerdeVerpleging = [];
 
-        // UF Simulatie & Timer variabelen (met doorlopende timestamps)
+        // UF Simulatie & Timer variabelen
         let isTimerRunning = false;
         let timerTargetTime = null;
         let isDoorgaanGekozen = false;
@@ -915,7 +932,6 @@
             document.getElementById('dispClockBp').innerText = `${toonText} (${laatste.hart} bpm)`;
         }
 
-        // Lokale opslag inclusief timersharing voor herstel bij uitval of herstart
         function slaLokaalOp() {
             let data = {
                 duur: document.getElementById('valDuurUur').value,
@@ -976,7 +992,6 @@
                 berekenUF();
                 berekenWerkelijkeUF();
 
-                // Herstel lopende sessietimer na uitval / herstart
                 if (d.isTimerRunning && d.timerStartTimestamp && d.timerTargetTime) {
                     isTimerRunning = true;
                     timerStartTimestamp = d.timerStartTimestamp;
@@ -992,6 +1007,7 @@
             isTimerRunning = false;
             timerStartTimestamp = null;
             timerTargetTime = null;
+            document.getElementById('clockProgressCircle').style.height = '0%';
             updateBloeddrukLijstEnScherm();
         }
 
@@ -1218,6 +1234,7 @@
             document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
 
             let countdownEl = document.getElementById('countdownDisplay');
+            let progressCircle = document.getElementById('clockProgressCircle');
 
             if (isTimerRunning && timerTargetTime && timerStartTimestamp) {
                 let overms = timerTargetTime - nu.getTime();
@@ -1230,6 +1247,16 @@
                 let voortgangFractie = verlopenMs / totaleDuurMs;
                 if (voortgangFractie > 1) voortgangFractie = 1;
 
+                // Binnenste cirkel vullen en kleur geleidelijk laten verschuiven van geel naar groen
+                let hoogtePct = Math.round(voortgangFractie * 100);
+                progressCircle.style.height = hoogtePct + '%';
+
+                // Kleurinterpolaatje (geel naar groen naarmate de voortgang vordert)
+                let rood = Math.round(248 - (248 - 16) * voortgangFractie);
+                let groen = Math.round(231 + (124 - 231) * (voortgangFractie * 0.2)); // subtiele kleurovergang
+                let blauw = Math.round(28 + (65 - 28) * voortgangFractie);
+                progressCircle.style.backgroundColor = `rgba(${rood}, ${groen}, ${blauw}, 0.38)`;
+
                 huidigUfGeweestMl = Math.round(totaalUfDoelMl * voortgangFractie);
                 let overgeblevenUfDoel = totaalUfDoelMl - huidigUfGeweestMl;
                 if (overgeblevenUfDoel < 0) overgeblevenUfDoel = 0;
@@ -1239,6 +1266,7 @@
 
                 if (overms <= 0) {
                     countdownEl.innerText = "00:00:00";
+                    progressCircle.style.height = '100%';
                     if (!isDoorgaanGekozen) {
                         document.getElementById('analogueClock').classList.add('alarm-state');
                         document.getElementById('alarmModal').style.display = 'flex';
@@ -1257,6 +1285,7 @@
                 }
             } else {
                 countdownEl.innerText = `${uuu}:${mmm}:${sss}`;
+                progressCircle.style.height = '0%';
             }
         }
 
@@ -1290,7 +1319,10 @@
         function genereerUurStrepen() {
             let clock = document.getElementById('analogueClock');
             let countdownEl = document.getElementById('countdownDisplay');
+            let progressCircle = document.getElementById('clockProgressCircle');
+            
             clock.innerHTML = '';
+            clock.appendChild(progressCircle);
             clock.appendChild(countdownEl);
 
             for (let i = 0; i < 12; i++) {
