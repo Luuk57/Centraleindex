@@ -19,6 +19,7 @@
             --red-bg: #fde7e9;
             --green-ok: #107c41;
             --green-bg: #dff6dd;
+            --orange-warn: #ca5010;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
@@ -60,7 +61,7 @@
 
         /* CONTENT CONTAINER */
         .content-body {
-            flex: 1; padding: 15px; overflow-y: auto; width: 100%; max-width: 700px; margin: 0 auto;
+            flex: 1; padding: 15px; overflow-y: auto; width: 100%; max-width: 800px; margin: 0 auto;
         }
 
         .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
@@ -81,11 +82,14 @@
         table.admin-table th, table.admin-table td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
         table.admin-table th { background: var(--win-header-bg); color: white; font-weight: 600; }
 
-        .badge-admin { background: #eef6fc; color: var(--win-blue); border: 1px solid #bce0fd; padding: 2px 6px; border-radius: 10px; font-weight: 700; font-size: 10px; }
-        .badge-user { background: #f1f1f1; color: var(--text-secondary); border: 1px solid #d1d1d1; padding: 2px 6px; border-radius: 10px; font-weight: 700; font-size: 10px; }
+        .badge-admin { background: #eef6fc; color: var(--win-blue); border: 1px solid #bce0fd; padding: 2px 6px; border-radius: 10px; font-weight: 700; font-size: 10px; display: inline-block; }
+        .badge-user { background: #f1f1f1; color: var(--text-secondary); border: 1px solid #d1d1d1; padding: 2px 6px; border-radius: 10px; font-weight: 700; font-size: 10px; display: inline-block; }
 
-        .btn-small-del { padding: 4px 8px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; font-weight: bold; background: var(--red-alert); }
-        .btn-small-del:hover { background: #a80000; }
+        .btn-small { padding: 4px 8px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; font-weight: bold; margin-right: 3px; }
+        .btn-edit { background: var(--win-blue); }
+        .btn-edit:hover { background: var(--win-blue-hover); }
+        .btn-del { background: var(--red-alert); }
+        .btn-del:hover { background: #a80000; }
 
         .back-link { display: inline-block; margin-bottom: 10px; font-size: 11px; font-weight: 600; color: var(--win-blue); text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
@@ -99,7 +103,7 @@
     <!-- WINDOWS TITLEBAR -->
     <div class="win-titlebar">
         <div class="win-title-left">
-            <span>⚙️ Admin Beheerpaneel</span>
+            <span>⚙️ Admin Gebruikersbeheer</span>
             <span id="adminNaamLabel" style="font-size: 11px; opacity: 0.8; font-weight: normal;"></span>
         </div>
         <div class="win-title-actions">
@@ -112,43 +116,45 @@
     <div class="content-body">
         <a href="index.html" class="back-link">← Terug naar Dashboard</a>
 
-        <!-- NIEUWE GEBRUIKER TOEVOEGEN -->
+        <!-- REGISTREREN / EDIT PANEEL -->
         <div class="card">
-            <div class="section-title">➕ Nieuwe Gebruiker Registreren</div>
+            <div class="section-title" id="paneelTitel">➕ Nieuwe Gebruiker Registreren</div>
             
             <div class="row-inputs">
                 <div class="form-group">
                     <label>Gebruikersnaam</label>
-                    <input type="text" id="nieuwNaam" placeholder="Bijv. pieter">
+                    <input type="text" id="inputNaam" placeholder="Bijv. pieter">
                 </div>
                 <div class="form-group">
                     <label>Wachtwoord</label>
-                    <input type="text" id="nieuwWw" placeholder="Wachtwoord">
+                    <input type="text" id="inputWw" placeholder="Wachtwoord">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Toegangsniveau / Rol</label>
-                <select id="nieuwRol">
+                <select id="inputRol">
                     <option value="gebruiker">Gebruiker (Alleen eigen data)</option>
                     <option value="admin">Admin (Volledige toegang)</option>
                 </select>
             </div>
 
-            <button type="button" class="action-btn" onclick="voegGebruikerToe()">GEBRUIKER OPSLAAN IN CLOUD</button>
+            <button type="button" class="action-btn" id="btnActie" onclick="slaGebruikerOp()">GEBRUIKER OPSLAAN IN CLOUD</button>
+            <button type="button" class="action-btn" id="btnAnnuleer" onclick="resetFormulier()" style="background: #666; display: none; margin-top: 4px;">BEWERKEN ANNULEREN</button>
+            
             <div id="feedbackMsg" class="alert-box alert-success"></div>
         </div>
 
-        <!-- OVERZICHT BESTAANDE GEBRUIKERS -->
+        <!-- OVERZICHT LIJST -->
         <div class="card">
-            <div class="section-title">👥 Beheer Geregistreerde Gebruikers</div>
+            <div class="section-title">👥 Overzicht Geregistreerde Personen</div>
             <table class="admin-table">
                 <thead>
                     <tr>
                         <th>Gebruikersnaam</th>
                         <th>Rol</th>
                         <th>Wachtwoord</th>
-                        <th style="width: 70px; text-align: center;">Actie</th>
+                        <th style="width: 120px; text-align: center;">Acties</th>
                     </tr>
                 </thead>
                 <tbody id="gebruikersTabelBody">
@@ -159,16 +165,15 @@
     </div>
 
     <script>
-        // Jouw cloud JSONBin ID voor gebruikersbeheer
         const JSONBIN_ID = "6ad06e3cffd5d160536c7baa"; 
         const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
 
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker');
         let gebruikerRol = localStorage.getItem('gebruiker_rol');
         let gebruikersDatabase = {};
+        let wordtBewerkt = null; // Houdt bij welke gebruikersnaam momenteel bewerkt wordt
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Beveiliging: als je geen admin bent, stuur direct terug naar dashboard/login
             if (!actieveGebruiker || gebruikerRol !== 'admin') {
                 alert('Toegang geweigerd. Alleen admins hebben toegang tot deze pagina.');
                 window.location.href = 'index.html';
@@ -213,10 +218,10 @@
             .catch(err => console.error("Fout bij opslaan in cloud:", err));
         }
 
-        function voegGebruikerToe() {
-            let naam = document.getElementById('nieuwNaam').value.trim().toLowerCase();
-            let ww = document.getElementById('nieuwWw').value.trim();
-            let rol = document.getElementById('nieuwRol').value;
+        function slaGebruikerOp() {
+            let naam = document.getElementById('inputNaam').value.trim().toLowerCase();
+            let ww = document.getElementById('inputWw').value.trim();
+            let rol = document.getElementById('inputRol').value;
             let feedback = document.getElementById('feedbackMsg');
 
             if (!naam || !ww) {
@@ -224,30 +229,61 @@
                 return;
             }
 
-            if (gebruikersDatabase[naam]) {
+            // Als we een nieuwe toevoegen en de naam bestaat al
+            if (!wordtBewerkt && gebruikersDatabase[naam]) {
                 alert('Deze gebruikersnaam bestaat al!');
                 return;
+            }
+
+            // Als de naam is gewijzigd tijdens het bewerken, oude verwijderen
+            if (wordtBewerkt && wordtBewerkt !== naam) {
+                delete gebruikersDatabase[wordtBewerkt];
             }
 
             gebruikersDatabase[naam] = { rol: rol, wachtwoord: ww };
             slaNaarBin();
 
-            document.getElementById('nieuwNaam').value = '';
-            document.getElementById('nieuwWw').value = '';
+            let actieTekst = wordtBewerkt ? `Gebruiker '${naam}' bijgewerkt!` : `Gebruiker '${naam}' succesvol geregistreerd!`;
+            
+            resetFormulier();
 
-            feedback.innerText = `Gebruiker '${naam}' succesvol toegevoegd!`;
+            feedback.innerText = actieTekst;
             feedback.style.display = 'block';
             setTimeout(() => feedback.style.display = 'none', 4000);
         }
 
+        window.startBewerken = function(naam) {
+            let info = gebruikersDatabase[naam];
+            document.getElementById('inputNaam').value = naam;
+            document.getElementById('inputWw').value = info.wachtwoord;
+            document.getElementById('inputRol').value = info.rol;
+
+            wordtBewerkt = naam;
+            document.getElementById('paneelTitel').innerText = `✏️ Gebruiker Bewijken: ${naam}`;
+            document.getElementById('btnActie').innerText = "WIJZIGINGEN OPSLAAN";
+            document.getElementById('btnAnnuleer').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function resetFormulier() {
+            document.getElementById('inputNaam').value = '';
+            document.getElementById('inputWw').value = '';
+            document.getElementById('inputRol').value = 'gebruiker';
+            wordtBewerkt = null;
+            document.getElementById('paneelTitel').innerText = "➕ Nieuwe Gebruiker Registreren";
+            document.getElementById('btnActie').innerText = "GEBRUIKER OPSLAAN IN CLOUD";
+            document.getElementById('btnAnnuleer').style.display = 'none';
+        }
+
         window.verwijderGebruiker = function(naam) {
             if (naam === 'admin' && actieveGebruiker === naam) {
-                alert('Je kunt jezelf als hoofd-admin niet verwijderen.');
+                alert('Je kunt jezelf als actieve hoofd-admin niet verwijderen.');
                 return;
             }
 
             if (confirm(`Weet je zeker dat je gebruiker '${naam}' wilt verwijderen?`)) {
                 delete gebruikersDatabase[naam];
+                if (wordtBewerkt === naam) resetFormulier();
                 slaNaarBin();
             }
         };
@@ -272,7 +308,8 @@
                     <td>${rolBadge}</td>
                     <td><code>${info.wachtwoord}</code></td>
                     <td style="text-align: center;">
-                        <button type="button" class="btn-small-del" onclick="verwijderGebruiker('${naam}')">Verwijder</button>
+                        <button type="button" class="btn-small btn-edit" onclick="startBewerken('${naam}')">Edit</button>
+                        <button type="button" class="btn-small btn-del" onclick="verwijderGebruiker('${naam}')">Wis</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
