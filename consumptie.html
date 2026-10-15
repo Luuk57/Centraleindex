@@ -6,174 +6,161 @@
     <title>Rollodex • Consumptie Monitor</title>
     <style>
         :root {
-            --win-blue: #0078d4;
-            --win-header-bg: #202020;
-            --card-bg: #ffffff;
-            --text-main: #1b1b1b;
-            --font-ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            --red-alert: #d13438;
-            --orange-warn: #ca5010;
-            --green-ok: #107c41;
-            --dialysis-yellow: #f8e71c;
+            --android-bg: #f8f9fa;
+            --android-primary: #1a73e8;
+            --android-primary-dark: #1557b0;
+            --android-card-bg: #ffffff;
+            --android-text: #202124;
+            --android-subtext: #5f6368;
+            --red-alert: #d93025;
+            --orange-warn: #e37400;
+            --green-ok: #188038;
+            --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
-        body, html { width: 100%; height: 100%; background: #005a9e; color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
+        body, html { width: 100%; height: 100%; background: var(--android-bg); color: var(--android-text); display: flex; flex-direction: column; overflow: hidden; }
 
-        /* WINDOWS TITLEBAR */
-        .win-titlebar {
-            background: var(--win-header-bg);
+        /* ANDROID APP BAR / HEADER */
+        .android-appbar {
+            background: var(--android-primary);
             color: #ffffff;
-            height: 42px;
-            padding: 0 12px;
+            height: 56px;
+            padding: 0 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 12px;
-            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             z-index: 10;
         }
 
-        .win-title-left { display: flex; align-items: center; gap: 8px; }
-        .win-title-right { display: flex; align-items: center; gap: 10px; }
-
-        .win-clock {
-            font-size: 11px;
-            opacity: 0.9;
-            background: rgba(255,255,255,0.08);
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.05);
+        .appbar-title {
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .win-btn {
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.1);
+        .appbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .android-clock {
+            font-size: 12px;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-weight: 500;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
             color: white;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 16px;
             cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
         }
-        .win-btn:hover { background: rgba(255,255,255,0.25); }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
 
-        /* 4 OPVALLENDE TABS BOVENAAN */
-        .tab-bar { 
-            display: flex !important; 
-            background: #202020 !important; 
-            border-bottom: 3px solid var(--win-blue) !important; 
-            flex-shrink: 0 !important; 
-            padding: 4px 4px 0 4px !important;
-            gap: 4px !important;
-            z-index: 5 !important;
-        }
-
-        .tab-btn { 
-            flex: 1 !important; 
-            padding: 12px 6px !important; 
-            font-size: 11px !important; 
-            font-weight: 800 !important; 
-            background: #333333 !important; 
-            border: 1px solid #444 !important;
-            border-bottom: none !important;
-            border-radius: 6px 6px 0 0 !important;
-            cursor: pointer !important; 
-            text-align: center !important; 
-            color: #cccccc !important; 
-            text-transform: uppercase !important;
-            transition: all 0.2s ease !important;
-        }
-
-        .tab-btn:hover {
-            background: #444444 !important;
-            color: #ffffff !important;
-        }
-
-        .tab-btn.active { 
-            background: #ffffff !important; 
-            color: var(--win-blue) !important; 
-            border-top: 3px solid var(--win-blue) !important;
-            font-weight: 900 !important;
-        }
+        /* TAB BAR - ANDROID STYLE */
+        .tab-bar { display: flex; background: #e8eaed; border-bottom: 1px solid #dadce0; flex-shrink: 0; padding: 4px; gap: 4px; }
+        .tab-btn { flex: 1; padding: 10px 4px; font-size: 11px; font-weight: 500; background: transparent; border: none; cursor: pointer; text-align: center; color: var(--android-subtext); border-radius: 8px; transition: all 0.2s; text-transform: uppercase; }
+        .tab-btn.active { background: #ffffff; color: var(--android-primary); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
         /* WORKSPACE */
-        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 12px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; position: relative; }
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 16px; background: var(--android-bg); overflow-y: auto; position: relative; }
         .tab-pane { display: none; width: 100%; max-width: 820px; }
         .tab-pane.active { display: block; }
 
-        .back-link { display: inline-block; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: #ffffff; text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); cursor: pointer; }
-        .back-link:hover { text-decoration: underline; }
+        .back-link { display: inline-block; margin-bottom: 12px; font-size: 12px; font-weight: 500; color: var(--android-primary); text-decoration: none; background: #e8f0fe; padding: 6px 12px; border-radius: 8px; }
+        .back-link:hover { background: #d2e3fc; }
         
-        .card { background: #ffffff; border-radius: 8px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 12px; }
-        .card-title { font-size: 13px; font-weight: 800; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--win-blue); padding-bottom: 4px; }
+        .card { background: var(--android-card-bg); border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e8eaed; margin-bottom: 16px; }
+        .card-title { font-size: 14px; font-weight: 700; color: var(--android-primary); text-transform: uppercase; margin-bottom: 12px; border-bottom: 2px solid #e8f0fe; padding-bottom: 6px; }
 
         /* VOCHTBAND & METER */
-        .fluid-progress-container { background: #eef6fc; border: 2px solid #0078d4; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 12px; }
-        .fluid-values { display: flex; justify-content: space-between; font-weight: 800; font-size: 14px; margin-bottom: 6px; }
-        .progress-bar-bg { background: #e0e0e0; height: 22px; border-radius: 11px; overflow: hidden; position: relative; border: 1px solid #bbb; }
+        .fluid-progress-container { background: #f8f9fa; border: 1px solid #dadce0; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 12px; }
+        .fluid-values { display: flex; justify-content: space-between; font-weight: 700; font-size: 13px; margin-bottom: 8px; color: var(--android-text); }
+        .progress-bar-bg { background: #e0e0e0; height: 24px; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #ccc; }
         .progress-bar-fill { height: 100%; width: 0%; background: var(--green-ok); transition: width 0.4s ease, background-color 0.4s ease; }
-        .progress-text-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #000; text-shadow: 0 0 3px #fff; }
+        .progress-text-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #202124; text-shadow: 0 0 3px #fff; }
 
         /* INVOER FORMULIEREN */
-        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-        .form-group label { font-size: 11px; font-weight: 700; color: #5f5f5f; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 13px; background: #fff; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .form-group label { font-size: 11px; font-weight: 500; color: var(--android-subtext); }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #dadce0; border-radius: 8px; font-size: 13px; background: #fff; outline: none; }
+        .form-group input:focus { border-color: var(--android-primary); }
         .row-inputs { display: flex; gap: 8px; align-items: center; }
         .row-inputs .form-group { flex: 1; }
 
         /* SNELKNOPPEN VOCHT */
-        .quick-ml-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
-        .btn-quick-ml { background: #eef6fc; border: 1px solid #0078d4; color: #0078d4; font-weight: 700; padding: 10px; border-radius: 4px; cursor: pointer; text-align: center; font-size: 12px; }
-        .btn-quick-ml:hover { background: #0078d4; color: #fff; }
+        .quick-ml-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+        .btn-quick-ml { background: #e8f0fe; border: 1px solid #d2e3fc; color: var(--android-primary); font-weight: 700; padding: 10px; border-radius: 8px; cursor: pointer; text-align: center; font-size: 12px; }
+        .btn-quick-ml:hover { background: #d2e3fc; }
+
+        /* ANDROID BUTTONS */
+        .android-btn { background: var(--android-primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; }
+        .android-btn:hover { background: var(--android-primary-dark); }
+        .android-btn-green { background: var(--green-ok); }
+        .android-btn-green:hover { background: #137333; }
+        .android-btn-purple { background: #5c2d91; }
 
         /* TOUCHPADS */
-        .numeric-pad-container, .alpha-pad-container { background: #202020; border: 2px solid #0078d4; border-radius: 8px; padding: 10px; margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none; }
-        .pad-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 11px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+        .numeric-pad-container, .alpha-pad-container { background: #202020; border-radius: 12px; padding: 10px; margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none; }
+        .pad-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 11px; font-weight: 500; margin-bottom: 8px; text-transform: uppercase; }
         .numeric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .num-key { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; }
-        .num-key:hover { background: #0078d4; }
+        .num-key { background: #3c4043; color: #ffffff; border: none; border-radius: 8px; padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; }
+        .num-key:hover { background: var(--android-primary); }
         
         .alpha-row { display: flex; gap: 4px; justify-content: center; margin-bottom: 4px; }
-        .alpha-key { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 10px 8px; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; flex: 1; }
-        .alpha-key:hover { background: #0078d4; }
+        .alpha-key { background: #3c4043; color: #ffffff; border: none; border-radius: 8px; padding: 10px 8px; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; flex: 1; }
+        .alpha-key:hover { background: var(--android-primary); }
 
         /* TABEL STIJL */
-        .filter-bar { background: #f1f1f1; border: 1px solid #ddd; border-radius: 6px; padding: 10px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+        .filter-bar { background: #f1f3f4; border: 1px solid #dadce0; border-radius: 8px; padding: 10px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
         table.consumptie-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
-        table.consumptie-table th, table.consumptie-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-        table.consumptie-table th { background: var(--win-header-bg); color: white; }
+        table.consumptie-table th, table.consumptie-table td { border: 1px solid #dadce0; padding: 8px; text-align: left; }
+        table.consumptie-table th { background: #202124; color: white; font-weight: 500; }
 
-        .btn-small-del { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; background: var(--red-alert); }
-        .btn-small-edit { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; background: var(--win-blue); margin-right: 3px; }
+        .btn-small-del { padding: 4px 8px; font-size: 10px; border: none; border-radius: 6px; cursor: pointer; color: white; background: var(--red-alert); }
+        .btn-small-edit { padding: 4px 8px; font-size: 10px; border: none; border-radius: 6px; cursor: pointer; color: white; background: var(--android-primary); margin-right: 4px; }
 
         /* MEDISCHE PRINT STYLING */
         .print-only-header, .print-only-footer { display: none; }
         @media print {
             @page { size: A4 portrait; margin: 12mm 10mm; }
             body, html { background: #fff !important; color: #000 !important; overflow: visible !important; }
-            .win-titlebar, .tab-bar, .back-link, .filter-bar, .btn-small-del, .btn-small-edit, #drinkenInvoerPane, #etenInvoerPane, .card-title, .numeric-pad-container, .alpha-pad-container { display: none !important; }
+            .android-appbar, .tab-bar, .back-link, .filter-bar, .btn-small-del, .btn-small-edit, #drinkenInvoerPane, #etenInvoerPane, .card-title, .numeric-pad-container, .alpha-pad-container { display: none !important; }
             .workspace { padding: 0 !important; background: none !important; }
             .tab-pane.active { display: block !important; width: 100% !important; max-width: 100% !important; }
             .card { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
-            .print-only-header { display: block !important; border-bottom: 3px solid #0078d4; padding-bottom: 8px; margin-bottom: 12px; }
+            .print-only-header { display: block !important; border-bottom: 3px solid var(--android-primary); padding-bottom: 8px; margin-bottom: 12px; }
             .print-only-footer { display: block !important; margin-top: 24px; padding-top: 10px; border-top: 1px solid #aaa; }
         }
     </style>
 </head>
 <body>
 
-    <!-- WINDOWS TITLEBAR -->
-    <div class="win-titlebar">
-        <div class="win-title-left">
+    <!-- ANDROID APPBAR -->
+    <div class="android-appbar">
+        <div class="appbar-title">
             <span>🍵 Rollodex • Consumptie Monitor</span>
-            <span id="gebruikerTitleBadge" style="font-size: 11px; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 12px; font-weight: bold; color: var(--dialysis-yellow);">Patiënt: ...</span>
+            <span id="gebruikerTitleBadge" style="font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; color: #fbbc04;">Gebruiker: ...</span>
         </div>
-        <div class="win-title-right">
-            <div id="liveClock" class="win-clock">Laden...</div>
-            <button type="button" class="win-btn" onclick="location.reload()">🔄 Refresh</button>
+        <div class="appbar-actions">
+            <div id="liveClock" class="android-clock">--:--</div>
+            <button type="button" class="icon-btn" onclick="laadCloudData(true)" title="Cloud Vernieuwen">🔄</button>
+            <button type="button" class="icon-btn" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
         </div>
     </div>
 
@@ -181,8 +168,8 @@
     <div class="tab-bar">
         <button type="button" class="tab-btn active" id="btnDrinkenInvoer" onclick="toonTab('drinkenInvoer')">💧 Drinken Invoer</button>
         <button type="button" class="tab-btn" id="btnEtenInvoer" onclick="toonTab('etenInvoer')">🍽️ Eten Invoer</button>
-        <button type="button" class="tab-btn" id="btnDrinkenHistorie" onclick="toonTab('drinkenHistorie')">📊 Historie & Rapportage Drinken</button>
-        <button type="button" class="tab-btn" id="btnEtenHistorie" onclick="toonTab('etenHistorie')">📋 Historie & Rapportage Eten</button>
+        <button type="button" class="tab-btn" id="btnDrinkenHistorie" onclick="toonTab('drinkenHistorie')">📊 Historie Drinken</button>
+        <button type="button" class="tab-btn" id="btnEtenHistorie" onclick="toonTab('etenHistorie')">📋 Historie Eten</button>
     </div>
 
     <!-- WORKSPACE -->
@@ -190,13 +177,13 @@
 
         <!-- TAB 1: DRINKEN INVOER -->
         <div id="drinkenInvoerPane" class="tab-pane active">
-            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Rollodex Hoofdmenu</a>
+            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Hoofdmenu</a>
 
             <!-- DAGELIJKSE VOCHTBAND -->
             <div class="card">
                 <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
                     <span>💧 Vochtinname Vandaag</span>
-                    <span style="font-size:10px; font-weight:normal; text-transform:none;">Daglimiet aanpasbaar</span>
+                    <span style="font-size:10px; font-weight:normal; text-transform:none; color:var(--android-subtext);">Daglimiet aanpasbaar</span>
                 </div>
 
                 <div class="fluid-progress-container">
@@ -211,9 +198,9 @@
                 </div>
 
                 <div class="row-inputs">
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom:0;">
                         <label>Vocht Max Limiet (ml/dag)</label>
-                        <input type="text" inputmode="none" id="valVochtLimiet" value="1500" onfocus="activeerTouchpad(this)" oninput="updateVochtBalk(); slaLokaalOp();">
+                        <input type="text" inputmode="none" id="valVochtLimiet" value="1500" onfocus="activeerTouchpad(this)" oninput="updateVochtBalk();">
                     </div>
                 </div>
             </div>
@@ -253,13 +240,13 @@
                     <input type="text" inputmode="none" id="valDrinkenOmschrijving" placeholder="Bijv. Koppie koffie met melk" onfocus="activeerAlphaPad(this)">
                 </div>
 
-                <button type="button" class="win-btn" style="background:var(--green-ok); width:100%; padding:12px; font-size:13px; font-weight:bold;" onclick="slaDrinkenOp()">💾 Drinken Opslaan</button>
+                <button type="button" class="android-btn android-btn-green" style="width:100%;" onclick="slaDrinkenOp()">💾 Drinken Opslaan</button>
             </div>
         </div>
 
         <!-- TAB 2: ETEN INVOER -->
         <div id="etenInvoerPane" class="tab-pane">
-            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Rollodex Hoofdmenu</a>
+            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Hoofdmenu</a>
 
             <div class="card">
                 <div class="card-title" id="formEtenTitle">🍽️ Vaste Voeding Invoeren</div>
@@ -275,7 +262,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Portiegrootte (Optioneel)</label>
+                        <label>Portiegrootte</label>
                         <select id="valEtenPortie">
                             <option value="Normaal">Normaal</option>
                             <option value="Klein">Klein</option>
@@ -294,23 +281,23 @@
                     <input type="text" inputmode="none" id="valEtenNotitie" placeholder="Bijv. zoutarm bereid, extra eiwit" onfocus="activeerAlphaPad(this)">
                 </div>
 
-                <button type="button" class="win-btn" style="background:var(--green-ok); width:100%; padding:12px; font-size:13px; font-weight:bold;" onclick="slaEtenOp()">💾 Eten Opslaan</button>
+                <button type="button" class="android-btn android-btn-green" style="width:100%;" onclick="slaEtenOp()">💾 Eten Opslaan</button>
             </div>
         </div>
 
         <!-- TAB 3: HISTORIE & RAPPORTAGE DRINKEN -->
         <div id="drinkenHistoriePane" class="tab-pane">
-            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Rollodex Hoofdmenu</a>
+            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Hoofdmenu</a>
 
             <div class="card">
                 <div class="print-only-header">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <h2 style="color:#0078d4;">📋 CLINICAL FLUID INTAKE REPORT</h2>
+                            <h2 style="color:var(--android-primary);">📋 CLINICAL FLUID INTAKE REPORT</h2>
                             <p style="font-size:11px; color:#555;">Vochtinname & Balans Overzicht</p>
                         </div>
                         <div style="text-align:right; font-size:11px;">
-                            Patiënt: <strong id="printPatientName1">...</strong><br>
+                            Gebruiker: <strong id="printPatientName1">...</strong><br>
                             Afdrukdatum: <span id="printGeneratedDate1">...</span>
                         </div>
                     </div>
@@ -327,15 +314,15 @@
                         <label>Tot Datum:</label>
                         <input type="date" id="filterTotDrinken" onchange="vulDrinkenHistorieTabel()">
                     </div>
-                    <button type="button" class="win-btn" style="background:#5c2d91; padding:8px 12px;" onclick="resetteerDrinkenFilter()">🔄 Reset Filter</button>
-                    <button type="button" class="win-btn" style="background:var(--green-ok); padding:8px 12px;" onclick="printHistoriePdf('printGeneratedDate1')">🖨️ Exporteer PDF / Print</button>
+                    <button type="button" class="android-btn android-btn-purple" style="padding:10px 14px;" onclick="resetteerDrinkenFilter()">🔄 Reset</button>
+                    <button type="button" class="android-btn android-btn-green" style="padding:10px 14px;" onclick="printHistoriePdf('printGeneratedDate1')">🖨️ Print PDF</button>
                 </div>
 
                 <table class="consumptie-table">
                     <thead>
                         <tr>
                             <th>Datum & Tijd</th>
-                            <th>Patiënt</th>
+                            <th>Gebruiker</th>
                             <th>Categorie</th>
                             <th>Omschrijving</th>
                             <th>Vocht (ml)</th>
@@ -355,17 +342,17 @@
 
         <!-- TAB 4: HISTORIE & RAPPORTAGE ETEN -->
         <div id="etenHistoriePane" class="tab-pane">
-            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Rollodex Hoofdmenu</a>
+            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Hoofdmenu</a>
 
             <div class="card">
                 <div class="print-only-header">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <h2 style="color:#0078d4;">📋 CLINICAL DIETARY INTAKE REPORT</h2>
+                            <h2 style="color:var(--android-primary);">📋 CLINICAL DIETARY INTAKE REPORT</h2>
                             <p style="font-size:11px; color:#555;">Voedingsinname & Maaltijden Overzicht</p>
                         </div>
                         <div style="text-align:right; font-size:11px;">
-                            Patiënt: <strong id="printPatientName2">...</strong><br>
+                            Gebruiker: <strong id="printPatientName2">...</strong><br>
                             Afdrukdatum: <span id="printGeneratedDate2">...</span>
                         </div>
                     </div>
@@ -382,15 +369,15 @@
                         <label>Tot Datum:</label>
                         <input type="date" id="filterTotEten" onchange="vulEtenHistorieTabel()">
                     </div>
-                    <button type="button" class="win-btn" style="background:#5c2d91; padding:8px 12px;" onclick="resetteerEtenFilter()">🔄 Reset Filter</button>
-                    <button type="button" class="win-btn" style="background:var(--green-ok); padding:8px 12px;" onclick="printHistoriePdf('printGeneratedDate2')">🖨️ Exporteer PDF / Print</button>
+                    <button type="button" class="android-btn android-btn-purple" style="padding:10px 14px;" onclick="resetteerEtenFilter()">🔄 Reset</button>
+                    <button type="button" class="android-btn android-btn-green" style="padding:10px 14px;" onclick="printHistoriePdf('printGeneratedDate2')">🖨️ Print PDF</button>
                 </div>
 
                 <table class="consumptie-table">
                     <thead>
                         <tr>
                             <th>Datum & Tijd</th>
-                            <th>Patiënt</th>
+                            <th>Gebruiker</th>
                             <th>Type Maaltijd</th>
                             <th>Omschrijving</th>
                             <th>Bijzonderheden</th>
@@ -408,11 +395,11 @@
             </div>
         </div>
 
-        <!-- INGEBOUWD NUMERIEK TOETSENBORD -->
+        <!-- NUMERIEK TOETSENBORD -->
         <div class="numeric-pad-container" id="numericPad" style="position:fixed; bottom:10px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; z-index:999;">
             <div class="pad-header">
                 <span id="activeInputLabel">Numeriek Toetsenbord</span>
-                <button type="button" class="win-btn" onclick="sluitTouchpad()">Sluiten ✕</button>
+                <button type="button" class="icon-btn" style="font-size:11px;" onclick="sluitTouchpad()">Sluiten ✕</button>
             </div>
             <div class="numeric-grid">
                 <button type="button" class="num-key" onclick="voegNummerToe('1')">1</button>
@@ -430,11 +417,11 @@
             </div>
         </div>
 
-        <!-- INGEBOUWD ALFANUMERIEK TOETSENBORD -->
+        <!-- ALFANUMERIEK TOETSENBORD -->
         <div class="alpha-pad-container" id="alphaPad" style="position:fixed; bottom:10px; left:50%; transform:translateX(-50%); width:95%; max-width:600px; z-index:999;">
             <div class="pad-header">
-                <span id="activeAlphaLabel">Alfanumeriek Toetsenbord</span>
-                <button type="button" class="win-btn" onclick="sluitAlphaPad()">Sluiten ✕</button>
+                <span id="activeAlphaLabel">Toetsenbord</span>
+                <button type="button" class="icon-btn" style="font-size:11px;" onclick="sluitAlphaPad()">Sluiten ✕</button>
             </div>
             <div class="alpha-row">
                 <button type="button" class="alpha-key" onclick="voegAlphaToe('Q')">Q</button>
@@ -488,23 +475,30 @@
 
         let huidigeDrinkenBewerkingId = null;
         let huidigeEtenBewerkingId = null;
-
         let huidigInputVeld = null;
         let huidigAlphaVeld = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
-            document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${pNaam}`;
+            document.getElementById('gebruikerTitleBadge').innerText = `Gebruiker: ${pNaam}`;
             document.getElementById('printPatientName1').innerText = pNaam;
             document.getElementById('printPatientName2').innerText = pNaam;
 
+            if (localStorage.getItem('rollodex_fullscreen') === 'true') {
+                document.documentElement.requestFullscreen().catch(err => {});
+            }
+
             startKlok();
-            laadData();
+            laadCloudData(false);
+
+            // Automatische achtergrond-sync elke 5 seconden voor Tablet B
+            setInterval(() => {
+                laadCloudData(false);
+            }, 5000);
         });
 
         function gaNaarHoofdm(e) {
             e.preventDefault();
-            // Zoekt automatisch de juiste hoofdmenulocatie op basis van huidige pad
             let path = window.location.pathname;
             let dir = path.substring(0, path.lastIndexOf('/') + 1);
             window.location.href = dir + 'index.html';
@@ -513,7 +507,7 @@
         function startKlok() {
             setInterval(() => {
                 let nu = new Date();
-                document.getElementById('liveClock').innerText = nu.toLocaleString('nl-NL');
+                document.getElementById('liveClock').innerText = nu.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             }, 1000);
         }
 
@@ -598,14 +592,14 @@
                 drinkenLijst.unshift(item);
             }
 
-            slaNaarBin();
-            document.getElementById('valDrinkenMl').value = '';
-            document.getElementById('valDrinkenOmschrijving').value = '';
-            sluitTouchpad(); sluitAlphaPad();
-
-            updateVochtBalk();
-            vulDrinkenHistorieTabel();
-            alert('Drinken succesvol opgeslagen!');
+            slaCloudDataOp(() => {
+                document.getElementById('valDrinkenMl').value = '';
+                document.getElementById('valDrinkenOmschrijving').value = '';
+                sluitTouchpad(); sluitAlphaPad();
+                updateVochtBalk();
+                vulDrinkenHistorieTabel();
+                alert('Drinken succesvol opgeslagen in de cloud!');
+            });
         }
 
         function bewerkDrinken(id) {
@@ -624,9 +618,10 @@
         function verwijderDrinken(id) {
             if (confirm('Weet je zeker dat je deze vochtinvoer wilt verwijderen?')) {
                 drinkenLijst = drinkenLijst.filter(d => d.id !== id);
-                slaNaarBin();
-                updateVochtBalk();
-                vulDrinkenHistorieTabel();
+                slaCloudDataOp(() => {
+                    updateVochtBalk();
+                    vulDrinkenHistorieTabel();
+                });
             }
         }
 
@@ -663,13 +658,13 @@
                 etenLijst.unshift(item);
             }
 
-            slaNaarBin();
-            document.getElementById('valEtenOmschrijving').value = '';
-            document.getElementById('valEtenNotitie').value = '';
-            sluitTouchpad(); sluitAlphaPad();
-
-            vulEtenHistorieTabel();
-            alert('Voeding succesvol opgeslagen!');
+            slaCloudDataOp(() => {
+                document.getElementById('valEtenOmschrijving').value = '';
+                document.getElementById('valEtenNotitie').value = '';
+                sluitTouchpad(); sluitAlphaPad();
+                vulEtenHistorieTabel();
+                alert('Voeding succesvol opgeslagen in de cloud!');
+            });
         }
 
         function bewerkEten(id) {
@@ -689,16 +684,15 @@
         function verwijderEten(id) {
             if (confirm('Weet je zeker dat je deze voedinginvoer wilt verwijderen?')) {
                 etenLijst = etenLijst.filter(e => e.id !== id);
-                slaNaarBin();
-                vulEtenHistorieTabel();
+                slaCloudDataOp(() => {
+                    vulEtenHistorieTabel();
+                });
             }
         }
 
-        /* --- DATA HANDLING --- */
-        function laadData() {
-            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
-                headers: { 'X-Master-Key': API_KEY }
-            })
+        /* --- CLOUD DATA HANDLING --- */
+        function laadCloudData(showAlert) {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
             .then(res => res.json())
             .then(data => {
                 let rec = data.record || {};
@@ -708,11 +702,12 @@
                 updateVochtBalk();
                 vulDrinkenHistorieTabel();
                 vulEtenHistorieTabel();
+                if (showAlert) alert('Cloud gegevens succesvol ververst!');
             })
-            .catch(err => console.error(err));
+            .catch(err => console.error("Fout bij laden consumptie cloud data:", err));
         }
 
-        function slaNaarBin() {
+        function slaCloudDataOp(callback) {
             fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
             .then(res => res.json())
             .then(data => {
@@ -725,7 +720,11 @@
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
                     body: JSON.stringify(record)
                 });
-            });
+            })
+            .then(() => {
+                if (callback) callback();
+            })
+            .catch(err => console.error("Fout bij opslaan consumptie cloud data:", err));
         }
 
         function vulDrinkenHistorieTabel() {
@@ -811,24 +810,32 @@
             window.print();
         }
 
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => localStorage.setItem('rollodex_fullscreen', 'true'));
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen().then(() => localStorage.setItem('rollodex_fullscreen', 'false'));
+            }
+        }
+
         /* --- TOUCHPADS --- */
         function activeerTouchpad(el) {
             sluitAlphaPad();
             huidigInputVeld = el;
             document.getElementById('numericPad').style.display = 'block';
         }
-        function sluitTouchpad() { document.getElementById('numericPad').style.display = 'none'; }
-        function voegNummerToe(t) { if (huidigInputVeld) huidigInputVeld.value += t; }
-        function wisLaatsteTeken() { if (huidigInputVeld) huidigInputVeld.value = huidigInputVeld.value.slice(0, -1); }
+        function sluitTouchpad() { document.getElementById('numericPad').style.display = 'none'; huidigInputVeld = null; }
+        function voegNummerToe(t) { if (huidigInputVeld) { huidigInputVeld.value += t; huidigInputVeld.dispatchEvent(new Event('input', {bubbles:true})); } }
+        function wisLaatsteTeken() { if (huidigInputVeld) { huidigInputVeld.value = huidigInputVeld.value.slice(0, -1); huidigInputVeld.dispatchEvent(new Event('input', {bubbles:true})); } }
 
         function activeerAlphaPad(el) {
             sluitTouchpad();
             huidigAlphaVeld = el;
             document.getElementById('alphaPad').style.display = 'block';
         }
-        function sluitAlphaPad() { document.getElementById('alphaPad').style.display = 'none'; }
-        function voegAlphaToe(t) { if (huidigAlphaVeld) huidigAlphaVeld.value += t; }
-        function wisAlphaLaatsteTeken() { if (huidigAlphaVeld) huidigAlphaVeld.value = huidigAlphaVeld.value.slice(0, -1); }
+        function sluitAlphaPad() { document.getElementById('alphaPad').style.display = 'none'; huidigAlphaVeld = null; }
+        function voegAlphaToe(t) { if (huidigAlphaVeld) { huidigAlphaVeld.value += t; huidigAlphaVeld.dispatchEvent(new Event('input', {bubbles:true})); } }
+        function wisAlphaLaatsteTeken() { if (huidigAlphaVeld) { huidigAlphaVeld.value = huidigAlphaVeld.value.slice(0, -1); huidigAlphaVeld.dispatchEvent(new Event('input', {bubbles:true})); } }
     </script>
 </body>
 </html>
