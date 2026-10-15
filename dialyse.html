@@ -142,7 +142,7 @@
             border: 7px solid #144775;
             border-radius: 50%;
             position: relative;
-            background: #1c5c96; /* Standaard blauw */
+            background: #1c5c96;
             box-shadow: inset 0 4px 12px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
             transition: background-color 0.8s ease, border-color 0.3s ease;
@@ -415,7 +415,6 @@
         .num-key:hover { background: #0078d4; border-color: #0078d4; }
         .num-key:active { background: #106ebe; }
 
-        /* ALFANUMERIEK TOETSENBORD STIJL */
         .alpha-pad-container {
             background: #202020; border: 2px solid #0078d4; border-radius: 8px; padding: 10px;
             margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none; width: 100%;
@@ -454,14 +453,154 @@
         .back-link { display: inline-block; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: #ffffff; text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
         .back-link:hover { text-decoration: underline; }
 
-        /* PRINT STIJLEN ENKEL VOOR PDF EXPORT */
+        /* MEDISCHE PRINT & PDF HEADER (ALLEEN ZICHTBAAR BIJ PRINT/PDF) */
+        .print-only-header { display: none; }
+        .print-only-footer { display: none; }
+
+        /* PROFESSIONAL CLINICAL PRINT STYLES */
         @media print {
-            body { background: white !important; color: black !important; overflow: visible !important; }
-            .win-titlebar, .tab-bar, .back-link, .filter-bar, .btn-small-del, .btn-small-edit, #invoerPane { display: none !important; }
-            .workspace { padding: 0 !important; background: none !important; }
-            #historiePane { display: block !important; width: 100% !important; max-width: 100% !important; }
-            .controls-card { box-shadow: none !important; border: none !important; padding: 0 !important; }
-            table.dialyse-table th { background: #333 !important; color: white !important; }
+            @page {
+                size: A4 landscape;
+                margin: 12mm 10mm;
+            }
+
+            body, html {
+                background: #ffffff !important;
+                color: #000000 !important;
+                overflow: visible !important;
+                font-family: 'Segoe UI', Arial, sans-serif !important;
+            }
+
+            .win-titlebar, .tab-bar, .back-link, .filter-bar, .btn-small-del, .btn-small-edit, #invoerPane, .section-title {
+                display: none !important;
+            }
+
+            .workspace {
+                padding: 0 !important;
+                background: none !important;
+            }
+
+            #historiePane {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .controls-card {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* PROF MEDISCHE HEADER */
+            .print-only-header {
+                display: block !important;
+                border-bottom: 3px solid #144775;
+                padding-bottom: 8px;
+                margin-bottom: 12px;
+            }
+
+            .med-header-grid {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+
+            .med-header-title {
+                font-size: 18px;
+                font-weight: 800;
+                color: #144775;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .med-header-sub {
+                font-size: 11px;
+                color: #555;
+                margin-top: 2px;
+                font-weight: 600;
+            }
+
+            .med-header-patient-box {
+                border: 1px solid #144775;
+                background: #f4f8fb;
+                padding: 6px 12px;
+                border-radius: 4px;
+                text-align: right;
+                font-size: 11px;
+            }
+
+            .med-header-patient-box strong {
+                font-size: 13px;
+                color: #144775;
+            }
+
+            /* MEDISCHE TABEL */
+            table.dialyse-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-top: 8px !important;
+                font-size: 10px !important;
+            }
+
+            table.dialyse-table th {
+                background: #144775 !important;
+                color: #ffffff !important;
+                font-weight: 700 !important;
+                font-size: 10px !important;
+                padding: 6px 4px !important;
+                border: 1px solid #0d3254 !important;
+                text-transform: uppercase;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            table.dialyse-table td {
+                padding: 5px 4px !important;
+                border: 1px solid #cccccc !important;
+                color: #111111 !important;
+                vertical-align: top !important;
+            }
+
+            table.dialyse-table tr:nth-child(even) td {
+                background: #f9fbfd !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .badge-red { background: #fde7e9 !important; color: #d13438 !important; border: 1px solid #d13438; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .badge-orange { background: #fff4ce !important; color: #ca5010 !important; border: 1px solid #ca5010; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .badge-green { background: #dff6dd !important; color: #107c41 !important; border: 1px solid #107c41; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            /* MEDISCHE FOOTER & VALIDATIE HANDTEKENING */
+            .print-only-footer {
+                display: block !important;
+                margin-top: 24px;
+                padding-top: 10px;
+                border-top: 1px solid #aaa;
+            }
+
+            .print-signature-row {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 25px;
+            }
+
+            .sig-box {
+                width: 45%;
+                border-top: 1px dashed #555;
+                padding-top: 4px;
+                font-size: 10px;
+                color: #333;
+            }
+
+            .print-disclaimer {
+                font-size: 8px;
+                color: #777;
+                margin-top: 12px;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -830,6 +969,21 @@
             <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
 
             <div class="controls-card" style="display: block;">
+                
+                <!-- PROF MEDISCHE PRINT HEADER -->
+                <div class="print-only-header">
+                    <div class="med-header-grid">
+                        <div>
+                            <div class="med-header-title">🏥 CLINICAL DIALYSIS MONITOR RECORD</div>
+                            <div class="med-header-sub">Afdeling Dialyse & Nefrologie • Officiële Rapportage</div>
+                        </div>
+                        <div class="med-header-patient-box">
+                            Patiënt: <strong id="printPatientName">...</strong><br>
+                            Afdrukdatum: <span id="printGeneratedDate">...</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section-title">📊 Dialyse Historie & Kleurcodering</div>
                 
                 <!-- PERIODE FILTER EN PRINT OPTIE -->
@@ -864,6 +1018,24 @@
                         <tr><td colspan="9" style="color: #888; text-align: center;">Gegevens laden...</td></tr>
                     </tbody>
                 </table>
+
+                <!-- PROF MEDISCHE PRINT FOOTER -->
+                <div class="print-only-footer">
+                    <div class="print-signature-row">
+                        <div class="sig-box">
+                            Handtekening Verpleegkundige / Begeleider:<br><br><br>
+                            Naam: ___________________________________
+                        </div>
+                        <div class="sig-box">
+                            Paraaf Behandelend Nefroloog:<br><br><br>
+                            Datum: ___________________________________
+                        </div>
+                    </div>
+                    <div class="print-disclaimer">
+                        * Dit rapport is computergegenereerd via Rollodex Dialyse Monitor. Vertrouwelijk medisch document.
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -899,7 +1071,9 @@
         let huidigAlphaVeld = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1)}`;
+            let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
+            document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${pNaam}`;
+            document.getElementById('printPatientName').innerText = pNaam;
             
             if (localStorage.getItem('rollodex_fullscreen') === 'true') {
                 document.documentElement.requestFullscreen().catch(err => {});
@@ -1622,11 +1796,9 @@
             };
 
             if (huidigeBewerkingSessieId) {
-                // Vervang bestaande sessie bij bewerken
                 let idx = sessies.findIndex(s => s.id === huidigeBewerkingSessieId);
                 if (idx !== -1) sessies[idx] = sessieObject;
             } else {
-                // Nieuwe toevoegen
                 sessies.unshift(sessieObject);
             }
 
@@ -1644,7 +1816,6 @@
 
             huidigeBewerkingSessieId = s.id;
             
-            // Inladen in de velden
             document.getElementById('valPreGewicht').value = s.preGewicht !== '-' ? s.preGewicht : '';
             document.getElementById('valPostGewicht').value = s.postGewicht !== '-' ? s.postGewicht : '';
             document.getElementById('valDroogGewicht').value = s.droogGewicht;
@@ -1696,6 +1867,8 @@
         }
 
         function printHistoriePdf() {
+            let nu = new Date();
+            document.getElementById('printGeneratedDate').innerText = nu.toLocaleString('nl-NL');
             window.print();
         }
 
@@ -1705,7 +1878,6 @@
 
             let gefilterd = (gebruikerRol === 'admin') ? sessies : sessies.filter(s => s.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
 
-            // Periode Filter
             let vanDatum = document.getElementById('filterVanDatum').value;
             let totDatum = document.getElementById('filterTotDatum').value;
 
