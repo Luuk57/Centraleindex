@@ -3,200 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rollodex • Hoofdmenu</title>
+    <title>Rollodex • Home</title>
     <style>
         :root {
-            --win-blue: #0078d4;
-            --win-header-bg: #202020;
-            --win-bg: linear-gradient(135deg, #005a9e 0%, #0078d4 100%);
-            --card-bg: #ffffff;
-            --text-main: #1b1b1b;
-            --font-ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            --dialysis-yellow: #f8e71c;
+            --android-bg: #f8f9fa;
+            --android-primary: #1a73e8;
+            --android-primary-dark: #1557b0;
+            --android-card-bg: #ffffff;
+            --android-text: #202124;
+            --android-subtext: #5f6368;
+            --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
-        body, html { width: 100%; height: 100%; background: #005a9e; color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
+        body, html { width: 100%; height: 100%; background: var(--android-bg); color: var(--android-text); display: flex; flex-direction: column; overflow: hidden; }
 
-        /* WINDOWS TITLEBAR */
-        .win-titlebar {
-            background: var(--win-header-bg);
+        /* ANDROID APP BAR / HEADER */
+        .android-appbar {
+            background: var(--android-primary);
             color: #ffffff;
-            height: 42px;
-            padding: 0 12px;
+            height: 56px;
+            padding: 0 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 12px;
-            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             z-index: 10;
         }
 
-        .win-title-left { display: flex; align-items: center; gap: 8px; }
-        .win-title-right { display: flex; align-items: center; gap: 10px; }
-
-        .win-clock {
-            font-size: 11px;
-            opacity: 0.9;
-            background: rgba(255,255,255,0.08);
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.05);
+        .appbar-title {
+            font-size: 18px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .win-btn {
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.1);
+        .appbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .android-clock {
+            font-size: 13px;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-weight: 500;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
             color: white;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 18px;
             cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
         }
-        .win-btn:hover { background: rgba(255,255,255,0.25); }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
 
-        /* WORKSPACE GRID */
+        /* WORKSPACE / DASHBOARD */
         .workspace {
             flex: 1;
-            padding: 20px;
-            background: var(--win-bg);
+            padding: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow-y: auto;
         }
 
-        .menu-container {
+        .dashboard-container {
             width: 100%;
-            max-width: 820px;
+            max-width: 600px;
         }
 
-        .welcome-header {
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .welcome-header h1 { font-size: 22px; font-weight: 800; }
-        .welcome-header p { font-size: 13px; opacity: 0.9; }
-
-        .grid-menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            width: 100%;
-        }
-
-        .rollodex-card {
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 10px;
-            padding: 20px;
-            text-decoration: none;
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .rollodex-card:hover {
-            transform: translateY(-4px);
-            background: #ffffff;
-            box-shadow: 0 12px 26px rgba(0,0,0,0.3);
-            border-color: var(--win-blue);
-        }
-
-        .card-icon {
-            font-size: 42px;
-            margin-bottom: 10px;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--win-blue);
-            margin-bottom: 4px;
-        }
-
-        .card-desc {
-            font-size: 11px;
-            color: #666;
-            font-weight: 600;
-        }
-
-        /* GEBRUIKER SELECTOR CARD */
-        .user-select-card {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 20px;
-            color: white;
+        /* WELCOME CARD / PATIENT BAR */
+        .patient-card {
+            background: var(--android-card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        .user-select-card select {
-            padding: 6px 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-weight: bold;
+
+        .patient-info h2 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--android-text);
+        }
+
+        .patient-info p {
             font-size: 12px;
+            color: var(--android-subtext);
+            margin-top: 2px;
+        }
+
+        .patient-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--android-primary);
+            background: #f1f3f4;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* APPS GRID */
+        .grid-apps {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .app-card {
+            background: var(--android-card-bg);
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-decoration: none;
+            color: var(--android-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e8eaed;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .app-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+            border-color: var(--android-primary);
+        }
+
+        .app-icon-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #e8f0fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        .app-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--android-text);
+            margin-bottom: 4px;
+        }
+
+        .app-desc {
+            font-size: 11px;
+            color: var(--android-subtext);
+            line-height: 1.3;
         }
     </style>
 </head>
 <body>
 
-    <!-- WINDOWS TITLEBAR -->
-    <div class="win-titlebar">
-        <div class="win-title-left">
-            <span>📇 Rollodex • Hoofdmenu</span>
-            <span id="gebruikerTitleBadge" style="font-size: 11px; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 12px; font-weight: bold; color: var(--dialysis-yellow);">Patiënt: ...</span>
+    <!-- ANDROID APPBAR -->
+    <div class="android-appbar">
+        <div class="appbar-title">
+            <span>📱 Rollodex Home</span>
         </div>
-        <div class="win-title-right">
-            <div id="liveClock" class="win-clock">Laden...</div>
-            <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm">⛶ Scherm</button>
+        <div class="appbar-actions">
+            <div id="liveClock" class="android-clock">--:--</div>
+            <button type="button" class="icon-btn" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
         </div>
     </div>
 
     <!-- WORKSPACE -->
     <div class="workspace">
-        <div class="menu-container">
+        <div class="dashboard-container">
             
-            <div class="welcome-header">
-                <h1>Welkom bij Rollodex</h1>
-                <p>Kies een module om te starten</p>
+            <!-- PATIËNT SELECTIE KART -->
+            <div class="patient-card">
+                <div class="patient-info">
+                    <h2>Actieve Patiënt</h2>
+                    <p id="patientSubText">Selecteer je actieve profiel</p>
+                </div>
+                <div>
+                    <select id="selectGebruiker" class="patient-select" onchange="wisselGebruiker(this.value)">
+                        <option value="Gast">Gast</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- PATIËNT / GEBRUIKER SELECTIE -->
-            <div class="user-select-card">
-                <span>👤 Actieve Patiënt / Gebruiker:</span>
-                <select id="selectGebruiker" onchange="wisselGebruiker(this.value)">
-                    <option value="Gast">Gast</option>
-                </select>
-            </div>
-
-            <!-- GRID MET ROLLODEX APPS -->
-            <div class="grid-menu">
+            <!-- APPS GRID -->
+            <div class="grid-apps">
                 
                 <!-- 1. DIALYSE MONITOR -->
-                <a href="dialyse.html" class="rollodex-card">
-                    <div class="card-icon">🩺</div>
-                    <div class="card-title">Dialyse Monitor</div>
-                    <div class="card-desc">UF berekeningen, timer, gewichten & bloeddrukmetingen</div>
+                <a href="dialyse.html" class="app-card">
+                    <div class="app-icon-wrap" style="background: #e8f0fe; color: #1a73e8;">🩺</div>
+                    <div class="app-title">Dialyse Monitor</div>
+                    <div class="app-desc">UF berekeningen, timer & bloeddruk</div>
                 </a>
 
-                <!-- 2. CONSUMPTIE MONITOR (NIEUW) -->
-                <a href="consumptie.html" class="rollodex-card">
-                    <div class="card-icon">🍵</div>
-                    <div class="card-title">Consumptie Monitor</div>
-                    <div class="card-desc">Vochtinname bijhouden, daglimiet & voeding overzicht</div>
+                <!-- 2. CONSUMPTIE MONITOR -->
+                <a href="consumptie.html" class="app-card">
+                    <div class="app-icon-wrap" style="background: #e6f4ea; color: #137333;">🍵</div>
+                    <div class="app-title">Consumptie Monitor</div>
+                    <div class="app-desc">Drinken, eten & dagelijkse vochtbalans</div>
                 </a>
 
             </div>
@@ -207,8 +230,6 @@
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
-            document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1)}`;
-            
             vulGebruikersDropdown(actieveGebruiker);
             startKlok();
         });
@@ -216,13 +237,14 @@
         function startKlok() {
             setInterval(() => {
                 let nu = new Date();
-                document.getElementById('liveClock').innerText = nu.toLocaleString('nl-NL');
+                let tijdStr = nu.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                document.getElementById('liveClock').innerText = tijdStr;
             }, 1000);
         }
 
         function vulGebruikersDropdown(actieve) {
             let select = document.getElementById('selectGebruiker');
-            let gebruikers = ['Gast', 'Patiënt 1']; // Uitbreidbaar
+            let gebruikers = ['Gast', 'Patiënt 1'];
             select.innerHTML = '';
             gebruikers.forEach(g => {
                 let opt = document.createElement('option');
@@ -235,12 +257,11 @@
 
         function wisselGebruiker(naam) {
             localStorage.setItem('actieve_gebruiker', naam);
-            document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${naam.charAt(0).toUpperCase() + naam.slice(1)}`;
         }
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
+                document.documentElement.requestFullscreen().catch(err => {});
             } else {
                 if (document.exitFullscreen) document.exitFullscreen();
             }
