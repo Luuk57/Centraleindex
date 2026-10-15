@@ -14,7 +14,6 @@
             --red-alert: #d13438;
             --green-ok: #107c41;
             
-            /* Fresenius medische blauwe stijl uit de foto */
             --dialysis-blue: #1c5c96;
             --dialysis-panel-bg: #144775;
             --dialysis-screen-bg: #236fae;
@@ -81,7 +80,7 @@
         .tab-pane { display: none; width: 100%; max-width: 780px; }
         .tab-pane.active { display: block; }
 
-        /* EXACTE DIALYSE MONITOR SCHERM STIJL (FRESENIUS LOOK)[span_3](start_span)[span_3](end_span) */
+        /* DIALYSIS CONSOLE SCHERM */
         .dialysis-console {
             background: var(--dialysis-panel-bg);
             border: 4px solid #0d3254;
@@ -109,7 +108,7 @@
         .med-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
         .med-box .value { font-size: 16px; font-weight: 700; color: var(--dialysis-yellow); margin-top: 2px; }
 
-        /* DE GROTE RONDE KLOK IN HET MIDDEN[span_4](start_span)[span_4](end_span) */
+        /* DE GROTE RONDE KLOK IN HET MIDDEN */
         .center-clock-panel {
             grid-column: 2;
             grid-row: 1 / span 3;
@@ -196,7 +195,7 @@
     <!-- WINDOWS TITLEBAR -->
     <div class="win-titlebar">
         <div class="win-title-left">
-            <span>🩺 Rollodex • Dialyse Monitor (Fresenius Stijl)</span>
+            <span>🩺 Rollodex • Dialyse Monitor</span>
             <span id="gebruikerLabel" style="font-size: 10px; opacity: 0.8; font-weight: normal;"></span>
         </div>
         <div class="win-title-right">
@@ -221,7 +220,7 @@
         <div id="invoerPane" class="tab-pane active">
             <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
 
-            <!-- DIALYSIS CONSOLE SCHERM (LAYOUT UIT AFBEELDING)[span_5](start_span)[span_5](end_span) -->
+            <!-- DIALYSIS CONSOLE SCHERM -->
             <div class="dialysis-console">
                 
                 <!-- Links boven: ART -->
@@ -230,16 +229,16 @@
                     <div class="value" id="dispArt">-80</div>
                 </div>
 
-                <!-- Midden: De grote ronde klok met countdown in het midden[span_6](start_span)[span_6](end_span) -->
+                <!-- Midden: De grote ronde klok met countdown in het midden -->
                 <div class="center-clock-panel">
                     <div class="analogue-clock" id="analogueClock">
                         <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
                     </div>
                 </div>
 
-                <!-- Rechts boven: UF goal[span_7](start_span)[span_7](end_span) -->
+                <!-- Rechts boven: UF DOEL -->
                 <div class="med-box" style="grid-column: 3; grid-row: 1;">
-                    <div class="label">UF goal ml</div>
+                    <div class="label">UF DOEL</div>
                     <div class="value" id="dispUfGoal">3000</div>
                 </div>
 
@@ -249,10 +248,10 @@
                     <div class="value" id="dispVen">120</div>
                 </div>
 
-                <!-- Rechts midden: Blood flow[span_8](start_span)[span_8](end_span) -->
+                <!-- Rechts midden: UF PER UUR -->
                 <div class="med-box" style="grid-column: 3; grid-row: 2;">
-                    <div class="label">Blood flow</div>
-                    <div class="value" style="color: #fff; font-size: 13px;">300 ml/min</div>
+                    <div class="label">UF PER UUR</div>
+                    <div class="value" id="dispUfPerUur" style="color: var(--dialysis-yellow); font-size: 15px;">750 ml</div>
                 </div>
 
                 <!-- Links onder: UF rate -->
@@ -419,7 +418,9 @@
             if (!isNaN(pre) && !isNaN(droog)) {
                 let uf = (pre - droog) + 0.3;
                 ufInput.value = uf.toFixed(2) + " kg";
-                document.getElementById('dispUfGoal').innerText = Math.round(uf * 1000);
+                let doelMl = Math.round(uf * 1000);
+                document.getElementById('dispUfGoal').innerText = doelMl;
+                document.getElementById('dispUfPerUur').innerText = Math.round(doelMl / 4) + " ml"; // Standaard indicatie op 4 uur
             } else {
                 ufInput.value = "";
             }
