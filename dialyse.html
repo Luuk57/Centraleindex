@@ -106,6 +106,9 @@
             width: 100%;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
+        .med-box.interactive { cursor: pointer; transition: background 0.15s; }
+        .med-box.interactive:hover { background: #2a7cbd; }
+
         .med-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
         .med-box .value { font-size: 15px; font-weight: 700; color: var(--dialysis-yellow); margin-top: 2px; }
 
@@ -210,21 +213,8 @@
             font-weight: 600;
         }
 
-        .alarm-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-alarm {
-            flex: 1;
-            padding: 10px;
-            font-size: 12px;
-            font-weight: 700;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-        }
+        .alarm-actions { display: flex; gap: 10px; }
+        .btn-alarm { flex: 1; padding: 10px; font-size: 12px; font-weight: 700; border: none; border-radius: 4px; cursor: pointer; color: white; }
         .btn-alarm-stop { background: var(--red-alert); }
         .btn-alarm-stop:hover { background: #a80000; }
         .btn-alarm-continue { background: var(--win-blue); }
@@ -254,22 +244,13 @@
         .form-group { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
         .form-group label { font-size: 11px; font-weight: 700; color: #5f5f5f; }
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 13px; background: #fff; }
+        .form-group input:focus { border-color: var(--win-blue); outline: none; box-shadow: 0 0 0 2px rgba(0,120,212,0.2); }
 
         .row-inputs { display: flex; gap: 8px; }
         .row-inputs .form-group { flex: 1; }
 
-        .input-grid-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .sub-section-box {
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 10px;
-        }
+        .input-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .sub-section-box { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; }
 
         .btn-toggle-group { display: flex; gap: 6px; margin-top: 2px; }
         .btn-toggle {
@@ -284,6 +265,46 @@
         .time-btn-start:hover { background: #0e6b39; }
         .time-btn-stop { background: var(--red-alert); }
         .time-btn-stop:hover { background: #a80000; }
+
+        /* NUMERIEK TOUCHPAD (VIRTUEEL TOETSBORD) */
+        .numeric-pad-container {
+            background: #202020;
+            border: 2px solid #0078d4;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            display: none;
+        }
+        .numeric-pad-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .numeric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .num-key {
+            background: #333333;
+            color: #ffffff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.1s;
+        }
+        .num-key:hover { background: #0078d4; border-color: #0078d4; }
+        .num-key:active { background: #106ebe; }
 
         .action-btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; margin-top: 10px; }
         .action-btn:hover { background: #106ebe; }
@@ -352,7 +373,7 @@
                     <div class="value" id="dispArt">-80</div>
                 </div>
 
-                <!-- Midden: De grote ronde klok met aftellende countdown -->
+                <!-- Midden: De grote ronde klok met countdown -->
                 <div class="center-clock-panel">
                     <div class="analogue-clock" id="analogueClock">
                         <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
@@ -391,8 +412,16 @@
 
                 <!-- 5 KNOPPEN RIJ ONDER DE KLOK -->
                 <div class="bottom-buttons-row">
-                    <div class="med-box"><div class="label">KNOP 1</div><div class="value">---</div></div>
-                    <div class="med-box"><div class="label">KNOP 2</div><div class="value">---</div></div>
+                    <!-- Knop 1 = Tijd -->
+                    <div class="med-box interactive" onclick="springNaarTijdVeld()">
+                        <div class="label">KNOP 1</div>
+                        <div class="value">⏱️ TIJD</div>
+                    </div>
+                    <!-- Knop 2 = UF -->
+                    <div class="med-box interactive" onclick="springNaarUfVeld()">
+                        <div class="label">KNOP 2</div>
+                        <div class="value">💧 UF</div>
+                    </div>
                     <div class="med-box"><div class="label">KNOP 3</div><div class="value">---</div></div>
                     <div class="med-box"><div class="label">KNOP 4</div><div class="value">---</div></div>
                     <div class="med-box"><div class="label">KNOP 5</div><div class="value">---</div></div>
@@ -413,19 +442,19 @@
                         </div>
                         <div class="form-group">
                             <label>Pre Gewicht (kg)</label>
-                            <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF(); berekenWerkelijkeUF();">
+                            <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF();">
                         </div>
                         <div class="form-group">
                             <label>Post Gewicht (kg)</label>
-                            <input type="number" step="0.1" id="valPostGewicht" placeholder="Bijv. 109.2" oninput="berekenWerkelijkeUF();">
+                            <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF();">
                         </div>
                         <div class="row-inputs">
                             <div class="form-group">
                                 <label>UF Ingesteld (l)</label>
-                                <input type="number" step="0.1" id="valUfIngesteld" placeholder="Bijv. 3.0">
+                                <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)">
                             </div>
                             <div class="form-group">
-                                <label>Werkelijke UF (Pre - Post) (kg)</label>
+                                <label>Werkelijke UF (kg)</label>
                                 <input type="text" id="valWerkelijkUf" readonly style="background: #f1f1f1; font-weight: bold;" placeholder="Berekend...">
                             </div>
                         </div>
@@ -442,13 +471,13 @@
                         </div>
                         <div class="form-group">
                             <label>Droog Gewicht Aanpasbaar (kg)</label>
-                            <input type="number" step="0.1" id="valDroogGewicht" value="109" oninput="berekenUF(); opslaanNieuwDroogGewichtBin();">
+                            <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); opslaanNieuwDroogGewichtBin();">
                         </div>
                         <div class="form-group">
                             <label>UF Advies (kg)</label>
                             <input type="text" id="valUfAdvies" readonly style="background: #fff; font-weight: bold;" placeholder="Berekend...">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="ufVeldAnker">
                             <label>Uitgerekende UF (ml) → Naar UF Doel</label>
                             <input type="text" id="valUitgerekendeUf" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="0 ml">
                         </div>
@@ -456,11 +485,11 @@
                 </div>
 
                 <!-- DUUR & START/STOP TIJDEN -->
-                <div class="sub-section-box" style="margin-top: 10px;">
+                <div class="sub-section-box" style="margin-top: 10px;" id="tijdVeldAnker">
                     <div class="row-inputs">
                         <div class="form-group" style="max-width: 130px;">
                             <label>Duur (Uur)</label>
-                            <input type="number" step="0.5" id="valDuurUur" value="4.0" oninput="berekenAutomatischeEindtijd();">
+                            <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd();">
                         </div>
                         <div class="form-group">
                             <label>Start Datum & Tijd</label>
@@ -476,6 +505,28 @@
                                 <button type="button" class="time-btn time-btn-stop" onclick="stopSessieTijd()">⏹ STOP</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- INGEBOUWD NUMERIEK TOUCHPAD (ZONDER TABLET TOETSBORD) -->
+                <div class="numeric-pad-container" id="numericPad">
+                    <div class="numeric-pad-header">
+                        <span id="activeInputLabel">Numeriek Toetsenbord</span>
+                        <button type="button" class="win-btn" style="padding: 2px 6px; font-size: 10px;" onclick="sluitTouchpad()">Sluiten ✕</button>
+                    </div>
+                    <div class="numeric-grid">
+                        <button type="button" class="num-key" onclick="voegNummerToe('1')">1</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('2')">2</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('3')">3</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('4')">4</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('5')">5</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('6')">6</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('7')">7</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('8')">8</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('9')">9</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('.')">.</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('0')">0</button>
+                        <button type="button" class="num-key" style="background: #a80000; border-color: #d13438;" onclick="wisLaatsteTeken()">⌫</button>
                     </div>
                 </div>
 
@@ -525,10 +576,13 @@
         let sessies = [];
         let gebruikerProfielen = {};
 
-        // Timer variabelen voor countdown
+        // Timer variabelen
         let isTimerRunning = false;
         let timerTargetTime = null;
         let isDoorgaanGekozen = false;
+
+        // Actief input element voor numeriek touchpad
+        let huidigInputVeld = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('rollodex_fullscreen') === 'true') {
@@ -542,6 +596,58 @@
             startKlokLus();
             laadData();
         });
+
+        // Knoppen onder de klok logica
+        function springNaarTijdVeld() {
+            let el = document.getElementById('tijdVeldAnker');
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            let input = document.getElementById('valDuurUur');
+            activeerTouchpad(input);
+        }
+
+        function springNaarUfVeld() {
+            let el = document.getElementById('ufVeldAnker');
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            let input = document.getElementById('valPreGewicht');
+            activeerTouchpad(input);
+        }
+
+        // Numeriek Touchpad logica
+        function activeerTouchpad(inputEl) {
+            huidigInputVeld = inputEl;
+            let labelTekst = inputEl.previousElementSibling ? inputEl.previousElementSibling.innerText : 'Invoer';
+            document.getElementById('activeInputLabel').innerText = `Invoer: ${labelTekst}`;
+            document.getElementById('numericPad').style.display = 'block';
+            inputEl.style.borderColor = '#0078d4';
+            inputEl.style.background = '#f0f7ff';
+        }
+
+        function sluitTouchpad() {
+            document.getElementById('numericPad').style.display = 'none';
+            if (huidigInputVeld) {
+                huidigInputVeld.style.borderColor = '#d1d1d1';
+                huidigInputVeld.style.background = '#fff';
+                huidigInputVeld = null;
+            }
+        }
+
+        function voegNummerToe(teken) {
+            if (!huidigInputVeld) return;
+            huidigInputVeld.value += teken;
+            triggerInputEvent(huidigInputVeld);
+        }
+
+        function wisLaatsteTeken() {
+            if (!huidigInputVeld) return;
+            let val = huidigInputVeld.value;
+            huidigInputVeld.value = val.substring(0, val.length - 1);
+            triggerInputEvent(huidigInputVeld);
+        }
+
+        function triggerInputEvent(el) {
+            let evt = new Event('input', { bubbles: true });
+            el.dispatchEvent(evt);
+        }
 
         function setSoortDialyse(soort) {
             actieveSoortDialyse = soort;
@@ -582,7 +688,6 @@
             document.getElementById('valStartTijd').value = formatDatetimeLocal(nu);
             berekenAutomatischeEindtijd();
 
-            // Activeer de countdown timer
             let stopVal = document.getElementById('valStopTijd').value;
             if (stopVal) {
                 timerTargetTime = new Date(stopVal).getTime();
@@ -623,7 +728,6 @@
         function updateKlok() {
             let nu = new Date();
 
-            // Update live titelbalk klok
             let dagen = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
             let dd = String(nu.getDate()).padStart(2, '0');
             let mm = String(nu.getMonth() + 1).padStart(2, '0');
@@ -633,22 +737,18 @@
             let sss = String(nu.getSeconds()).padStart(2, '0');
             document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
 
-            // Countdown verwerking in het midden van de klok
             let countdownEl = document.getElementById('countdownDisplay');
 
             if (isTimerRunning && timerTargetTime) {
                 let overms = timerTargetTime - nu.getTime();
 
                 if (overms <= 0) {
-                    // Timer is ten einde!
                     countdownEl.innerText = "00:00:00";
-                    
                     if (!isDoorgaanGekozen) {
                         document.getElementById('analogueClock').classList.add('alarm-state');
                         document.getElementById('alarmModal').style.display = 'flex';
                     }
                 } else {
-                    // Aftellen
                     let totSec = Math.floor(overms / 1000);
                     let h = Math.floor(totSec / 3600);
                     let m = Math.floor((totSec % 3600) / 60);
@@ -661,7 +761,6 @@
                     countdownEl.innerText = `${hh}:${mm}:${ss}`;
                 }
             } else {
-                // Als er geen actieve sessie loopt, toon gewone huidige tijd
                 countdownEl.innerText = `${uuu}:${mmm}:${sss}`;
             }
         }
@@ -708,6 +807,7 @@
         }
 
         function toonTab(tab) {
+            sluitTouchpad();
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
@@ -808,6 +908,7 @@
         }
 
         function slaDialyseOp() {
+            sluitTouchpad();
             let pre = parseFloat(document.getElementById('valPreGewicht').value);
             let droog = parseFloat(document.getElementById('valDroogGewicht').value);
             let factor = (actieveSoortDialyse === 'dag') ? 0.6 : 0.3;
