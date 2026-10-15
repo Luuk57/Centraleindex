@@ -302,11 +302,11 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 0;
             font-size: 13px;
             font-weight: 700;
             color: #333;
             cursor: pointer;
+            white-space: nowrap;
         }
         .checkbox-group input[type="checkbox"] {
             width: 18px;
@@ -607,7 +607,7 @@
                     </div>
                 </div>
 
-                <!-- 5. TOEDIENINGEN BOX -->
+                <!-- 5. TOEDIENINGEN BOX (GEUPDATE NAAST ELKAAR) -->
                 <div class="sub-section-box" id="toedieningenBox">
                     <div class="row-inputs" style="margin-bottom: 8px;">
                         <div class="form-group">
@@ -620,22 +620,28 @@
                         </div>
                     </div>
 
+                    <!-- EPO & IJZER NAAST ELKAAR -->
                     <div style="border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px;">
-                        <label class="checkbox-group">
-                            <input type="checkbox" id="checkEpo"> Epo toegediend
-                        </label>
-                        <label class="checkbox-group">
-                            <input type="checkbox" id="checkIjzer"> IJzer toegediend
-                        </label>
+                        <div class="row-inputs">
+                            <label class="checkbox-group" style="flex:1;">
+                                <input type="checkbox" id="checkEpo"> Epo toegediend
+                            </label>
+                            <label class="checkbox-group" style="flex:1;">
+                                <input type="checkbox" id="checkIjzer"> IJzer toegediend
+                            </label>
+                        </div>
                     </div>
 
+                    <!-- SHUNTFLOW METING EN WAARDE NAAST ELKAAR -->
                     <div style="border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px;">
-                        <label class="checkbox-group">
-                            <input type="checkbox" id="checkShuntflow"> Shuntflow meting uitgevoerd
-                        </label>
-                        <div class="form-group" style="margin-top: 4px;">
-                            <label>Shuntflow waarde (max 4 digits)</label>
-                            <input type="text" inputmode="none" maxlength="4" id="valShuntflow" placeholder="Bijv. 1200" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 4)">
+                        <div class="row-inputs">
+                            <label class="checkbox-group" style="flex: 1;">
+                                <input type="checkbox" id="checkShuntflow"> Shuntflow meting
+                            </label>
+                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                <label>Waarde (max 4 digits)</label>
+                                <input type="text" inputmode="none" maxlength="4" id="valShuntflow" placeholder="Bijv. 1200" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 4)">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -719,10 +725,6 @@
         let huidigInputVeld = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('rollodex_fullscreen') === 'true') {
-                document.documentElement.requestFullscreen().catch(err => {});
-            }
-
             document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1)}`;
             
             genereerUurStrepen();
@@ -772,6 +774,21 @@
         function springNaarToedieningenVeld() {
             toonExclusiefMenu('toedieningenBox', '💊 TOEDIENINGEN & SHUNTFLOW');
             activeerTouchpad(document.getElementById('valFragmin2500'));
+        }
+
+        // Volledig scherm toggle logica
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    localStorage.setItem('rollodex_fullscreen', 'true');
+                }).catch(err => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        localStorage.setItem('rollodex_fullscreen', 'false');
+                    });
+                }
+            }
         }
 
         // Verpleging logica
@@ -1097,20 +1114,6 @@
         function verversPagina() {
             laadData();
             location.reload();
-        }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().then(() => {
-                    localStorage.setItem('rollodex_fullscreen', 'true');
-                }).catch(err => {});
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen().then(() => {
-                        localStorage.setItem('rollodex_fullscreen', 'false');
-                    });
-                }
-            }
         }
 
         function laadData() {
