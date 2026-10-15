@@ -142,10 +142,10 @@
             border: 7px solid #144775;
             border-radius: 50%;
             position: relative;
-            background: #1c5c96;
+            background: #1c5c96; /* Standaard blauw */
             box-shadow: inset 0 4px 12px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s ease;
+            transition: background-color 0.8s ease, border-color 0.3s ease;
             margin-top: 4px;
         }
 
@@ -161,22 +161,9 @@
             padding: 8px 18px;
         }
 
-        /* SVG VOORTGANGSRING BINNEN IN DE KLOK */
-        .clock-progress-svg {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            transform: rotate(-90deg);
-            pointer-events: none;
-            border-radius: 50%;
-        }
-        .progress-ring-circle {
-            transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
-        }
-
         .analogue-clock.alarm-state {
-            border-color: var(--red-alert);
-            background: #8b0000;
+            border-color: var(--red-alert) !important;
+            background: #8b0000 !important;
             animation: pulseBg 1s infinite alternate;
         }
 
@@ -203,7 +190,7 @@
             font-weight: 800;
             color: #ffffff;
             text-align: center;
-            background: rgba(0, 0, 0, 0.45);
+            background: rgba(0, 0, 0, 0.55);
             padding: 6px 14px;
             border-radius: 6px;
             border: 1px solid rgba(255,255,255,0.2);
@@ -492,12 +479,9 @@
                     <div class="value" id="dispArt">---/---</div>
                 </div>
 
-                <!-- Midden: De grote ronde klok met countdown EN SVG voortgangscirkel -->
+                <!-- Midden: De grote ronde klok met countdown -->
                 <div class="center-clock-panel" id="clockPanel">
                     <div class="analogue-clock" id="analogueClock">
-                        <svg class="clock-progress-svg" viewBox="0 0 100 100">
-                            <circle class="progress-ring-circle" id="progressRing" cx="50" cy="50" r="42" fill="none" stroke="rgba(248, 231, 28, 0.45)" stroke-width="12" stroke-dasharray="263.89" stroke-dashoffset="263.89"></circle>
-                        </svg>
                         <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
                     </div>
                     <div class="clock-action-row">
@@ -1008,8 +992,7 @@
             isTimerRunning = false;
             timerStartTimestamp = null;
             timerTargetTime = null;
-            let ring = document.getElementById('progressRing');
-            if(ring) ring.style.strokeDashoffset = '263.89';
+            document.getElementById('analogueClock').style.backgroundColor = '#1c5c96'; // Weer blauw instellen
             updateBloeddrukLijstEnScherm();
         }
 
@@ -1191,6 +1174,9 @@
                 isDoorgaanGekozen = false;
                 document.getElementById('analogueClock').classList.remove('alarm-state');
                 document.getElementById('alarmModal').style.display = 'none';
+                
+                // Klok direct geel maken bij start
+                document.getElementById('analogueClock').style.backgroundColor = '#f8e71c';
                 slaLokaalOp();
             }
         }
@@ -1236,8 +1222,7 @@
             document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
 
             let countdownEl = document.getElementById('countdownDisplay');
-            let progressRing = document.getElementById('progressRing');
-            let circum = 263.89; // Omtrek van cirkel met straal 42
+            let clockEl = document.getElementById('analogueClock');
 
             if (isTimerRunning && timerTargetTime && timerStartTimestamp) {
                 let overms = timerTargetTime - nu.getTime();
@@ -1250,18 +1235,11 @@
                 let voortgangFractie = verlopenMs / totaleDuurMs;
                 if (voortgangFractie > 1) voortgangFractie = 1;
 
-                // Bereken SVG ring vulling (van 263.89 naar 0)
-                let dashOffset = circum - (voortgangFractie * circum);
-                if(progressRing) {
-                    progressRing.style.strokeDashoffset = dashOffset;
-
-                    // Vloeiende kleurverandering van geel naar groen naarmate de voortgang vordert
-                    // Begin: rgba(248, 231, 28, 0.65) [Geel] -> Einde: rgba(16, 124, 65, 0.75) [Groen]
-                    let r = Math.round(248 - (248 - 16) * voortgangFractie);
-                    let g = Math.round(231 - (231 - 124) * voortgangFractie);
-                    let b = Math.round(28 + (65 - 28) * voortgangFractie);
-                    progressRing.style.stroke = `rgba(${r}, ${g}, ${b}, 0.75)`;
-                }
+                // Vloeiende kleurverandering van Geel (#f8e71c -> RGB: 248, 231, 28) naar Groen (#107c41 -> RGB: 16, 124, 65)
+                let r = Math.round(248 - (248 - 16) * voortgangFractie);
+                let g = Math.round(231 - (231 - 124) * voortgangFractie);
+                let b = Math.round(28 + (65 - 28) * voortgangFractie);
+                clockEl.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
 
                 huidigUfGeweestMl = Math.round(totaalUfDoelMl * voortgangFractie);
                 let overgeblevenUfDoel = totaalUfDoelMl - huidigUfGeweestMl;
@@ -1272,9 +1250,9 @@
 
                 if (overms <= 0) {
                     countdownEl.innerText = "00:00:00";
-                    if(progressRing) progressRing.style.strokeDashoffset = '0';
+                    clockEl.style.backgroundColor = '#107c41'; // Volledig groen bij einde
                     if (!isDoorgaanGekozen) {
-                        document.getElementById('analogueClock').classList.add('alarm-state');
+                        clockEl.classList.add('alarm-state');
                         document.getElementById('alarmModal').style.display = 'flex';
                     }
                 } else {
@@ -1291,10 +1269,6 @@
                 }
             } else {
                 countdownEl.innerText = `${uuu}:${mmm}:${sss}`;
-                if(progressRing) {
-                    progressRing.style.strokeDashoffset = circum;
-                    progressRing.style.stroke = 'rgba(248, 231, 28, 0.45)';
-                }
             }
         }
 
@@ -1328,10 +1302,9 @@
         function genereerUurStrepen() {
             let clock = document.getElementById('analogueClock');
             let countdownEl = document.getElementById('countdownDisplay');
-            let svgEl = clock.querySelector('.clock-progress-svg');
             
-            // Behoud de SVG en digitale tijd, ververs de uurmarkeringen
-            clock.querySelectorAll('.hour-mark').forEach(m => m.remove());
+            clock.innerHTML = '';
+            clock.appendChild(countdownEl);
 
             for (let i = 0; i < 12; i++) {
                 let mark = document.createElement('div');
@@ -1496,6 +1469,8 @@
 
             sessies.unshift(nieuweSessie);
             slaNaarBin();
+            
+            // Wis lokaal concept en zet klok weer op origineel blauw
             wisLokaalConcept();
             vulHistorieTabel();
 
