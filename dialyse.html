@@ -75,7 +75,7 @@
         .tab-btn.active { background: #ffffff; color: var(--win-blue); border-bottom: 3px solid var(--win-blue); }
 
         /* WORKSPACE */
-        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; padding: 10px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; }
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; padding: 10px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; position: relative; }
         
         .tab-pane { display: none; width: 100%; max-width: 820px; }
         .tab-pane.active { display: block; }
@@ -93,6 +93,7 @@
             gap: 12px;
             align-items: center;
             justify-items: center;
+            position: relative;
         }
 
         .med-box {
@@ -135,6 +136,18 @@
             background: #1c5c96;
             box-shadow: inset 0 4px 12px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .analogue-clock.alarm-state {
+            border-color: var(--red-alert);
+            background: #8b0000;
+            animation: pulseBg 1s infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            0% { box-shadow: 0 0 10px rgba(209, 52, 56, 0.5); }
+            100% { box-shadow: 0 0 25px rgba(209, 52, 56, 1); }
         }
 
         .hour-mark {
@@ -150,12 +163,72 @@
             font-weight: 800;
             color: #ffffff;
             text-align: center;
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(0, 0, 0, 0.4);
             padding: 6px 14px;
             border-radius: 6px;
             border: 1px solid rgba(255,255,255,0.2);
             letter-spacing: -0.5px;
         }
+
+        /* ALARM POP-UP OVERLAY */
+        .alarm-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: 10px;
+            backdrop-filter: blur(4px);
+        }
+
+        .alarm-card {
+            background: #ffffff;
+            border: 3px solid var(--red-alert);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .alarm-title {
+            color: var(--red-alert);
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .alarm-text {
+            font-size: 13px;
+            color: var(--text-main);
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+
+        .alarm-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-alarm {
+            flex: 1;
+            padding: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+        }
+        .btn-alarm-stop { background: var(--red-alert); }
+        .btn-alarm-stop:hover { background: #a80000; }
+        .btn-alarm-continue { background: var(--win-blue); }
+        .btn-alarm-continue:hover { background: #106ebe; }
 
         /* 5 KNOPPEN RIJ ONDER DE KLOK */
         .bottom-buttons-row {
@@ -198,46 +271,15 @@
             padding: 10px;
         }
 
-        /* STIJL VOOR DAG / NACHT DRUKKNOPPEN */
-        .btn-toggle-group {
-            display: flex;
-            gap: 6px;
-            margin-top: 2px;
-        }
+        .btn-toggle-group { display: flex; gap: 6px; margin-top: 2px; }
         .btn-toggle {
-            flex: 1;
-            padding: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            border: 1px solid #bce0fd;
-            background: #ffffff;
-            color: var(--win-blue);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.15s;
+            flex: 1; padding: 8px; font-size: 12px; font-weight: 700; border: 1px solid #bce0fd;
+            background: #ffffff; color: var(--win-blue); border-radius: 4px; cursor: pointer; transition: all 0.15s;
         }
-        .btn-toggle.active {
-            background: var(--win-blue);
-            color: #ffffff;
-            border-color: var(--win-blue);
-        }
+        .btn-toggle.active { background: var(--win-blue); color: #ffffff; border-color: var(--win-blue); }
 
-        /* STIJL VOOR START / STOP KNOPPEN */
-        .time-btn-row {
-            display: flex;
-            gap: 8px;
-            align-items: flex-end;
-        }
-        .time-btn {
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: 700;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-            white-space: nowrap;
-        }
+        .time-btn-row { display: flex; gap: 8px; align-items: flex-end; }
+        .time-btn { padding: 8px 12px; font-size: 12px; font-weight: 700; border: none; border-radius: 4px; cursor: pointer; color: white; white-space: nowrap; }
         .time-btn-start { background: var(--green-ok); }
         .time-btn-start:hover { background: #0e6b39; }
         .time-btn-stop { background: var(--red-alert); }
@@ -292,20 +334,32 @@
             <!-- DIALYSIS CONSOLE SCHERM -->
             <div class="dialysis-console">
                 
+                <!-- ALARM POP-UP OVERLAY -->
+                <div class="alarm-modal" id="alarmModal">
+                    <div class="alarm-card">
+                        <div class="alarm-title">⚠️ BEHANDELING TEN EINDE ⚠️</div>
+                        <div class="alarm-text">De ingestelde dialyseduur is verstreken. Maak uw keuze:</div>
+                        <div class="alarm-actions">
+                            <button type="button" class="btn-alarm btn-alarm-stop" onclick="kiesAfsluitenBehandeling()">Afsluiten</button>
+                            <button type="button" class="btn-alarm btn-alarm-continue" onclick="kiesDoorgaanBehandeling()">Doorgaan</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Links boven: ART -->
                 <div class="med-box" style="grid-column: 1; grid-row: 1;">
                     <div class="label">ART mmHg</div>
                     <div class="value" id="dispArt">-80</div>
                 </div>
 
-                <!-- Midden: De grote ronde klok met countdown in het midden -->
+                <!-- Midden: De grote ronde klok met aftellende countdown -->
                 <div class="center-clock-panel">
                     <div class="analogue-clock" id="analogueClock">
                         <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
                     </div>
                 </div>
 
-                <!-- Rechts boven: UF DOEL (gekoppeld aan Uitgerekende UF) -->
+                <!-- Rechts boven: UF DOEL -->
                 <div class="med-box" style="grid-column: 3; grid-row: 1;">
                     <div class="label">UF DOEL</div>
                     <div class="value" id="dispUfGoal">3000</div>
@@ -346,12 +400,12 @@
 
             </div>
 
-            <!-- INVOER & BEREKENINGEN (WITTE VLAK) -->
+            <!-- INVOER & BEREKENINGEN -->
             <div class="controls-card">
                 <div class="section-title">🩺 Sessie Invoer & Gegevens</div>
                 
                 <div class="input-grid-2col">
-                    <!-- LINKERKANT: Pre, Post, Ingesteld & Werkelijke UF -->
+                    <!-- LINKERKANT -->
                     <div class="sub-section-box">
                         <div class="form-group">
                             <label>Actieve Patiënt</label>
@@ -377,7 +431,7 @@
                         </div>
                     </div>
 
-                    <!-- RECHTERKANT: Soort dialyse (knoppen), Aanpasbaar Drooggewicht & Uitgerekende UF -->
+                    <!-- RECHTERKANT -->
                     <div class="sub-section-box">
                         <div class="form-group">
                             <label>Soort Dialyse</label>
@@ -401,7 +455,7 @@
                     </div>
                 </div>
 
-                <!-- DUUR & START/STOP TIJDEN (VERVANGT BLOEDDRUK/HARTSLAG) -->
+                <!-- DUUR & START/STOP TIJDEN -->
                 <div class="sub-section-box" style="margin-top: 10px;">
                     <div class="row-inputs">
                         <div class="form-group" style="max-width: 130px;">
@@ -467,9 +521,14 @@
 
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
         let gebruikerRol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
-        let actieveSoortDialyse = 'nacht'; // Standaard Nacht (0.3)
+        let actieveSoortDialyse = 'nacht'; 
         let sessies = [];
         let gebruikerProfielen = {};
+
+        // Timer variabelen voor countdown
+        let isTimerRunning = false;
+        let timerTargetTime = null;
+        let isDoorgaanGekozen = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('rollodex_fullscreen') === 'true') {
@@ -480,7 +539,7 @@
             document.getElementById('gebruikerLabel').innerText = `• Ingelogd als: ${actieveGebruiker}`;
             
             genereerUurStrepen();
-            startKlok();
+            startKlokLus();
             laadData();
         });
 
@@ -509,7 +568,6 @@
             }
         }
 
-        // Tijd functies
         function formatDatetimeLocal(d) {
             let yyyy = d.getFullYear();
             let mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -523,11 +581,24 @@
             let nu = new Date();
             document.getElementById('valStartTijd').value = formatDatetimeLocal(nu);
             berekenAutomatischeEindtijd();
+
+            // Activeer de countdown timer
+            let stopVal = document.getElementById('valStopTijd').value;
+            if (stopVal) {
+                timerTargetTime = new Date(stopVal).getTime();
+                isTimerRunning = true;
+                isDoorgaanGekozen = false;
+                document.getElementById('analogueClock').classList.remove('alarm-state');
+                document.getElementById('alarmModal').style.display = 'none';
+            }
         }
 
         function stopSessieTijd() {
             let nu = new Date();
             document.getElementById('valStopTijd').value = formatDatetimeLocal(nu);
+            isTimerRunning = false;
+            document.getElementById('analogueClock').classList.remove('alarm-state');
+            document.getElementById('alarmModal').style.display = 'none';
         }
 
         function berekenAutomatischeEindtijd() {
@@ -538,10 +609,74 @@
                 let startDatum = new Date(startVal);
                 let eindDatum = new Date(startDatum.getTime() + (duurUur * 60 * 60 * 1000));
                 document.getElementById('valStopTijd').value = formatDatetimeLocal(eindDatum);
+                if (isTimerRunning) {
+                    timerTargetTime = eindDatum.getTime();
+                }
             }
         }
 
-        // Drooggewicht direct synchroniseren met Cloud Bin
+        function startKlokLus() {
+            updateKlok();
+            setInterval(updateKlok, 1000);
+        }
+
+        function updateKlok() {
+            let nu = new Date();
+
+            // Update live titelbalk klok
+            let dagen = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+            let dd = String(nu.getDate()).padStart(2, '0');
+            let mm = String(nu.getMonth() + 1).padStart(2, '0');
+            let yyyy = nu.getFullYear();
+            let uuu = String(nu.getHours()).padStart(2, '0');
+            let mmm = String(nu.getMinutes()).padStart(2, '0');
+            let sss = String(nu.getSeconds()).padStart(2, '0');
+            document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
+
+            // Countdown verwerking in het midden van de klok
+            let countdownEl = document.getElementById('countdownDisplay');
+
+            if (isTimerRunning && timerTargetTime) {
+                let overms = timerTargetTime - nu.getTime();
+
+                if (overms <= 0) {
+                    // Timer is ten einde!
+                    countdownEl.innerText = "00:00:00";
+                    
+                    if (!isDoorgaanGekozen) {
+                        document.getElementById('analogueClock').classList.add('alarm-state');
+                        document.getElementById('alarmModal').style.display = 'flex';
+                    }
+                } else {
+                    // Aftellen
+                    let totSec = Math.floor(overms / 1000);
+                    let h = Math.floor(totSec / 3600);
+                    let m = Math.floor((totSec % 3600) / 60);
+                    let s = totSec % 60;
+
+                    let hh = String(h).padStart(2, '0');
+                    let mm = String(m).padStart(2, '0');
+                    let ss = String(s).padStart(2, '0');
+
+                    countdownEl.innerText = `${hh}:${mm}:${ss}`;
+                }
+            } else {
+                // Als er geen actieve sessie loopt, toon gewone huidige tijd
+                countdownEl.innerText = `${uuu}:${mmm}:${sss}`;
+            }
+        }
+
+        function kiesAfsluitenBehandeling() {
+            stopSessieTijd();
+            alert("Behandeling beëindigd. Sla de sessie op om alle gegevens te bewaren.");
+        }
+
+        function kiesDoorgaanBehandeling() {
+            isDoorgaanGekozen = true;
+            document.getElementById('alarmModal').style.display = 'none';
+            document.getElementById('analogueClock').classList.remove('alarm-state');
+        }
+
         let binSaveTimeout = null;
         function opslaanNieuwDroogGewichtBin() {
             clearTimeout(binSaveTimeout);
@@ -572,27 +707,6 @@
             }
         }
 
-        function startKlok() {
-            updateKlok();
-            setInterval(updateKlok, 1000);
-        }
-
-        function updateKlok() {
-            let nu = new Date();
-            let uuu = String(nu.getHours()).padStart(2, '0');
-            let mmm = String(nu.getMinutes()).padStart(2, '0');
-            let sss = String(nu.getSeconds()).padStart(2, '0');
-
-            document.getElementById('countdownDisplay').innerText = `${uuu}:${mmm}:${sss}`;
-
-            let dagen = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
-            let dd = String(nu.getDate()).padStart(2, '0');
-            let mm = String(nu.getMonth() + 1).padStart(2, '0');
-            let yyyy = nu.getFullYear();
-
-            document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
-        }
-
         function toonTab(tab) {
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -618,7 +732,6 @@
                 document.getElementById('valUfAdvies').value = ufAdviesKg.toFixed(2) + " kg";
                 document.getElementById('valUitgerekendeUf').value = doelMl + " ml";
                 
-                // Direct doorzetten naar de bovenste console knoppen
                 document.getElementById('dispUfGoal').innerText = doelMl;
                 
                 let duur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
@@ -670,7 +783,6 @@
                 sessies = (data.record && data.record.sessies) ? data.record.sessies : [];
                 gebruikerProfielen = (data.record && data.record.profielen) ? data.record.profielen : {};
 
-                // Indien er een opgeslagen drooggewicht is voor deze gebruiker, laad deze
                 if (gebruikerProfielen[actieveGebruiker] && gebruikerProfielen[actieveGebruiker].droogGewicht) {
                     document.getElementById('valDroogGewicht').value = gebruikerProfielen[actieveGebruiker].droogGewicht;
                 }
