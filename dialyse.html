@@ -104,11 +104,6 @@
             text-align: center;
             width: 100%;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .med-box:hover {
-            background: #2a7cbd;
         }
         .med-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
         .med-box .value { font-size: 15px; font-weight: 700; color: var(--dialysis-yellow); margin-top: 2px; }
@@ -162,7 +157,7 @@
             letter-spacing: -0.5px;
         }
 
-        /* RIJ MET 5 KNOPPEN ONDER DE KLOK */
+        /* 5 KNOPPEN RIJ ONDER DE KLOK */
         .bottom-buttons-row {
             grid-column: 1 / span 3;
             grid-row: 4;
@@ -173,7 +168,7 @@
             margin-top: 4px;
         }
 
-        /* EXTRA INPUT KAART ONDER HET SCHERM */
+        /* INVOER KAART ONDER HET SCHERM */
         .controls-card {
             background: #ffffff;
             border-radius: 8px;
@@ -185,12 +180,25 @@
         
         .form-group { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
         .form-group label { font-size: 11px; font-weight: 700; color: #5f5f5f; }
-        .form-group input { width: 100%; padding: 8px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 13px; background: #fff; }
 
         .row-inputs { display: flex; gap: 8px; }
         .row-inputs .form-group { flex: 1; }
 
-        .action-btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; margin-top: 4px; }
+        .input-grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .sub-section-box {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .action-btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; margin-top: 8px; }
         .action-btn:hover { background: #106ebe; }
 
         table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
@@ -252,7 +260,7 @@
                     </div>
                 </div>
 
-                <!-- Rechts boven: UF DOEL -->
+                <!-- Rechts boven: UF DOEL (gekoppeld aan Uitgerekende UF) -->
                 <div class="med-box" style="grid-column: 3; grid-row: 1;">
                     <div class="label">UF DOEL</div>
                     <div class="value" id="dispUfGoal">3000</div>
@@ -284,57 +292,71 @@
 
                 <!-- 5 KNOPPEN RIJ ONDER DE KLOK -->
                 <div class="bottom-buttons-row">
-                    <div class="med-box">
-                        <div class="label">KNOP 1</div>
-                        <div class="value">---</div>
-                    </div>
-                    <div class="med-box">
-                        <div class="label">KNOP 2</div>
-                        <div class="value">---</div>
-                    </div>
-                    <div class="med-box">
-                        <div class="label">KNOP 3</div>
-                        <div class="value">---</div>
-                    </div>
-                    <div class="med-box">
-                        <div class="label">KNOP 4</div>
-                        <div class="value">---</div>
-                    </div>
-                    <div class="med-box">
-                        <div class="label">KNOP 5</div>
-                        <div class="value">---</div>
-                    </div>
+                    <div class="med-box"><div class="label">KNOP 1</div><div class="value">---</div></div>
+                    <div class="med-box"><div class="label">KNOP 2</div><div class="value">---</div></div>
+                    <div class="med-box"><div class="label">KNOP 3</div><div class="value">---</div></div>
+                    <div class="med-box"><div class="label">KNOP 4</div><div class="value">---</div></div>
+                    <div class="med-box"><div class="label">KNOP 5</div><div class="value">---</div></div>
                 </div>
 
             </div>
 
-            <!-- INVOER & BEREKENINGEN -->
+            <!-- INVOER & BEREKENINGEN (WITTE VLAK) -->
             <div class="controls-card">
                 <div class="section-title">🩺 Sessie Invoer & Gegevens</div>
                 
-                <div class="row-inputs">
-                    <div class="form-group">
-                        <label>Actieve Patiënt</label>
-                        <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
+                <div class="input-grid-2col">
+                    <!-- LINKERKANT: Gewichten & UF waarden -->
+                    <div class="sub-section-box">
+                        <div class="form-group">
+                            <label>Actieve Patiënt</label>
+                            <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
+                        </div>
+                        <div class="form-group">
+                            <label>Pre Gewicht (kg)</label>
+                            <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF()">
+                        </div>
+                        <div class="form-group">
+                            <label>Post Gewicht (kg)</label>
+                            <input type="number" step="0.1" id="valPostGewicht" placeholder="Na dialyse">
+                        </div>
+                        <div class="row-inputs">
+                            <div class="form-group">
+                                <label>UF Ingesteld (l)</label>
+                                <input type="number" step="0.1" id="valUfIngesteld" placeholder="Bijv. 3.0">
+                            </div>
+                            <div class="form-group">
+                                <label>Werkelijke UF (l)</label>
+                                <input type="number" step="0.1" id="valWerkelijkUf" placeholder="Werkelijk">
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Droog Gewicht (kg)</label>
-                        <input type="number" step="0.1" id="valDroogGewicht" value="109" oninput="berekenUF()">
+
+                    <!-- RECHTERKANT: Soort dialyse, Drooggewicht & Uitgerekende UF -->
+                    <div class="sub-section-box">
+                        <div class="form-group">
+                            <label>Soort Dialyse</label>
+                            <select id="valSoortDialyse" onchange="berekenUF()">
+                                <option value="nacht">Nacht (Factor 0,3)</option>
+                                <option value="dag">Dag (Factor 0,6)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Droog Gewicht Aanpasbaar (kg)</label>
+                            <input type="number" step="0.1" id="valDroogGewicht" value="109" oninput="berekenUF()">
+                        </div>
+                        <div class="form-group">
+                            <label>UF Advies (kg)</label>
+                            <input type="text" id="valUfAdvies" readonly style="background: #fff; font-weight: bold;" placeholder="Berekend...">
+                        </div>
+                        <div class="form-group">
+                            <label>Uitgerekende UF (ml) → Naar UF Doel</label>
+                            <input type="text" id="valUitgerekendeUf" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="0 ml">
+                        </div>
                     </div>
                 </div>
 
-                <div class="row-inputs">
-                    <div class="form-group">
-                        <label>Pre-Gewicht (kg)</label>
-                        <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF()">
-                    </div>
-                    <div class="form-group">
-                        <label>Automatisch UF-Advies (Pre - Droog + 0.3)</label>
-                        <input type="text" id="valUfAdvies" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="Wordt berekend...">
-                    </div>
-                </div>
-
-                <div class="row-inputs">
+                <div class="row-inputs" style="margin-top: 10px;">
                     <div class="form-group">
                         <label>Bloeddruk (Systool/Diastool)</label>
                         <input type="text" id="valBloeddruk" placeholder="Bijv. 130/80">
@@ -343,11 +365,10 @@
                         <label>Hartslag (bpm)</label>
                         <input type="number" id="valHartslag" placeholder="Bijv. 72">
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Notitie</label>
-                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, bijzonderheden">
+                    <div class="form-group">
+                        <label>Notitie</label>
+                        <input type="text" id="valNotitie" placeholder="Bijzonderheden">
+                    </div>
                 </div>
 
                 <button type="button" class="action-btn" onclick="slaDialyseOp()">💾 SESSIE OPSLAAN IN CLOUD</button>
@@ -453,16 +474,23 @@
         function berekenUF() {
             let pre = parseFloat(document.getElementById('valPreGewicht').value);
             let droog = parseFloat(document.getElementById('valDroogGewicht').value);
-            let ufInput = document.getElementById('valUfAdvies');
+            let soort = document.getElementById('valSoortDialyse').value;
+            
+            let factor = (soort === 'dag') ? 0.6 : 0.3;
 
             if (!isNaN(pre) && !isNaN(droog)) {
-                let uf = (pre - droog) + 0.3;
-                ufInput.value = uf.toFixed(2) + " kg";
-                let doelMl = Math.round(uf * 1000);
+                let ufAdviesKg = (pre - droog) + factor;
+                let doelMl = Math.round(ufAdviesKg * 1000);
+
+                document.getElementById('valUfAdvies').value = ufAdviesKg.toFixed(2) + " kg";
+                document.getElementById('valUitgerekendeUf').value = doelMl + " ml";
+                
+                // Direct doorzetten naar de bovenste console knop (UF DOEL)
                 document.getElementById('dispUfGoal').innerText = doelMl;
                 document.getElementById('dispUfPerUur').innerText = Math.round(doelMl / 4) + " ml";
             } else {
-                ufInput.value = "";
+                document.getElementById('valUfAdvies').value = "";
+                document.getElementById('valUitgerekendeUf').value = "";
             }
         }
 
@@ -525,16 +553,15 @@
         function slaDialyseOp() {
             let pre = parseFloat(document.getElementById('valPreGewicht').value);
             let droog = parseFloat(document.getElementById('valDroogGewicht').value);
-            let bd = document.getElementById('valBloeddruk').value.trim();
-            let hr = document.getElementById('valHartslag').value.trim();
-            let notitie = document.getElementById('valNotitie').value.trim();
+            let soort = document.getElementById('valSoortDialyse').value;
+            let factor = (soort === 'dag') ? 0.6 : 0.3;
 
             if (isNaN(pre)) {
                 alert('Vul alstublieft een geldig pre-gewicht in.');
                 return;
             }
 
-            let ufVal = ((pre - droog) + 0.3).toFixed(2);
+            let ufVal = ((pre - droog) + factor).toFixed(2);
             let nu = new Date();
 
             let nieuweSessie = {
@@ -543,11 +570,15 @@
                 datum: nu.toISOString().split('T')[0],
                 tijd: nu.toTimeString().slice(0, 5),
                 preGewicht: pre,
+                postGewicht: document.getElementById('valPostGewicht').value || '-',
                 droogGewicht: droog,
+                soortDialyse: soort,
+                ufIngesteld: document.getElementById('valUfIngesteld').value || '-',
+                werkelijkUf: document.getElementById('valWerkelijkUf').value || '-',
                 ufAdvies: ufVal,
-                bloeddruk: bd || '-',
-                hartslag: hr || '-',
-                notitie: notitie || '-'
+                bloeddruk: document.getElementById('valBloeddruk').value.trim() || '-',
+                hartslag: document.getElementById('valHartslag').value.trim() || '-',
+                notitie: document.getElementById('valNotitie').value.trim() || '-'
             };
 
             sessies.unshift(nieuweSessie);
@@ -582,7 +613,7 @@
                 tr.innerHTML = `
                     <td>${s.datum} ${s.tijd}</td>
                     <td><b>${s.persoon}</b></td>
-                    <td>${s.preGewicht}kg / ${s.droogGewicht}kg</td>
+                    <td>Pre: ${s.preGewicht}kg / Droog: ${s.droogGewicht}kg</td>
                     <td><b>${getUfKleurBadge(s.ufAdvies)}</b></td>
                     <td>${s.bloeddruk} mmHg<br><span style="font-size:10px; color:#666;">HR: ${s.hartslag} bpm</span></td>
                     <td>${s.notitie}</td>
