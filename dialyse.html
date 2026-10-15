@@ -597,7 +597,7 @@
                     </div>
                 </div>
 
-                <!-- 2. UF BOX -->
+                <!-- 2. UF BOX (BEVAT NU UF INGESTELD & WERKELIJKER UF) -->
                 <div class="sub-section-box" id="ufBox">
                     <div class="form-group">
                         <label>Soort Dialyse</label>
@@ -606,9 +606,15 @@
                             <button type="button" class="btn-toggle active" id="btnDialyseNacht" onclick="setSoortDialyse('nacht')">🌙 Nacht (0,3)</button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Droog Gewicht Aanpasbaar (kg)</label>
-                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); opslaanNieuwDroogGewichtBin(); slaLokaalOp();">
+                    <div class="row-inputs">
+                        <div class="form-group">
+                            <label>UF Ingesteld (l)</label>
+                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="slaLokaalOp();">
+                        </div>
+                        <div class="form-group">
+                            <label>Werkelijke UF (kg)</label>
+                            <input type="text" id="valWerkelijkUf" readonly style="background: #f1f1f1; font-weight: bold;" placeholder="Berekend...">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>UF Advies (kg)</label>
@@ -620,7 +626,7 @@
                     </div>
                 </div>
 
-                <!-- 3. GEWICHT BOX -->
+                <!-- 3. GEWICHT BOX (BEVAT NU PRE, POST & DROOG GEWICHT) -->
                 <div class="sub-section-box" id="gewichtBox">
                     <div class="form-group">
                         <label>Pre Gewicht (kg)</label>
@@ -630,15 +636,9 @@
                         <label>Post Gewicht (kg)</label>
                         <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF(); slaLokaalOp();">
                     </div>
-                    <div class="row-inputs">
-                        <div class="form-group">
-                            <label>UF Ingesteld (l)</label>
-                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="slaLokaalOp();">
-                        </div>
-                        <div class="form-group">
-                            <label>Werkelijke UF (kg)</label>
-                            <input type="text" id="valWerkelijkUf" readonly style="background: #f1f1f1; font-weight: bold;" placeholder="Berekend...">
-                        </div>
+                    <div class="form-group">
+                        <label>Droog Gewicht Aanpasbaar (kg)</label>
+                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); opslaanNieuwDroogGewichtBin(); slaLokaalOp();">
                     </div>
                 </div>
 
@@ -832,7 +832,7 @@
 
         function springNaarUfVeld() {
             toonExclusiefMenu('ufBox', '💧 UF & INSTELLINGEN');
-            activeerTouchpad(document.getElementById('valDroogGewicht'));
+            activeerTouchpad(document.getElementById('valUfIngesteld'));
         }
 
         function springNaarGewichtVeld() {
@@ -923,6 +923,7 @@
                 stop: document.getElementById('valStopTijd').value,
                 pre: document.getElementById('valPreGewicht').value,
                 post: document.getElementById('valPostGewicht').value,
+                droog: document.getElementById('valDroogGewicht').value,
                 ufIngesteld: document.getElementById('valUfIngesteld').value,
                 frag25: document.getElementById('valFragmin2500').value,
                 frag50: document.getElementById('valFragmin5000').value,
@@ -949,6 +950,7 @@
                 if (d.stop) document.getElementById('valStopTijd').value = d.stop;
                 if (d.pre) document.getElementById('valPreGewicht').value = d.pre;
                 if (d.post) document.getElementById('valPostGewicht').value = d.post;
+                if (d.droog) document.getElementById('valDroogGewicht').value = d.droog;
                 if (d.ufIngesteld) document.getElementById('valUfIngesteld').value = d.ufIngesteld;
                 if (d.frag25) document.getElementById('valFragmin2500').value = d.frag25;
                 if (d.frag50) document.getElementById('valFragmin5000').value = d.frag50;
@@ -1202,7 +1204,6 @@
             if (isTimerRunning && timerTargetTime) {
                 let overms = timerTargetTime - nu.getTime();
 
-                // UF VOLUME OMHOOG & UF DOEL OMLAAG BEREKENEN
                 let duurUur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
                 let totaleDuurMs = duurUur * 3600 * 1000;
                 let verlopenMs = nu.getTime() - timerStartTimestamp;
