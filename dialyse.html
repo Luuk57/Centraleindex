@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dialyse Monitor • Medische Suite</title>
+    <title>Rollodex • Dialyse Monitor</title>
     <style>
         :root {
             --win-blue: #0078d4;
             --win-blue-hover: #106ebe;
-            --win-bg: #f3f3f3;
+            --win-bg: #e0e0e0;
             --win-header-bg: #202020;
             --card-bg: #ffffff;
             --text-main: #1b1b1b;
@@ -26,7 +26,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
         body, html { width: 100%; height: 100%; background: var(--win-bg); color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
 
-        /* WINDOWS TITLEBAR / HEADER */
+        /* WINDOWS TITLEBAR / TASKBAR */
         .win-titlebar {
             background: var(--win-header-bg);
             color: #ffffff;
@@ -35,22 +35,34 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 10;
         }
 
         .win-title-left { display: flex; align-items: center; gap: 8px; }
+        .win-title-right { display: flex; align-items: center; gap: 10px; }
         .win-title-actions { display: flex; gap: 4px; }
+
+        .win-clock {
+            font-size: 11px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.08);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+            white-space: nowrap;
+        }
 
         .win-btn {
             background: rgba(255,255,255,0.12);
             border: 1px solid rgba(255,255,255,0.1);
             color: white;
-            padding: 5px 10px;
+            padding: 5px 8px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
@@ -61,40 +73,64 @@
         .win-btn:hover { background: rgba(255,255,255,0.25); }
 
         /* TAB BAR */
-        .tab-bar { display: flex; background: #e5e5e5; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        .tab-btn { flex: 1; padding: 10px 8px; font-size: 12px; font-weight: 600; background: #dedede; border: none; cursor: pointer; text-align: center; color: #444; transition: background 0.15s; }
+        .tab-bar { display: flex; background: #dcdcdc; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; background: #cccccc; border: none; cursor: pointer; text-align: center; color: #444; transition: background 0.15s; }
         .tab-btn.active { background: var(--card-bg); color: var(--win-blue); border-bottom: 3px solid var(--win-blue); }
 
-        /* CONTENT PANEEL */
-        .tab-pane { display: none; flex: 1; padding: 12px; overflow-y: auto; width: 100%; max-width: 800px; margin: 0 auto; }
+        /* WORKSPACE CONTAINER */
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 14px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; }
+        
+        .tab-pane { display: none; width: 100%; max-width: 650px; }
         .tab-pane.active { display: block; }
 
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; margin-bottom: 12px; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .section-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 8px; border-bottom: 2px solid var(--win-blue); padding-bottom: 3px; letter-spacing: 0.5px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        .section-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--win-blue); padding-bottom: 3px; letter-spacing: 0.5px; }
 
-        .form-group { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
-        .form-group label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; background: #fff; }
+        /* ANALOGUE CLOCK STYLING */
+        .clock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .analogue-clock {
+            width: 150px; height: 150px; border: 4px solid var(--win-blue); border-radius: 50%;
+            position: relative; background: #fafafa; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .clock-center {
+            position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: var(--win-blue);
+            border-radius: 50%; transform: translate(-50%, -50%); z-index: 5;
+        }
+        .hour-mark {
+            position: absolute; width: 2px; height: 10px; background: #333; top: 6px; left: calc(50% - 1px);
+            transform-origin: 50% 69px; /* Straal = 75px - padding */
+        }
+        .hand {
+            position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 4px; z-index: 3;
+        }
+        .hour-hand { width: 4px; height: 35px; background: #333; transform: translate(-50%, 0); }
+        .minute-hand { width: 3px; height: 50px; background: #666; transform: translate(-50%, 0); }
+        .second-hand { width: 1px; height: 58px; background: var(--red-alert); transform: translate(-50%, 0); z-index: 4; }
+        .digital-subtext { font-size: 13px; font-weight: 700; color: var(--text-secondary); margin-top: 8px; }
+
+        /* FORM ELEMENTS */
+        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+        .form-group label { font-size: 11px; font-weight: 700; color: var(--text-secondary); }
+        .form-group input, .form-group select { width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; background: #fff; }
         .form-group input:focus { outline: none; border-color: var(--win-blue); box-shadow: 0 0 0 2px rgba(0,120,212,0.15); }
 
         .row-inputs { display: flex; gap: 8px; }
         .row-inputs .form-group { flex: 1; }
 
-        .action-btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 6px; text-align: center; }
+        .action-btn { background: var(--win-blue); color: white; border: none; padding: 11px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 8px; text-align: center; }
         .action-btn:hover { background: var(--win-blue-hover); }
 
-        /* TABELLEN & KLEURCODERING */
+        /* TABLES & BADGES */
         table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
-        table.dialyse-table th, table.dialyse-table td { border: 1px solid #ddd; padding: 6px; text-align: left; vertical-align: middle; }
-        table.dialyse-table th { background: var(--win-blue); color: white; font-weight: 600; }
+        table.dialyse-table th, table.dialyse-table td { border: 1px solid #ddd; padding: 7px; text-align: left; vertical-align: middle; }
+        table.dialyse-table th { background: var(--win-header-bg); color: white; font-weight: 600; }
 
         .badge-red { background: var(--red-bg); color: var(--red-alert); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
         .badge-orange { background: var(--orange-bg); color: var(--orange-alert); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
         .badge-green { background: var(--green-bg); color: var(--green-ok); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
 
-        .btn-small { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; font-weight: bold; background: var(--red-alert); }
-
-        .back-link { display: inline-block; margin-bottom: 10px; font-size: 11px; font-weight: 600; color: var(--win-blue); text-decoration: none; }
+        .btn-small-del { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; font-weight: bold; background: var(--red-alert); }
+        .back-link { display: inline-block; margin-bottom: 10px; font-size: 11px; font-weight: 600; color: #ffffff; text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
         .back-link:hover { text-decoration: underline; }
     </style>
 </head>
@@ -103,96 +139,115 @@
     <!-- WINDOWS TITLEBAR -->
     <div class="win-titlebar">
         <div class="win-title-left">
-            <span>🩺 Dialyse Monitor</span>
-            <span id="gebruikerLabel" style="font-size: 11px; opacity: 0.8; font-weight: normal;"></span>
+            <span>🩺 Rollodex • Dialyse Monitor</span>
+            <span id="gebruikerLabel" style="font-size: 10px; opacity: 0.8; font-weight: normal;"></span>
         </div>
-        <div class="win-title-actions">
-            <button type="button" class="win-btn" onclick="location.reload()" title="Gegevens Verversen">🔄 Refresh</button>
-            <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm">⛶ Scherm</button>
+        <div class="win-title-right">
+            <div id="liveClock" class="win-clock">Laden...</div>
+            <div class="win-title-actions">
+                <button type="button" class="win-btn" onclick="verversPagina()" title="Systeem Herladen">🔄 Refresh</button>
+                <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm">⛶ Scherm</button>
+            </div>
         </div>
     </div>
 
     <!-- TABBALK -->
     <div class="tab-bar">
-        <button type="button" class="tab-btn active" id="btnInvoer" onclick="toonTab('invoer')">📝 Nieuwe Sessie</button>
+        <button type="button" class="tab-btn active" id="btnInvoer" onclick="toonTab('invoer')">📝 Nieuwe Dialyse Sessie</button>
         <button type="button" class="tab-btn" id="btnHistorie" onclick="toonTab('historie')">📊 Historie & Advies</button>
     </div>
 
-    <!-- TAB 1: INVOER -->
-    <div id="invoerPane" class="tab-pane active">
-        <a href="index.html" class="back-link">← Terug naar Dashboard</a>
+    <!-- WORKSPACE -->
+    <div class="workspace">
+        
+        <!-- TAB 1: INVOER & KLOK -->
+        <div id="invoerPane" class="tab-pane active">
+            <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
 
-        <div class="card">
-            <div class="section-title">🩺 Dialyse & Vocht Invoer</div>
-            
-            <div class="form-group">
-                <label>Persoon / Patiënt</label>
-                <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
-            </div>
-
-            <div class="row-inputs">
-                <div class="form-group">
-                    <label>Pre-Gewicht (kg)</label>
-                    <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF()">
+            <!-- Grote Ronde Klok met uurstrepen -->
+            <div class="card clock-container">
+                <div class="analogue-clock" id="analogueClock">
+                    <div class="clock-center"></div>
+                    <div class="hand hour-hand" id="hourHand"></div>
+                    <div class="hand minute-hand" id="minuteHand"></div>
+                    <div class="hand second-hand" id="secondHand"></div>
                 </div>
+                <div class="digital-subtext" id="digitalSubClock">--:--:--</div>
+            </div>
+
+            <!-- Invoerformulier -->
+            <div class="card">
+                <div class="section-title">🩺 Dialyse & Vocht Invoer</div>
+                
                 <div class="form-group">
-                    <label>Droog Gewicht (kg)</label>
-                    <input type="number" step="0.1" id="valDroogGewicht" value="109" placeholder="Bijv. 109" oninput="berekenUF()">
+                    <label>Patiënt / Actieve Gebruiker</label>
+                    <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Automatisch UF-Advies (Pre - Droog + 0.3)</label>
-                <input type="text" id="valUfAdvies" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="Wordt berekend...">
-            </div>
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>Pre-Gewicht (kg)</label>
+                        <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF()">
+                    </div>
+                    <div class="form-group">
+                        <label>Droog Gewicht (kg)</label>
+                        <input type="number" step="0.1" id="valDroogGewicht" value="109" placeholder="Bijv. 109" oninput="berekenUF()">
+                    </div>
+                </div>
 
-            <div class="row-inputs">
                 <div class="form-group">
-                    <label>Bloeddruk (Systool/Diastool)</label>
-                    <input type="text" id="valBloeddruk" placeholder="Bijv. 130/80">
+                    <label>Automatisch UF-Advies (Pre - Droog + 0.3)</label>
+                    <input type="text" id="valUfAdvies" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="Wordt berekend...">
                 </div>
+
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>Bloeddruk (Systool/Diastool)</label>
+                        <input type="text" id="valBloeddruk" placeholder="Bijv. 130/80">
+                    </div>
+                    <div class="form-group">
+                        <label>Hartslag (bpm)</label>
+                        <input type="number" id="valHartslag" placeholder="Bijv. 72">
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label>Hartslag (bpm)</label>
-                    <input type="number" id="valHartslag" placeholder="Bijv. 72">
+                    <label>Notitie / Bijzonderheden</label>
+                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, moeheid, etc.">
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Notitie / Bijzonderheden</label>
-                <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, moeheid, etc.">
+                <button type="button" class="action-btn" onclick="slaDialyseOp()">💾 SESSIE OPSLAAN IN CLOUD</button>
             </div>
-
-            <button type="button" class="action-btn" onclick="slaDialyseOp()">💾 SESSIE OPSLAAN</button>
         </div>
-    </div>
 
-    <!-- TAB 2: HISTORIE -->
-    <div id="historiePane" class="tab-pane">
-        <a href="index.html" class="back-link">← Terug naar Dashboard</a>
+        <!-- TAB 2: HISTORIE -->
+        <div id="historiePane" class="tab-pane">
+            <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
 
-        <div class="card">
-            <div class="section-title">📊 Dialyse Historie & Kleurcodering</div>
-            <table class="dialyse-table">
-                <thead>
-                    <tr>
-                        <th>Datum & Tijd</th>
-                        <th>Persoon</th>
-                        <th>Pre / Droog</th>
-                        <th>UF Advies</th>
-                        <th>Bloeddruk / Hartslag</th>
-                        <th>Notitie</th>
-                        <th style="width: 45px;">Actie</th>
-                    </tr>
-                </thead>
-                <tbody id="historieTabelBody">
-                    <tr><td colspan="7" style="color: #888;">Gegevens laden...</td></tr>
-                </tbody>
-            </table>
+            <div class="card">
+                <div class="section-title">📊 Dialyse Historie & Kleurcodering</div>
+                <table class="dialyse-table">
+                    <thead>
+                        <tr>
+                            <th>Datum & Tijd</th>
+                            <th>Persoon</th>
+                            <th>Pre / Droog</th>
+                            <th>UF Advies</th>
+                            <th>Bloeddruk / HR</th>
+                            <th>Notitie</th>
+                            <th style="width: 45px; text-align: center;">Actie</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historieTabelBody">
+                        <tr><td colspan="7" style="color: #888; text-align: center;">Gegevens laden...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
     </div>
 
     <script>
-        // Je kunt hiervoor een eigen JSONBin aanmaken of deze placeholder gebruiken
         const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
         const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
 
@@ -201,10 +256,61 @@
         let sessies = [];
 
         window.addEventListener('DOMContentLoaded', () => {
+            // Fullscreen herstellen indien actief
+            if (localStorage.getItem('rollodex_fullscreen') === 'true') {
+                document.documentElement.requestFullscreen().catch(err => {});
+            }
+
             document.getElementById('valPersoon').value = actieveGebruiker;
             document.getElementById('gebruikerLabel').innerText = `• Ingelogd als: ${actieveGebruiker}`;
+            
+            genereerUurStrepen();
+            startKlok();
             laadData();
         });
+
+        // Genereer de 12 uurstrepen automatisch rondom de analoge klok
+        function genereerUurStrepen() {
+            let clock = document.getElementById('analogueClock');
+            for (let i = 0; i < 12; i++) {
+                let mark = document.createElement('div');
+                mark.className = 'hour-mark';
+                mark.style.transform = `rotate(${i * 30}deg)`;
+                clock.appendChild(mark);
+            }
+        }
+
+        // Live klok (analoog + digitaal)
+        function startKlok() {
+            updateKlok();
+            setInterval(updateKlok, 1000);
+        }
+
+        function updateKlok() {
+            let nu = new Date();
+            let seconden = nu.getSeconds();
+            let minuten = nu.getMinutes();
+            let uren = nu.getHours();
+
+            let secDeg = seconden * 6;
+            let minDeg = (minuten * 6) + (seconden * 0.1);
+            let hrDeg = (uren % 12 * 30) + (minuten * 0.5);
+
+            document.getElementById('secondHand').style.transform = `translate(-50%, 0) rotate(${secDeg}deg)`;
+            document.getElementById('minuteHand').style.transform = `translate(-50%, 0) rotate(${minDeg}deg)`;
+            document.getElementById('hourHand').style.transform = `translate(-50%, 0) rotate(${hrDeg}deg)`;
+
+            let dagen = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+            let dd = String(nu.getDate()).padStart(2, '0');
+            let mm = String(nu.getMonth() + 1).padStart(2, '0');
+            let yyyy = nu.getFullYear();
+            let uuu = String(uren).padStart(2, '0');
+            let mmm = String(minuten).padStart(2, '0');
+            let sss = String(seconden).padStart(2, '0');
+
+            document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
+            document.getElementById('digitalSubClock').innerText = `${uuu}:${mmm}:${sss}`;
+        }
 
         function toonTab(tab) {
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -242,6 +348,25 @@
                 return `<span class="badge-orange">${ufWaarde} (≥ 4.0)</span>`;
             } else {
                 return `<span class="badge-green">${ufWaarde} (< 4.0)</span>`;
+            }
+        }
+
+        function verversPagina() {
+            laadData();
+            location.reload();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    localStorage.setItem('rollodex_fullscreen', 'true');
+                }).catch(err => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        localStorage.setItem('rollodex_fullscreen', 'false');
+                    });
+                }
             }
         }
 
@@ -301,7 +426,7 @@
             slaNaarBin();
             vulHistorieTabel();
 
-            alert('Dialyse sessie succesvol opgeslagen!');
+            alert('Dialyse sessie succesvol opgeslagen in de cloud!');
             toonTab('historie');
         }
 
@@ -317,7 +442,6 @@
             let tbody = document.getElementById('historieTabelBody');
             tbody.innerHTML = '';
 
-            // Als gewone gebruiker zie je alleen je eigen data; als admin zie je alles
             let gefilterd = (gebruikerRol === 'admin') ? sessies : sessies.filter(s => s.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
 
             if (gefilterd.length === 0) {
@@ -334,18 +458,10 @@
                     <td><b>${getUfKleurBadge(s.ufAdvies)}</b></td>
                     <td>${s.bloeddruk} mmHg<br><span style="font-size:10px; color:#666;">HR: ${s.hartslag} bpm</span></td>
                     <td>${s.notitie}</td>
-                    <td><button type="button" class="btn-small" onclick="verwijderSessie(${s.id})">Wis</button></td>
+                    <td style="text-align: center;"><button type="button" class="btn-small-del" onclick="verwijderSessie(${s.id})">Wis</button></td>
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(e => {});
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
         }
     </script>
 </body>
