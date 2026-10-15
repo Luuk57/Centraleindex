@@ -75,7 +75,7 @@
         .tab-btn.active { background: #ffffff; color: var(--win-blue); border-bottom: 3px solid var(--win-blue); }
 
         /* WORKSPACE */
-        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; padding: 10px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; position: relative; }
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 10px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; position: relative; }
         
         .tab-pane { display: none; width: 100%; max-width: 820px; }
         .tab-pane.active { display: block; }
@@ -108,10 +108,13 @@
         }
         .med-box.interactive { cursor: pointer; transition: background 0.15s, transform 0.1s; }
         .med-box.interactive:hover { background: #2a7cbd; transform: translateY(-1px); }
-        .med-box.interactive:active { transform: translateY(1px); }
+        .med-box.btn-save { background: #107c41; border-color: #0e6b39; }
+        .med-box.btn-save:hover { background: #138d4a; }
+        .med-box.btn-home { background: #0078d4; border-color: #005a9e; }
+        .med-box.btn-home:hover { background: #106ebe; }
 
         .med-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
-        .med-box .value { font-size: 15px; font-weight: 700; color: var(--dialysis-yellow); margin-top: 2px; }
+        .med-box .value { font-size: 14px; font-weight: 700; color: var(--dialysis-yellow); margin-top: 2px; }
 
         /* DE GROTE RONDE KLOK IN HET MIDDEN */
         .center-clock-panel {
@@ -130,6 +133,7 @@
             min-height: 260px;
             box-shadow: inset 0 4px 10px rgba(0,0,0,0.25);
             position: relative;
+            transition: all 0.3s ease;
         }
 
         .analogue-clock {
@@ -141,6 +145,18 @@
             box-shadow: inset 0 4px 12px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
             transition: all 0.3s ease;
+        }
+
+        /* Stand wanneer hoofdmenu actief is: Extra grote Klok */
+        .center-clock-panel.ponti-mode {
+            min-height: 340px;
+        }
+        .center-clock-panel.ponti-mode .analogue-clock {
+            width: 250px; height: 250px;
+            border-width: 8px;
+        }
+        .center-clock-panel.ponti-mode .clock-center-digital {
+            font-size: 26px;
         }
 
         .analogue-clock.alarm-state {
@@ -159,6 +175,10 @@
             transform-origin: 50% 82px;
             border-radius: 1px;
             opacity: 0.8;
+        }
+        .ponti-mode .hour-mark {
+            transform-origin: 50% 117px;
+            height: 18px;
         }
 
         .clock-center-digital {
@@ -239,6 +259,7 @@
             padding: 14px;
             margin-top: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
         }
         .section-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 8px; border-bottom: 2px solid var(--win-blue); padding-bottom: 2px; }
         
@@ -252,7 +273,7 @@
 
         .input-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .sub-section-box { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; transition: all 0.2s; }
-        .sub-section-box.highlight { border-color: var(--win-blue); box-shadow: 0 0 0 2px rgba(0,120,212,0.2); }
+        .sub-section-box.highlight { border-color: var(--win-blue); box-shadow: 0 0 0 2px rgba(0,120,212,0.25); }
 
         .btn-toggle-group { display: flex; gap: 6px; margin-top: 2px; }
         .btn-toggle {
@@ -268,7 +289,7 @@
         .time-btn-stop { background: var(--red-alert); }
         .time-btn-stop:hover { background: #a80000; }
 
-        /* NUMERIEK TOUCHPAD (VIRTUEEL TOETSBORD) */
+        /* NUMERIEK TOUCHPAD */
         .numeric-pad-container {
             background: #202020;
             border: 2px solid #0078d4;
@@ -288,28 +309,13 @@
             margin-bottom: 8px;
             text-transform: uppercase;
         }
-        .numeric-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-        }
+        .numeric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
         .num-key {
-            background: #333333;
-            color: #ffffff;
-            border: 1px solid #555;
-            border-radius: 4px;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.1s;
+            background: #333333; color: #ffffff; border: 1px solid #555; border-radius: 4px;
+            padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.1s;
         }
         .num-key:hover { background: #0078d4; border-color: #0078d4; }
         .num-key:active { background: #106ebe; }
-
-        .action-btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; margin-top: 10px; }
-        .action-btn:hover { background: #106ebe; }
 
         table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
         table.dialyse-table th, table.dialyse-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
@@ -326,11 +332,11 @@
 </head>
 <body>
 
-    <!-- WINDOWS TITLEBAR -->
+    <!-- WINDOWS TITLEBAR MET PATIËNT NAAM -->
     <div class="win-titlebar">
         <div class="win-title-left">
             <span>🩺 Rollodex • Dialyse Monitor</span>
-            <span id="gebruikerLabel" style="font-size: 10px; opacity: 0.8; font-weight: normal;"></span>
+            <span id="gebruikerTitleBadge" style="font-size: 11px; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 12px; font-weight: bold; color: var(--dialysis-yellow);">Patiënt: ...</span>
         </div>
         <div class="win-title-right">
             <div id="liveClock" class="win-clock">Laden...</div>
@@ -376,7 +382,7 @@
                 </div>
 
                 <!-- Midden: De grote ronde klok met countdown -->
-                <div class="center-clock-panel">
+                <div class="center-clock-panel ponti-mode" id="clockPanel">
                     <div class="analogue-clock" id="analogueClock">
                         <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
                     </div>
@@ -388,10 +394,10 @@
                     <div class="value" id="dispUfGoal">3000</div>
                 </div>
 
-                <!-- Links midden: VEN -->
-                <div class="med-box" style="grid-column: 1; grid-row: 2;">
-                    <div class="label">VEN mmHg</div>
-                    <div class="value" id="dispVen">120</div>
+                <!-- Links midden: KNOP HOOFDSCHERM -->
+                <div class="med-box interactive btn-home" style="grid-column: 1; grid-row: 2;" onclick="schakelHoofdscherm()">
+                    <div class="label">SCHERM</div>
+                    <div class="value" style="color:#fff;">🖥️ HOOFD</div>
                 </div>
 
                 <!-- Rechts midden: UF PER UUR -->
@@ -400,10 +406,10 @@
                     <div class="value" id="dispUfPerUur">750 ml</div>
                 </div>
 
-                <!-- Links onder: UF rate -->
-                <div class="med-box" style="grid-column: 1; grid-row: 3;">
-                    <div class="label">UF rate ml/h</div>
-                    <div class="value" id="dispUfRate">750</div>
+                <!-- Links onder: KNOP OPSLAAN IN CLOUD -->
+                <div class="med-box interactive btn-save" style="grid-column: 1; grid-row: 3;" onclick="slaDialyseOp()">
+                    <div class="label">ACTIE</div>
+                    <div class="value" style="color:#fff;">💾 OPSLAAN</div>
                 </div>
 
                 <!-- Rechts onder: UF volume -->
@@ -435,17 +441,13 @@
 
             </div>
 
-            <!-- INVOER & BEREKENINGEN -->
-            <div class="controls-card">
-                <div class="section-title">🩺 Sessie Invoer & Gegevens</div>
+            <!-- INVOER & BEREKENINGEN (STANDAARD VERBORGEN VOOR PONTIFICAAL SCHERM) -->
+            <div class="controls-card" id="controlsCard" style="display: none;">
+                <div class="section-title" id="controlsTitle">🩺 Invoer & Gegevens</div>
                 
                 <div class="input-grid-2col">
-                    <!-- LINKERKANT: GEWICHT & UF BEREKENING -->
+                    <!-- GEWICHT SECTIE -->
                     <div class="sub-section-box" id="gewichtBoxAnker">
-                        <div class="form-group">
-                            <label>Actieve Patiënt</label>
-                            <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
-                        </div>
                         <div class="form-group">
                             <label>Pre Gewicht (kg)</label>
                             <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF();">
@@ -466,7 +468,7 @@
                         </div>
                     </div>
 
-                    <!-- RECHTERKANT: INSTELLINGEN & BEREKENING -->
+                    <!-- UF SECTIE -->
                     <div class="sub-section-box" id="ufBoxAnker">
                         <div class="form-group">
                             <label>Soort Dialyse</label>
@@ -490,7 +492,7 @@
                     </div>
                 </div>
 
-                <!-- DUUR & START/STOP TIJDEN -->
+                <!-- TIJD SECTIE -->
                 <div class="sub-section-box" style="margin-top: 10px;" id="tijdBoxAnker">
                     <div class="row-inputs">
                         <div class="form-group" style="max-width: 130px;">
@@ -540,8 +542,6 @@
                     <label>Notitie / Bijzonderheden</label>
                     <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, bijzonderheden">
                 </div>
-
-                <button type="button" class="action-btn" onclick="slaDialyseOp()">💾 SESSIE OPSLAAN IN CLOUD</button>
             </div>
         </div>
 
@@ -549,7 +549,7 @@
         <div id="historiePane" class="tab-pane">
             <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
 
-            <div class="controls-card">
+            <div class="controls-card" style="display: block;">
                 <div class="section-title">📊 Dialyse Historie & Kleurcodering</div>
                 <table class="dialyse-table">
                     <thead>
@@ -595,15 +595,28 @@
                 document.documentElement.requestFullscreen().catch(err => {});
             }
 
-            document.getElementById('valPersoon').value = actieveGebruiker;
-            document.getElementById('gebruikerLabel').innerText = `• Ingelogd als: ${actieveGebruiker}`;
+            document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1)}`;
             
             genereerUurStrepen();
             startKlokLus();
             laadData();
         });
 
-        // Knoppen onder de klok navigatie
+        // Hoofdscherm & Menu schakelen
+        function schakelHoofdscherm() {
+            sluitTouchpad();
+            document.getElementById('controlsCard').style.display = 'none';
+            document.getElementById('clockPanel').classList.add('ponti-mode');
+            genereerUurStrepen();
+        }
+
+        function toonMenuCard(titelText) {
+            document.getElementById('controlsCard').style.display = 'block';
+            document.getElementById('clockPanel').classList.remove('ponti-mode');
+            document.getElementById('controlsTitle').innerText = titelText;
+            genereerUurStrepen();
+        }
+
         function markeerSectie(elementId) {
             document.querySelectorAll('.sub-section-box').forEach(box => box.classList.remove('highlight'));
             let el = document.getElementById(elementId);
@@ -614,18 +627,21 @@
         }
 
         function springNaarTijdVeld() {
+            toonMenuCard("⏱️ TIJD & BEHANDELINGSDUUR INSTELLEN");
             markeerSectie('tijdBoxAnker');
             let input = document.getElementById('valDuurUur');
             activeerTouchpad(input);
         }
 
         function springNaarUfVeld() {
+            toonMenuCard("💧 UF ADVIES & INSTELLINGEN");
             markeerSectie('ufBoxAnker');
-            let input = document.getElementById('valPreGewicht');
+            let input = document.getElementById('valDroogGewicht');
             activeerTouchpad(input);
         }
 
         function springNaarGewichtVeld() {
+            toonMenuCard("⚖️ PRE & POST GEWICHT INVOER");
             markeerSectie('gewichtBoxAnker');
             let input = document.getElementById('valPreGewicht');
             activeerTouchpad(input);
@@ -786,7 +802,7 @@
 
         function kiesAfsluitenBehandeling() {
             stopSessieTijd();
-            alert("Behandeling beëindigd. Sla de sessie op om alle gegevens te bewaren.");
+            alert("Behandeling beëindigd. Druk op 💾 OPSLAAN om alle gegevens in de cloud op te slaan.");
         }
 
         function kiesDoorgaanBehandeling() {
