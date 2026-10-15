@@ -624,7 +624,7 @@
                         <input type="text" id="valUfAdvies" readonly style="background: #fff; font-weight: bold;" placeholder="Berekend...">
                     </div>
                     <div class="form-group">
-                        <label>Uitgerekende UF (ml) → Naar UF Doel</label>
+                        <label>Uitgerekende UF (ml) → Naار UF Doel</label>
                         <input type="text" id="valUitgerekendeUf" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="0 ml">
                     </div>
                 </div>
@@ -915,7 +915,6 @@
                 container.appendChild(div);
             });
 
-            // Laatste meting tonen in console en klok
             let laatste = bloeddrukMetingen[bloeddrukMetingen.length - 1];
             let toonText = `${laatste.sys}/${laatste.dia}`;
             document.getElementById('dispArt').innerText = toonText;
@@ -1201,7 +1200,7 @@
             let uuu = String(nu.getHours()).padStart(2, '0');
             let mmm = String(nu.getMinutes()).padStart(2, '0');
             let sss = String(nu.getSeconds()).padStart(2, '0');
-            document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy}${uuu}:${mmm}:${sss}`;
+            document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
 
             let countdownEl = document.getElementById('countdownDisplay');
 
@@ -1313,4 +1312,148 @@
             if (isNaN(val)) return `<span>${ufWaarde}</span>`;
 
             if (val >= 4.5) {
-                return `<span class="badge-red">${ufWaarde} (
+                return `<span class="badge-red">${ufWaarde} (≥ 4.5)</span>`;
+            } else if (val >= 4.0) {
+                return `<span class="badge-orange">${ufWaarde} (≥ 4.0)</span>`;
+            } else {
+                return `<span class="badge-green">${ufWaarde} (< 4.0)</span>`;
+            }
+        }
+
+        function verversPagina() {
+            laadData();
+            location.reload();
+        }
+
+        function laadData() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
+                headers: { 'X-Master-Key': API_KEY }
+            })
+            .then(res => res.json())
+            .then(data => {
+                sessies = (data.record && data.record.sessies) ? data.record.sessies : [];
+                gebruikerProfielen = (data.record && data.record.profielen) ? data.record.profielen : {};
+
+                if (data.record && data.record.verplegingLijst) {
+                    beschikbareVerpleging = data.record.verplegingLijst;
+                }
+
+                if (gebruikerProfielen[actieveGebruiker] && gebruikerProfielen[actieveGebruiker].droogGewicht) {
+                    document.getElementById('valDroogGewicht').value = gebruikerProfielen[actieveGebruiker].droogGewicht;
+                }
+
+                herstelLokaalOp();
+                vulHistorieTabel();
+            })
+            .catch(err => console.error("Fout bij laden:", err));
+        }
+
+        function slaNaarBin() {
+            let payload = { 
+                sessies: sessies,
+                profielen: gebruikerProfielen,
+                verplegingLijst: beschikbareVerpleging
+            };
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': API_KEY
+                },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Fout bij opslaan:", err));
+        }
+
+        function slaDialyseOp() {
+            sluitTouchpad();
+            let pre = parseFloat(document.getElementById('valPreGewicht').value);
+            let droog = parseFloat(document.getElementById('valDroogGewicht').value);
+            let factor = (actieveSoortDialyse === 'dag') ? 0.6 : 0.3;
+
+            if (isNaN(pre)) {
+                alert('Vul alstublieft een geldig pre-gewicht in.');
+                return;
+            }
+
+            let ufVal = ((pre - droog) + factor).toFixed(2);
+            let nu = new Date();
+
+            let nieuweSessie = {
+                id: Date.now(),
+                persoon: actieveGebruiker,
+                verpleging: geselecteerdeVerpleging.join(', ') || '-',
+                bloeddrukken: bloeddrukMetingen,
+                datum: nu.toISOString().split('T')[0],
+                tijd: nu.toTimeString().slice(0, 5),
+                preGewicht: pre,
+                postGewicht: document.getElementById('valPostGewicht').value || '-',
+                droogGewicht: droog,
+                soortDialyse: actieveSoortDialyse,
+                ufIngesteld: document.getElementById('valUfIngesteld').value || '-',
+                werkelijkUf: document.getElementById('valWerkelijkUf').value || '-',
+                ufAdvies: ufVal,
+                fragmin2500: document.getElementById('valFragmin2500').value || '0',
+                fragmin5000: document.getElementById('valFragmin5000').value || '0',
+                epo: document.getElementById('checkEpo').checked ? 'Ja' : 'Nee',
+                ijzer: document.getElementById('checkIjzer').checked ? 'Ja' : 'Nee',
+                shuntflowCheck: document.getElementById('checkShuntflow').checked ? 'Ja' : 'Nee',
+                shuntflowWaarde: document.getElementById('valShuntflow').value || '-',
+                duurUur: document.getElementById('valDuurUur').value || '-',
+                startTijd: document.getElementById('valStartTijd').value || '-',
+                stopTijd: document.getElementById('valStopTijd').value || '-',
+                notitie: document.getElementById('valNotitie').value.trim() || '-'
+            };
+
+            sessies.unshift(nieuweSessie);
+            slaNaarBin();
+            wisLokaalConcept();
+            vulHistorieTabel();
+
+            alert('Dialyse sessie succesvol opgeslagen in de cloud!');
+            toonTab('historie');
+        }
+
+        window.verwijderSessie = function(id) {
+            if (confirm('Weet je zeker dat je deze sessie wilt verwijderen?')) {
+                sessies = sessies.filter(s => s.id !== id);
+                slaNaarBin();
+                vulHistorieTabel();
+            }
+        };
+
+        function vulHistorieTabel() {
+            let tbody = document.getElementById('historieTabelBody');
+            tbody.innerHTML = '';
+
+            let gefilterd = (gebruikerRol === 'admin') ? sessies : sessies.filter(s => s.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
+
+            if (gefilterd.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="color: #888; text-align: center;">Geen dialyse historie gevonden.</td></tr>';
+                return;
+            }
+
+            gefilterd.forEach(s => {
+                let bpStr = '-';
+                if (s.bloeddrukken && s.bloeddrukken.length > 0) {
+                    bpStr = s.bloeddrukken.map(b => `${b.tijd}: ${b.sys}/${b.dia} (${b.hart})`).join('<br>');
+                }
+
+                let toedieningTekst = `Frag25: ${s.fragmin2500}, Frag50: ${s.fragmin5000}<br>Epo: ${s.epo}, IJzer: ${s.ijzer}<br>Shunt: ${s.shuntflowCheck} (${s.shuntflowWaarde})`;
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${s.datum} ${s.tijd}</td>
+                    <td><b>${s.persoon}</b> (${s.soortDialyse})</td>
+                    <td>${s.verpleging}</td>
+                    <td><small>${bpStr}</small></td>
+                    <td>Pre: ${s.preGewicht}kg<br>Post: ${s.postGewicht}kg<br>Droog: ${s.droogGewicht}kg</td>
+                    <td>Advies: <b>${getUfKleurBadge(s.ufAdvies)}</b><br>Ingesteld: ${s.ufIngesteld}L</td>
+                    <td><small>${toedieningTekst}</small></td>
+                    <td>Start: ${s.startTijd ? s.startTijd.replace('T', ' ') : '-'}<br>Stop: ${s.stopTijd ? s.stopTijd.replace('T', ' ') : '-'}<br>Duur: ${s.duurUur}u</td>
+                    <td style="text-align: center;"><button type="button" class="btn-small-del" onclick="verwijderSessie(${s.id})">Wis</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
