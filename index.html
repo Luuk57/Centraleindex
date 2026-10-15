@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Inloggen - Medische Suite</title>
+    <title>Medische Suite - Inloggen & Dashboard</title>
     <style>
         :root {
             --win-blue: #0078d7;
@@ -13,56 +13,142 @@
             --border-color: #d1d1d1;
             --font-ui: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             --red-alert: #d13438;
+            --green-ok: #107c41;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
-        body, html { width: 100%; height: 100%; background: var(--win-bg); color: var(--win-dark); display: flex; justify-content: center; align-items: center; }
+        body, html { width: 100%; height: 100%; background: var(--win-bg); color: var(--win-dark); display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-        .login-card {
+        .container {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 20px;
             width: 100%;
-            max-width: 340px;
+            max-width: 400px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
-        .login-title { font-size: 16px; font-weight: bold; color: var(--win-blue); margin-bottom: 12px; text-align: center; }
+        .title { font-size: 16px; font-weight: bold; color: var(--win-blue); margin-bottom: 12px; text-align: center; }
         
         .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
         .form-group label { font-size: 11px; font-weight: 600; color: #555; }
         .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
 
-        .btn-login { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; }
-        .btn-login:hover { background: #005a9e; }
+        .btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; }
+        .btn:hover { background: #005a9e; }
+        .btn-green { background: var(--green-ok); }
+        .btn-logout { background: var(--red-alert); margin-top: 15px; }
 
         .error-msg { color: var(--red-alert); font-size: 11px; text-align: center; margin-top: 8px; display: none; }
+
+        /* Dashboard stijlen na inloggen */
+        #dashboardSectie { display: none; }
+        .apps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+        .app-tile { background: #f8f8f8; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; text-align: center; text-decoration: none; color: var(--win-dark); font-weight: bold; font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
+        .app-tile:hover { background: #eef6fc; border-color: var(--win-blue); }
+
+        .admin-box { background: #eef6fc; border: 1px solid #bce0fd; border-radius: 6px; padding: 10px; margin-top: 15px; }
+        .admin-title { font-size: 11px; font-weight: bold; color: var(--win-blue); margin-bottom: 6px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div class="login-title">🔐 Medische Suite Login</div>
-        <div class="form-group">
-            <label>Gebruikersnaam (of 'admin')</label>
-            <input type="text" id="gebruikerNaam" placeholder="Jouw naam">
+    <div class="container">
+        <!-- INLOGSECTIE -->
+        <div id="loginSectie">
+            <div class="title">🔐 Medische Suite Login</div>
+            <div class="form-group">
+                <label>Gebruikersnaam</label>
+                <input type="text" id="gebruikerNaam" placeholder="Jouw naam (bijv. jan of admin)">
+            </div>
+            <div class="form-group">
+                <label>Wachtwoord</label>
+                <input type="password" id="gebruikerWachtwoord" placeholder="Wachtwoord">
+            </div>
+            <button type="button" class="btn" onclick="controleerLogin()">Inloggen</button>
+            <div id="errorMsg" class="error-msg">Onjuiste naam of wachtwoord!</div>
         </div>
-        <div class="form-group">
-            <label>Wachtwoord</label>
-            <input type="password" id="gebruikerWachtwoord" placeholder="Wachtwoord">
+
+        <!-- DASHBOARD SECTIE (Zichtbaar na inloggen) -->
+        <div id="dashboardSectie" style="display: none;">
+            <div class="title" id="welkomTxt">Welkom</div>
+            <div style="font-size: 11px; color: #666; margin-bottom: 10px; text-align: center;" id="rolTxt">Rol: Gebruiker</div>
+
+            <div style="font-size: 11px; font-weight: bold; color: var(--win-blue); border-bottom: 2px solid var(--win-blue); padding-bottom: 2px;">📂 Apps</div>
+            <div class="apps-grid">
+                <a href="bloedsuiker.html" class="app-tile"><span>🩸</span>Bloedsuiker</a>
+                <a href="medicatie.html" class="app-tile"><span>💊</span>Medicatie</a>
+                <a href="dialyse.html" class="app-tile"><span>🩺</span>Dialyse</a>
+                <a href="taxi.html" class="app-tile"><span>🚕</span>Taxi / Vervoer</a>
+            </div>
+
+            <!-- ADMIN PANEEL (Alleen zichtbaar voor admin) -->
+            <div id="adminPaneel" class="admin-box" style="display: none;">
+                <div class="admin-title">⚙️ Admin Beheer: Nieuwe Gebruiker</div>
+                <div class="form-group">
+                    <label>Nieuwe gebruikersnaam</label>
+                    <input type="text" id="nieuwGebruikerNaam" placeholder="Naam">
+                </div>
+                <div class="form-group">
+                    <label>Nieuw wachtwoord</label>
+                    <input type="text" id="nieuwGebruikerWachtwoord" placeholder="Wachtwoord">
+                </div>
+                <button type="button" class="btn btn-green" onclick="voegNieuweGebruikerToe()">+ Gebruiker Toevoegen</button>
+            </div>
+
+            <button type="button" class="btn btn-logout" onclick="uitloggen()">Uitloggen</button>
         </div>
-        <button type="button" class="btn-login" onclick="controleerLogin()">Inloggen</button>
-        <div id="errorMsg" class="error-msg">Onjuiste naam of wachtwoord!</div>
     </div>
 
     <script>
-        // Eenvoudige toegangscontrole (je kunt hier je eigen gebruikers en wachtwoorden instellen)
-        const gebruikersDatabase = {
+        // Jouw ingevulde JSONBin ID voor de gebruikers!
+        const JSONBIN_ID = "6ad06e3cffd5d160536c7baa"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+
+        // Standaard fallback database voor als het laden even duurt
+        let gebruikersDatabase = {
             "admin": { rol: "admin", wachtwoord: "admin123" },
-            "jan": { rol: "gebruiker", wachtwoord: "jan2026" },
-            "petra": { rol: "gebruiker", wachtwoord: "petra2026" }
+            "jan": { rol: "gebruiker", wachtwoord: "jan2026" }
         };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let actieveGebruiker = localStorage.getItem('actieve_gebruiker');
+            if (actieveGebruiker) {
+                toonDashboard(actieveGebruiker);
+            }
+            laadGebruikersVanBin();
+        });
+
+        function laadGebruikersVanBin() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
+                headers: { 'X-Master-Key': API_KEY }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.record && data.record.gebruikers) {
+                    gebruikersDatabase = data.record.gebruikers;
+                }
+            })
+            .catch(err => console.error("Fout bij ophalen gebruikers:", err));
+        }
+
+        function slaGebruikersNaarBin() {
+            let payload = { gebruikers: gebruikersDatabase };
+
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': API_KEY
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .catch(err => console.error("Fout bij opslaan gebruikers in cloud:", err));
+        }
 
         function controleerLogin() {
             let naam = document.getElementById('gebruikerNaam').value.trim().toLowerCase();
@@ -70,15 +156,56 @@
             let errorDiv = document.getElementById('errorMsg');
 
             if (gebruikersDatabase[naam] && gebruikersDatabase[naam].wachtwoord === ww) {
-                // Sla de ingelogde sessie op in de browser
                 localStorage.setItem('actieve_gebruiker', naam);
                 localStorage.setItem('gebruiker_rol', gebruikersDatabase[naam].rol);
-
-                // Stuur door naar het centrale dashboard
-                window.location.href = "dashboard.html";
+                toonDashboard(naam);
             } else {
                 errorDiv.style.display = 'block';
             }
+        }
+
+        function toonDashboard(naam) {
+            document.getElementById('loginSectie').style.display = 'none';
+            document.getElementById('dashboardSectie').style.display = 'block';
+            
+            let rol = gebruikersDatabase[naam] ? gebruikersDatabase[naam].rol : 'gebruiker';
+
+            document.getElementById('welkomTxt').innerText = `Welkom, ${naam.toUpperCase()}`;
+            document.getElementById('rolTxt').innerText = `Toegangsniveau: ${rol.toUpperCase()}`;
+
+            if (rol === 'admin') {
+                document.getElementById('adminPaneel').style.display = 'block';
+            } else {
+                document.getElementById('adminPaneel').style.display = 'none';
+            }
+        }
+
+        function voegNieuweGebruikerToe() {
+            let nieuweNaam = document.getElementById('nieuwGebruikerNaam').value.trim().toLowerCase();
+            let nieuwWw = document.getElementById('nieuwGebruikerWachtwoord').value.trim();
+
+            if (!nieuweNaam || !nieuwWw) {
+                alert('Vul zowel een gebruikersnaam als een wachtwoord in.');
+                return;
+            }
+
+            if (gebruikersDatabase[nieuweNaam]) {
+                alert('Deze gebruikersnaam bestaat al!');
+                return;
+            }
+
+            gebruikersDatabase[nieuweNaam] = { rol: "gebruiker", wachtwoord: nieuwWw };
+            slaGebruikersNaarBin();
+
+            document.getElementById('nieuwGebruikerNaam').value = '';
+            document.getElementById('nieuwGebruikerWachtwoord').value = '';
+            alert(`Gebruiker '${nieuweNaam}' is succesvol toegevoegd en opgeslagen in de cloud!`);
+        }
+
+        function uitloggen() {
+            localStorage.removeItem('actieve_gebruiker');
+            localStorage.removeItem('gebruiker_rol');
+            location.reload();
         }
     </script>
 </body>
