@@ -137,7 +137,7 @@
         }
 
         .analogue-clock {
-            width: 180px; height: 180px;
+            width: 160px; height: 160px;
             border: 6px solid #144775;
             border-radius: 50%;
             position: relative;
@@ -149,14 +149,14 @@
 
         /* Stand wanneer hoofdmenu actief is: Extra grote Klok */
         .center-clock-panel.ponti-mode {
-            min-height: 340px;
+            min-height: 320px;
         }
         .center-clock-panel.ponti-mode .analogue-clock {
-            width: 250px; height: 250px;
+            width: 220px; height: 220px;
             border-width: 8px;
         }
         .center-clock-panel.ponti-mode .clock-center-digital {
-            font-size: 26px;
+            font-size: 24px;
         }
 
         .analogue-clock.alarm-state {
@@ -171,28 +171,51 @@
         }
 
         .hour-mark {
-            position: absolute; width: 4px; height: 14px; background: #ffffff; top: 8px; left: calc(50% - 2px);
-            transform-origin: 50% 82px;
+            position: absolute; width: 4px; height: 12px; background: #ffffff; top: 8px; left: calc(50% - 2px);
+            transform-origin: 50% 72px;
             border-radius: 1px;
             opacity: 0.8;
         }
         .ponti-mode .hour-mark {
-            transform-origin: 50% 117px;
-            height: 18px;
+            transform-origin: 50% 102px;
+            height: 16px;
         }
 
         .clock-center-digital {
             position: absolute;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             color: #ffffff;
             text-align: center;
             background: rgba(0, 0, 0, 0.4);
-            padding: 6px 14px;
+            padding: 4px 10px;
             border-radius: 6px;
             border: 1px solid rgba(255,255,255,0.2);
             letter-spacing: -0.5px;
         }
+
+        /* INTEGRATIE START / STOP IN KLOKPANEEL */
+        .clock-action-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        .clock-action-btn {
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .clock-btn-start { background: var(--green-ok); }
+        .clock-btn-start:hover { background: #0e6b39; }
+        .clock-btn-stop { background: var(--red-alert); }
+        .clock-btn-stop:hover { background: #a80000; }
 
         /* ALARM POP-UP OVERLAY */
         .alarm-modal {
@@ -219,21 +242,8 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .alarm-title {
-            color: var(--red-alert);
-            font-size: 18px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .alarm-text {
-            font-size: 13px;
-            color: var(--text-main);
-            margin-bottom: 18px;
-            font-weight: 600;
-        }
-
+        .alarm-title { color: var(--red-alert); font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
+        .alarm-text { font-size: 13px; color: var(--text-main); margin-bottom: 18px; font-weight: 600; }
         .alarm-actions { display: flex; gap: 10px; }
         .btn-alarm { flex: 1; padding: 10px; font-size: 12px; font-weight: 700; border: none; border-radius: 4px; cursor: pointer; color: white; }
         .btn-alarm-stop { background: var(--red-alert); }
@@ -260,6 +270,7 @@
             margin-top: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transition: all 0.3s ease;
+            display: none;
         }
         .section-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 8px; border-bottom: 2px solid var(--win-blue); padding-bottom: 2px; }
         
@@ -271,9 +282,8 @@
         .row-inputs { display: flex; gap: 8px; }
         .row-inputs .form-group { flex: 1; }
 
-        .input-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .sub-section-box { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; transition: all 0.2s; }
-        .sub-section-box.highlight { border-color: var(--win-blue); box-shadow: 0 0 0 2px rgba(0,120,212,0.25); }
+        .sub-section-box { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; display: none; }
+        .sub-section-box.active-box { display: block; }
 
         .btn-toggle-group { display: flex; gap: 6px; margin-top: 2px; }
         .btn-toggle {
@@ -282,37 +292,19 @@
         }
         .btn-toggle.active { background: var(--win-blue); color: #ffffff; border-color: var(--win-blue); }
 
-        .time-btn-row { display: flex; gap: 8px; align-items: flex-end; }
-        .time-btn { padding: 8px 12px; font-size: 12px; font-weight: 700; border: none; border-radius: 4px; cursor: pointer; color: white; white-space: nowrap; }
-        .time-btn-start { background: var(--green-ok); }
-        .time-btn-start:hover { background: #0e6b39; }
-        .time-btn-stop { background: var(--red-alert); }
-        .time-btn-stop:hover { background: #a80000; }
-
         /* NUMERIEK TOUCHPAD */
         .numeric-pad-container {
-            background: #202020;
-            border: 2px solid #0078d4;
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            display: none;
+            background: #202020; border: 2px solid #0078d4; border-radius: 8px; padding: 10px;
+            margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none;
         }
         .numeric-pad-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-transform: uppercase;
+            display: flex; justify-content: space-between; align-items: center; color: #fff;
+            font-size: 11px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase;
         }
         .numeric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
         .num-key {
             background: #333333; color: #ffffff; border: 1px solid #555; border-radius: 4px;
-            padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.1s;
+            padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center;
         }
         .num-key:hover { background: #0078d4; border-color: #0078d4; }
         .num-key:active { background: #106ebe; }
@@ -381,10 +373,14 @@
                     <div class="value" id="dispArt">-80</div>
                 </div>
 
-                <!-- Midden: De grote ronde klok met countdown -->
+                <!-- Midden: De grote ronde klok met countdown en start/stop knoppen -->
                 <div class="center-clock-panel ponti-mode" id="clockPanel">
                     <div class="analogue-clock" id="analogueClock">
                         <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
+                    </div>
+                    <div class="clock-action-row">
+                        <button type="button" class="clock-action-btn clock-btn-start" onclick="startSessieTijd()">▶ START</button>
+                        <button type="button" class="clock-action-btn clock-btn-stop" onclick="stopSessieTijd()">⏹ STOP</button>
                     </div>
                 </div>
 
@@ -441,78 +437,68 @@
 
             </div>
 
-            <!-- INVOER & BEREKENINGEN (STANDAARD VERBORGEN VOOR PONTIFICAAL SCHERM) -->
-            <div class="controls-card" id="controlsCard" style="display: none;">
+            <!-- INVOER & BEREKENINGEN (GECONTROLEERD PER KNOP) -->
+            <div class="controls-card" id="controlsCard">
                 <div class="section-title" id="controlsTitle">🩺 Invoer & Gegevens</div>
                 
-                <div class="input-grid-2col">
-                    <!-- GEWICHT SECTIE -->
-                    <div class="sub-section-box" id="gewichtBoxAnker">
-                        <div class="form-group">
-                            <label>Pre Gewicht (kg)</label>
-                            <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF();">
-                        </div>
-                        <div class="form-group">
-                            <label>Post Gewicht (kg)</label>
-                            <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF();">
-                        </div>
-                        <div class="row-inputs">
-                            <div class="form-group">
-                                <label>UF Ingesteld (l)</label>
-                                <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)">
-                            </div>
-                            <div class="form-group">
-                                <label>Werkelijke UF (kg)</label>
-                                <input type="text" id="valWerkelijkUf" readonly style="background: #f1f1f1; font-weight: bold;" placeholder="Berekend...">
-                            </div>
-                        </div>
+                <!-- 1. GEWICHT BOX -->
+                <div class="sub-section-box" id="gewichtBox">
+                    <div class="form-group">
+                        <label>Pre Gewicht (kg)</label>
+                        <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF();">
                     </div>
-
-                    <!-- UF SECTIE -->
-                    <div class="sub-section-box" id="ufBoxAnker">
+                    <div class="form-group">
+                        <label>Post Gewicht (kg)</label>
+                        <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF();">
+                    </div>
+                    <div class="row-inputs">
                         <div class="form-group">
-                            <label>Soort Dialyse</label>
-                            <div class="btn-toggle-group">
-                                <button type="button" class="btn-toggle" id="btnDialyseDag" onclick="setSoortDialyse('dag')">☀️ Dag (0,6)</button>
-                                <button type="button" class="btn-toggle active" id="btnDialyseNacht" onclick="setSoortDialyse('nacht')">🌙 Nacht (0,3)</button>
-                            </div>
+                            <label>UF Ingesteld (l)</label>
+                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)">
                         </div>
                         <div class="form-group">
-                            <label>Droog Gewicht Aanpasbaar (kg)</label>
-                            <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); opslaanNieuwDroogGewichtBin();">
-                        </div>
-                        <div class="form-group">
-                            <label>UF Advies (kg)</label>
-                            <input type="text" id="valUfAdvies" readonly style="background: #fff; font-weight: bold;" placeholder="Berekend...">
-                        </div>
-                        <div class="form-group">
-                            <label>Uitgerekende UF (ml) → Naar UF Doel</label>
-                            <input type="text" id="valUitgerekendeUf" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="0 ml">
+                            <label>Werkelijke UF (kg)</label>
+                            <input type="text" id="valWerkelijkUf" readonly style="background: #f1f1f1; font-weight: bold;" placeholder="Berekend...">
                         </div>
                     </div>
                 </div>
 
-                <!-- TIJD SECTIE -->
-                <div class="sub-section-box" style="margin-top: 10px;" id="tijdBoxAnker">
-                    <div class="row-inputs">
-                        <div class="form-group" style="max-width: 130px;">
-                            <label>Duur (Uur)</label>
-                            <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd();">
+                <!-- 2. UF BOX -->
+                <div class="sub-section-box" id="ufBox">
+                    <div class="form-group">
+                        <label>Soort Dialyse</label>
+                        <div class="btn-toggle-group">
+                            <button type="button" class="btn-toggle" id="btnDialyseDag" onclick="setSoortDialyse('dag')">☀️ Dag (0,6)</button>
+                            <button type="button" class="btn-toggle active" id="btnDialyseNacht" onclick="setSoortDialyse('nacht')">🌙 Nacht (0,3)</button>
                         </div>
-                        <div class="form-group">
-                            <label>Start Datum & Tijd</label>
-                            <div class="time-btn-row">
-                                <input type="datetime-local" id="valStartTijd">
-                                <button type="button" class="time-btn time-btn-start" onclick="startSessieTijd()">▶ START</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Stop Datum & Tijd (Start + Duur)</label>
-                            <div class="time-btn-row">
-                                <input type="datetime-local" id="valStopTijd">
-                                <button type="button" class="time-btn time-btn-stop" onclick="stopSessieTijd()">⏹ STOP</button>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Droog Gewicht Aanpasbaar (kg)</label>
+                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); opslaanNieuwDroogGewichtBin();">
+                    </div>
+                    <div class="form-group">
+                        <label>UF Advies (kg)</label>
+                        <input type="text" id="valUfAdvies" readonly style="background: #fff; font-weight: bold;" placeholder="Berekend...">
+                    </div>
+                    <div class="form-group">
+                        <label>Uitgerekende UF (ml) → Naar UF Doel</label>
+                        <input type="text" id="valUitgerekendeUf" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="0 ml">
+                    </div>
+                </div>
+
+                <!-- 3. TIJD BOX -->
+                <div class="sub-section-box" id="tijdBox">
+                    <div class="form-group">
+                        <label>Duur (Uur)</label>
+                        <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd();">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Datum & Tijd</label>
+                        <input type="datetime-local" id="valStartTijd">
+                    </div>
+                    <div class="form-group">
+                        <label>Stop Datum & Tijd (Start + Duur)</label>
+                        <input type="datetime-local" id="valStopTijd">
                     </div>
                 </div>
 
@@ -602,49 +588,39 @@
             laadData();
         });
 
-        // Hoofdscherm & Menu schakelen
+        // Schakelen naar Hoofdscherm (Alleen grote klok)
         function schakelHoofdscherm() {
             sluitTouchpad();
             document.getElementById('controlsCard').style.display = 'none';
             document.getElementById('clockPanel').classList.add('ponti-mode');
+            document.querySelectorAll('.sub-section-box').forEach(b => b.classList.remove('active-box'));
             genereerUurStrepen();
         }
 
-        function toonMenuCard(titelText) {
+        // Toon specifiek menu in het kader
+        function toonActiefMenu(boxId, titelTekst) {
             document.getElementById('controlsCard').style.display = 'block';
             document.getElementById('clockPanel').classList.remove('ponti-mode');
-            document.getElementById('controlsTitle').innerText = titelText;
-            genereerUurStrepen();
-        }
+            document.getElementById('controlsTitle').innerText = titelTekst;
 
-        function markeerSectie(elementId) {
-            document.querySelectorAll('.sub-section-box').forEach(box => box.classList.remove('highlight'));
-            let el = document.getElementById(elementId);
-            if (el) {
-                el.classList.add('highlight');
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            document.querySelectorAll('.sub-section-box').forEach(b => b.classList.remove('active-box'));
+            document.getElementById(boxId).classList.add('active-box');
+            genereerUurStrepen();
         }
 
         function springNaarTijdVeld() {
-            toonMenuCard("⏱️ TIJD & BEHANDELINGSDUUR INSTELLEN");
-            markeerSectie('tijdBoxAnker');
-            let input = document.getElementById('valDuurUur');
-            activeerTouchpad(input);
+            toonActiefMenu('tijdBox', '⏱️ TIJD & BEHANDELINGSDUUR');
+            activeerTouchpad(document.getElementById('valDuurUur'));
         }
 
         function springNaarUfVeld() {
-            toonMenuCard("💧 UF ADVIES & INSTELLINGEN");
-            markeerSectie('ufBoxAnker');
-            let input = document.getElementById('valDroogGewicht');
-            activeerTouchpad(input);
+            toonActiefMenu('ufBox', '💧 UF & INSTELLINGEN');
+            activeerTouchpad(document.getElementById('valDroogGewicht'));
         }
 
         function springNaarGewichtVeld() {
-            toonMenuCard("⚖️ PRE & POST GEWICHT INVOER");
-            markeerSectie('gewichtBoxAnker');
-            let input = document.getElementById('valPreGewicht');
-            activeerTouchpad(input);
+            toonActiefMenu('gewichtBox', '⚖️ GEWICHTSREGISTRATIE');
+            activeerTouchpad(document.getElementById('valPreGewicht'));
         }
 
         // Numeriek Touchpad logica
@@ -833,7 +809,10 @@
             clock.innerHTML = '';
             clock.appendChild(countdownEl);
 
-            for (let i = 0; i < 12; i++) {
+            let isPonti = document.getElementById('clockPanel').classList.contains('ponti-mode');
+            let count = isPonti ? 12 : 12;
+
+            for (let i = 0; i < count; i++) {
                 let mark = document.createElement('div');
                 mark.className = 'hour-mark';
                 mark.style.transform = `rotate(${i * 30}deg)`;
