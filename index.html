@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Medische Suite • Windows Hub</title>
+    <title>Medische Suite • Windows Omgeving</title>
     <style>
         :root {
             --win-blue: #0078d4;
             --win-blue-hover: #106ebe;
-            --win-bg: #f3f3f3;
+            --win-bg: #e0e0e0;
             --win-header-bg: #202020;
             --card-bg: #ffffff;
             --text-main: #1b1b1b;
@@ -24,7 +24,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
         body, html { width: 100%; height: 100%; background: var(--win-bg); color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
 
-        /* WINDOWS TITLEBAR / HEADER */
+        /* WINDOWS TITLEBAR / TASKBAR */
         .win-titlebar {
             background: var(--win-header-bg);
             color: #ffffff;
@@ -36,7 +36,8 @@
             font-size: 13px;
             font-weight: 600;
             flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 10;
         }
 
         .win-title-left { display: flex; align-items: center; gap: 8px; }
@@ -57,75 +58,69 @@
             transition: background 0.15s ease;
         }
         .win-btn:hover { background: rgba(255,255,255,0.25); }
-        .win-btn:active { background: rgba(255,255,255,0.08); }
 
-        /* MAIN CONTAINER (RESPONSIVE) */
-        .app-body {
+        /* DESKTOP / WORKSPACE BACKGROUND */
+        .win-desktop {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 16px;
+            background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%);
             overflow-y: auto;
         }
 
+        /* WINDOWS APP FRAME (VENSTER) */
         .win-window {
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(0,0,0,0.2);
             border-radius: 8px;
             width: 100%;
-            max-width: 440px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+            max-width: 420px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
             padding: 24px;
             max-height: 90vh;
             overflow-y: auto;
-            transition: all 0.2s ease;
         }
 
-        /* MEDIA QUERIES VOOR TABLETS & TELEFOONS */
-        @media (max-width: 600px) {
-            .app-body { padding: 10px; align-items: flex-start; }
+        @media (max-width: 500px) {
+            .win-desktop { padding: 8px; align-items: flex-start; }
             .win-window { max-width: 100%; padding: 18px; border-radius: 6px; }
-            .win-titlebar { height: 48px; padding: 0 10px; }
         }
 
         .brand-section {
             text-align: center;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
-        .brand-icon { font-size: 40px; margin-bottom: 4px; }
+        .brand-icon { font-size: 42px; margin-bottom: 4px; }
         .brand-title { font-size: 20px; font-weight: 700; color: var(--win-blue); letter-spacing: -0.3px; }
         .brand-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
         /* FORM ELEMENTS */
         .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
-        .form-group label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
         .form-group input { 
-            width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; 
-            font-size: 13px; background: #fafafa; transition: all 0.2s; 
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 4px; 
+            font-size: 14px; background: #fafafa; transition: all 0.2s; 
         }
         .form-group input:focus { 
             outline: none; border-color: var(--win-blue); background: #ffffff; 
             box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2); 
         }
 
-        /* BUTTONS */
         .btn { 
             background: var(--win-blue); color: white; border: none; padding: 11px 16px; 
             width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; 
             transition: background 0.15s; margin-top: 6px; text-align: center; 
         }
         .btn:hover { background: var(--win-blue-hover); }
-        .btn-green { background: var(--green-ok); }
-        .btn-green:hover { background: #0e6b39; }
         .btn-danger { background: transparent; color: var(--red-alert); border: 1px solid var(--border-color); margin-top: 16px; }
         .btn-danger:hover { background: var(--red-bg); border-color: var(--red-alert); }
 
         .alert-box { padding: 10px; border-radius: 4px; font-size: 12px; text-align: center; margin-top: 10px; display: none; }
         .alert-error { background: var(--red-bg); color: var(--red-alert); border: 1px solid #f8d7da; }
-        .alert-success { background: var(--green-bg); color: var(--green-ok); border: 1px solid #c3e6cb; }
 
-        /* DASHBOARD SECTION */
+        /* DASHBOARD / STARTMENU STIJL */
         #dashboardSectie { display: none; }
         
         .user-banner {
@@ -149,7 +144,7 @@
         .apps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 18px; }
         .app-tile {
             background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px;
-            padding: 16px 12px; text-align: center; text-decoration: none; color: var(--text-main);
+            padding: 16px 10px; text-align: center; text-decoration: none; color: var(--text-main);
             display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
@@ -159,39 +154,32 @@
         }
         .app-tile-icon { font-size: 28px; }
         .app-tile-name { font-size: 12px; font-weight: 700; }
-
-        .admin-panel { background: #f8f9fa; border: 1px solid var(--border-color); border-radius: 6px; padding: 14px; margin-top: 14px; }
-        .admin-panel-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- WINDOWS HEADER / TOOLBAR -->
+    <!-- WINDOWS TITLEBAR / TASKBAR -->
     <div class="win-titlebar">
         <div class="win-title-left">
-            <span>🎛️ Medische Suite</span>
-            <span id="titleSyncStatus" style="font-size: 10px; opacity: 0.7; font-weight: normal;">• Cloud Actief</span>
+            <span>🎛️ Windows Medische Suite</span>
+            <span id="titleSyncStatus" style="font-size: 10px; opacity: 0.7; font-weight: normal;">• Cloud Verbonden</span>
         </div>
         <div class="win-title-actions">
-            <button type="button" class="win-btn" onclick="verversPagina()" title="Systeem Herladen / Synchroniseren">
-                🔄 Refresh
-            </button>
-            <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm In/Uitschakelen">
-                ⛶ Scherm
-            </button>
+            <button type="button" class="win-btn" onclick="verversPagina()" title="Systeem Herladen">🔄 Refresh</button>
+            <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm">⛶ Scherm</button>
         </div>
     </div>
 
-    <!-- INHOUD (CENTERED CARD) -->
-    <div class="app-body">
+    <!-- WINDOWS DESKTOP -->
+    <div class="win-desktop">
         <div class="win-window">
             
-            <!-- ================= INLOGSECTIE ================= -->
+            <!-- ================= INLOGVENSTER (NAAM + PINCODE) ================= -->
             <div id="loginSectie">
                 <div class="brand-section">
-                    <div class="brand-icon">🏥</div>
-                    <div class="brand-title">Medische Suite</div>
-                    <div class="brand-subtitle">Centraal Windows Zorgportaal</div>
+                    <div class="brand-icon">🔐</div>
+                    <div class="brand-title">Windows Inlog</div>
+                    <div class="brand-subtitle">Voer uw naam en pincode in</div>
                 </div>
 
                 <div class="form-group">
@@ -199,26 +187,30 @@
                     <input type="text" id="gebruikerNaam" placeholder="Bijv. jan of admin" autocomplete="username">
                 </div>
                 <div class="form-group">
-                    <label>Wachtwoord</label>
-                    <input type="password" id="gebruikerWachtwoord" placeholder="••••••••" autocomplete="current-password" onkeypress="handleEnter(event)">
+                    <label>Pincode (4 cijfers)</label>
+                    <input type="password" id="gebruikerPin" placeholder="••••" maxlength="6" inputmode="numeric" autocomplete="current-password" onkeypress="handleEnter(event)">
                 </div>
                 
                 <button type="button" class="btn" onclick="controleerLogin()">Inloggen</button>
-                <div id="loginError" class="alert-box alert-error">Onjuiste gebruikersnaam of wachtwoord.</div>
+                <div id="loginError" class="alert-box alert-error">Onjuiste gebruikersnaam of pincode.</div>
             </div>
 
-            <!-- ================= DASHBOARD SECTIE ================= -->
+            <!-- ================= STARTMENU / DASHBOARD VENSTER ================= -->
             <div id="dashboardSectie">
                 <div class="user-banner">
                     <div class="user-info">
                         <div class="name" id="welkomNaam">Gebruiker</div>
-                        <div class="sub" id="syncSub">Online gesynchroniseerd</div>
+                        <div class="sub">Windows Sessie Actief</div>
                     </div>
                     <div id="rolBadge" class="badge badge-user">Gebruiker</div>
                 </div>
 
-                <div class="section-label">Gekoppelde Applicaties</div>
-                <div class="apps-grid">
+                <div class="section-label">Windows Programma's</div>
+                <div class="apps-grid" id="appsGridContainer">
+                    <a href="dialyse.html" class="app-tile">
+                        <div class="app-tile-icon">🩺</div>
+                        <div class="app-tile-name">Dialyse</div>
+                    </a>
                     <a href="bloedsuiker.html" class="app-tile">
                         <div class="app-tile-icon">🩸</div>
                         <div class="app-tile-name">Bloedsuiker</div>
@@ -227,29 +219,17 @@
                         <div class="app-tile-icon">💊</div>
                         <div class="app-tile-name">Medicatie</div>
                     </a>
-                    <a href="dialyse.html" class="app-tile">
-                        <div class="app-tile-icon">🩺</div>
-                        <div class="app-tile-name">Dialyse</div>
-                    </a>
                     <a href="taxi.html" class="app-tile">
                         <div class="app-tile-icon">🚕</div>
                         <div class="app-tile-name">Taxi / Vervoer</div>
                     </a>
                 </div>
 
-                <!-- ADMIN CONFIGURATIE PANEEL -->
-                <div id="adminPaneel" class="admin-panel" style="display: none;">
-                    <div class="admin-panel-title">⚙️ Admin: Nieuwe Gebruiker Registreren</div>
-                    <div class="form-group">
-                        <label>Nieuwe Naam</label>
-                        <input type="text" id="nieuwGebruikerNaam" placeholder="Naam van gebruiker">
-                    </div>
-                    <div class="form-group">
-                        <label>Wachtwoord</label>
-                        <input type="text" id="nieuwGebruikerWachtwoord" placeholder="Tijdelijk wachtwoord">
-                    </div>
-                    <button type="button" class="btn btn-green" onclick="voegNieuweGebruikerToe()">Gebruiker Toevoegen</button>
-                    <div id="adminFeedback" class="alert-box alert-success"></div>
+                <div id="adminTegelContainer" style="margin-bottom: 12px; display: none;">
+                    <a href="admin.html" class="app-tile" style="width: 100%; flex-direction: row; justify-content: center; background: #eef6fc; border-color: #0078d4;">
+                        <span style="font-size: 20px;">⚙️</span>
+                        <span style="font-size: 12px; font-weight: 700; color: #0078d4;">Systeem Admin Beheer</span>
+                    </a>
                 </div>
 
                 <button type="button" class="btn btn-danger" onclick="uitloggen()">Uitloggen</button>
@@ -259,13 +239,13 @@
     </div>
 
     <script>
-        // Jouw definitieve JSONBin ID voor gebruikersbeheer
+        // Jouw JSONBin ID voor gebruikersbeheer
         const JSONBIN_ID = "6ad06e3cffd5d160536c7baa"; 
         const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
 
         let gebruikersDatabase = {
-            "admin": { rol: "admin", wachtwoord: "admin123" },
-            "jan": { rol: "gebruiker", wachtwoord: "jan2026" }
+            "admin": { rol: "admin", pincode: "1234" },
+            "jan": { rol: "gebruiker", pincode: "0000" }
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -287,13 +267,9 @@
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Fout bij activeren schermvullende weergave: ${err.message}`);
-                });
+                document.documentElement.requestFullscreen().catch(err => {});
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                if (document.exitFullscreen) document.exitFullscreen();
             }
         }
 
@@ -305,7 +281,7 @@
             .then(data => {
                 if (data && data.record && data.record.gebruikers) {
                     gebruikersDatabase = data.record.gebruikers;
-                    document.getElementById('titleSyncStatus').innerText = "• Cloud Gesynchroniseerd";
+                    document.getElementById('titleSyncStatus').innerText = "• Cloud Verbonden";
                 }
             })
             .catch(err => {
@@ -314,29 +290,18 @@
             });
         }
 
-        function slaGebruikersNaarBin() {
-            let payload = { gebruikers: gebruikersDatabase };
-
-            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': API_KEY
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .catch(err => console.error("Fout bij opslaan gebruikers in cloud:", err));
-        }
-
         function controleerLogin() {
             let naam = document.getElementById('gebruikerNaam').value.trim().toLowerCase();
-            let ww = document.getElementById('gebruikerWachtwoord').value.trim();
+            let pin = document.getElementById('gebruikerPin').value.trim();
             let errorDiv = document.getElementById('loginError');
 
-            if (gebruikersDatabase[naam] && gebruikersDatabase[naam].wachtwoord === ww) {
+            // Ondersteunt zowel 'pincode' als 'wachtwoord' eigenschap uit je eerdere database structuur
+            let gebruikerInfo = gebruikersDatabase[naam];
+            let opgeslagenCode = gebruikerInfo ? (gebruikerInfo.pincode || gebruikerInfo.wachtwoord) : null;
+
+            if (gebruikerInfo && opgeslagenCode === pin) {
                 localStorage.setItem('actieve_gebruiker', naam);
-                localStorage.setItem('gebruiker_rol', gebruikersDatabase[naam].rol);
+                localStorage.setItem('gebruiker_rol', gebruikerInfo.rol);
                 toonDashboard(naam);
             } else {
                 errorDiv.style.display = 'block';
@@ -357,37 +322,11 @@
             
             if (rol === 'admin') {
                 badge.className = "badge badge-admin";
-                document.getElementById('adminPaneel').style.display = 'block';
+                document.getElementById('adminTegelContainer').style.display = 'block';
             } else {
                 badge.className = "badge badge-user";
-                document.getElementById('adminPaneel').style.display = 'none';
+                document.getElementById('adminTegelContainer').style.display = 'none';
             }
-        }
-
-        function voegNieuweGebruikerToe() {
-            let nieuweNaam = document.getElementById('nieuwGebruikerNaam').value.trim().toLowerCase();
-            let nieuwWw = document.getElementById('nieuwGebruikerWachtwoord').value.trim();
-            let feedback = document.getElementById('adminFeedback');
-
-            if (!nieuweNaam || !nieuwWw) {
-                alert('Vul alstublieft zowel een naam als een wachtwoord in.');
-                return;
-            }
-
-            if (gebruikersDatabase[nieuweNaam]) {
-                alert('Deze gebruikersnaam bestaat al in het systeem.');
-                return;
-            }
-
-            gebruikersDatabase[nieuweNaam] = { rol: "gebruiker", wachtwoord: nieuwWw };
-            slaGebruikersNaarBin();
-
-            document.getElementById('nieuwGebruikerNaam').value = '';
-            document.getElementById('nieuwGebruikerWachtwoord').value = '';
-            
-            feedback.innerText = `Gebruiker '${nieuweNaam}' succesvol toegevoegd!`;
-            feedback.style.display = 'block';
-            setTimeout(() => feedback.style.display = 'none', 4000);
         }
 
         function uitloggen() {
