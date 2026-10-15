@@ -415,6 +415,19 @@
         .num-key:hover { background: #0078d4; border-color: #0078d4; }
         .num-key:active { background: #106ebe; }
 
+        /* ALFANUMERIEK TOETSENBORD STIJL */
+        .alpha-pad-container {
+            background: #202020; border: 2px solid #0078d4; border-radius: 8px; padding: 10px;
+            margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none; width: 100%;
+        }
+        .alpha-row { display: flex; gap: 4px; justify-content: center; margin-bottom: 4px; }
+        .alpha-key {
+            background: #333333; color: #ffffff; border: 1px solid #555; border-radius: 4px;
+            padding: 10px 8px; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; flex: 1;
+        }
+        .alpha-key:hover { background: #0078d4; border-color: #0078d4; }
+        .alpha-key:active { background: #106ebe; }
+
         table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
         table.dialyse-table th, table.dialyse-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
         table.dialyse-table th { background: var(--win-header-bg); color: white; }
@@ -664,9 +677,55 @@
                     </div>
 
                     <div class="nurse-actions-row">
-                        <input type="text" id="newNurseNameInput" placeholder="Nieuwe naam toevoegen..." style="flex:1; padding:6px; font-size:12px;">
+                        <input type="text" inputmode="none" id="newNurseNameInput" placeholder="Nieuwe naam toevoegen..." style="flex:1; padding:6px; font-size:12px;" onfocus="activeerAlphaPad(this)">
                         <button type="button" class="win-btn" style="background:var(--green-ok);" onclick="registreerNieuweVerpleging()">+ Naam Opslaan</button>
                         <button type="button" class="win-btn" style="background:var(--red-alert);" onclick="verwijderGeselecteerdeNaamUitLijst()">- Naam Wissen</button>
+                    </div>
+
+                    <!-- ALFANUMERIEK TOETSENBORD VOOR VERPLEGING / TEKST -->
+                    <div class="alpha-pad-container" id="alphaPad">
+                        <div class="numeric-pad-header">
+                            <span id="activeAlphaLabel">Alfanumeriek Toetsenbord</span>
+                            <button type="button" class="win-btn" style="padding: 2px 6px; font-size: 10px;" onclick="sluitAlphaPad()">Sluiten ✕</button>
+                        </div>
+                        <div class="alpha-row">
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('Q')">Q</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('W')">W</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('E')">E</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('R')">R</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('T')">T</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('Y')">Y</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('U')">U</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('I')">I</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('O')">O</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('P')">P</button>
+                        </div>
+                        <div class="alpha-row">
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('A')">A</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('S')">S</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('D')">D</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('F')">F</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('G')">G</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('H')">H</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('J')">J</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('K')">K</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('L')">L</button>
+                        </div>
+                        <div class="alpha-row">
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('Z')">Z</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('X')">X</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('C')">C</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('V')">V</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('B')">B</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('N')">N</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('M')">M</button>
+                            <button type="button" class="alpha-key" style="background: #a80000; border-color: #d13438;" onclick="wisAlphaLaatsteTeken()">⌫</button>
+                        </div>
+                        <div class="alpha-row">
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe(' ')">Spatie</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('.')">.</button>
+                            <button type="button" class="alpha-key" onclick="voegAlphaToe('-')">-</button>
+                        </div>
                     </div>
                 </div>
 
@@ -731,7 +790,7 @@
 
                 <div class="form-group" style="margin-top: 8px;">
                     <label>Notitie / Bijzonderheden</label>
-                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, bijzonderheden" oninput="slaLokaalOp();">
+                    <input type="text" inputmode="none" id="valNotitie" placeholder="Bijv. nachtdialyse, bijzonderheden" onfocus="activeerAlphaPad(this)" oninput="slaLokaalOp();">
                 </div>
             </div>
         </div>
@@ -791,6 +850,7 @@
         let timerStartTimestamp = null;
 
         let huidigInputVeld = null;
+        let huidigAlphaVeld = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1)}`;
@@ -806,6 +866,7 @@
 
         function schakelHoofdscherm() {
             sluitTouchpad();
+            sluitAlphaPad();
             document.getElementById('controlsCard').style.display = 'none';
             document.getElementById('consolePanel').style.display = 'grid';
             document.getElementById('consolePanel').classList.add('ponti-mode');
@@ -992,7 +1053,7 @@
             isTimerRunning = false;
             timerStartTimestamp = null;
             timerTargetTime = null;
-            document.getElementById('analogueClock').style.backgroundColor = '#1c5c96'; // Weer blauw instellen
+            document.getElementById('analogueClock').style.backgroundColor = '#1c5c96';
             updateBloeddrukLijstEnScherm();
         }
 
@@ -1087,6 +1148,7 @@
         }
 
         function activeerTouchpad(inputEl) {
+            sluitAlphaPad();
             huidigInputVeld = inputEl;
             let labelTekst = inputEl.previousElementSibling ? inputEl.previousElementSibling.innerText : 'Invoer';
             document.getElementById('activeInputLabel').innerText = `Invoer: ${labelTekst}`;
@@ -1118,6 +1180,39 @@
             let val = huidigInputVeld.value;
             huidigInputVeld.value = val.substring(0, val.length - 1);
             triggerInputEvent(huidigInputVeld);
+        }
+
+        // Alfanumeriek toetsenbord functies
+        function activeerAlphaPad(inputEl) {
+            sluitTouchpad();
+            huidigAlphaVeld = inputEl;
+            let labelTekst = inputEl.previousElementSibling ? inputEl.previousElementSibling.innerText : 'Tekstinvoer';
+            document.getElementById('activeAlphaLabel').innerText = `Toetsenbord: ${labelTekst}`;
+            document.getElementById('alphaPad').style.display = 'block';
+            inputEl.style.borderColor = '#0078d4';
+            inputEl.style.background = '#f0f7ff';
+        }
+
+        function sluitAlphaPad() {
+            document.getElementById('alphaPad').style.display = 'none';
+            if (huidigAlphaVeld) {
+                huidigAlphaVeld.style.borderColor = '#d1d1d1';
+                huidigAlphaVeld.style.background = '#fff';
+                huidigAlphaVeld = null;
+            }
+        }
+
+        function voegAlphaToe(teken) {
+            if (!huidigAlphaVeld) return;
+            huidigAlphaVeld.value += teken;
+            triggerInputEvent(huidigAlphaVeld);
+        }
+
+        function wisAlphaLaatsteTeken() {
+            if (!huidigAlphaVeld) return;
+            let val = huidigAlphaVeld.value;
+            huidigAlphaVeld.value = val.substring(0, val.length - 1);
+            triggerInputEvent(huidigAlphaVeld);
         }
 
         function triggerInputEvent(el) {
@@ -1175,7 +1270,6 @@
                 document.getElementById('analogueClock').classList.remove('alarm-state');
                 document.getElementById('alarmModal').style.display = 'none';
                 
-                // Klok direct geel maken bij start
                 document.getElementById('analogueClock').style.backgroundColor = '#f8e71c';
                 slaLokaalOp();
             }
@@ -1235,7 +1329,6 @@
                 let voortgangFractie = verlopenMs / totaleDuurMs;
                 if (voortgangFractie > 1) voortgangFractie = 1;
 
-                // Vloeiende kleurverandering van Geel (#f8e71c -> RGB: 248, 231, 28) naar Groen (#107c41 -> RGB: 16, 124, 65)
                 let r = Math.round(248 - (248 - 16) * voortgangFractie);
                 let g = Math.round(231 - (231 - 124) * voortgangFractie);
                 let b = Math.round(28 + (65 - 28) * voortgangFractie);
@@ -1250,7 +1343,7 @@
 
                 if (overms <= 0) {
                     countdownEl.innerText = "00:00:00";
-                    clockEl.style.backgroundColor = '#107c41'; // Volledig groen bij einde
+                    clockEl.style.backgroundColor = '#107c41';
                     if (!isDoorgaanGekozen) {
                         clockEl.classList.add('alarm-state');
                         document.getElementById('alarmModal').style.display = 'flex';
@@ -1316,6 +1409,7 @@
 
         function toonTab(tab) {
             sluitTouchpad();
+            sluitAlphaPad();
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
@@ -1428,6 +1522,7 @@
 
         function slaDialyseOp() {
             sluitTouchpad();
+            sluitAlphaPad();
             let pre = parseFloat(document.getElementById('valPreGewicht').value);
             let droog = parseFloat(document.getElementById('valDroogGewicht').value);
             let factor = (actieveSoortDialyse === 'dag') ? 0.6 : 0.3;
@@ -1470,7 +1565,6 @@
             sessies.unshift(nieuweSessie);
             slaNaarBin();
             
-            // Wis lokaal concept en zet klok weer op origineel blauw
             wisLokaalConcept();
             vulHistorieTabel();
 
