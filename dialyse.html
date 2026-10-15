@@ -725,6 +725,11 @@
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1)}`;
             
+            // Herstel volledige scherm modus na refresh indien ingesteld
+            if (localStorage.getItem('rollodex_fullscreen') === 'true') {
+                document.documentElement.requestFullscreen().catch(err => {});
+            }
+
             genereerUurStrepen();
             startKlokLus();
             laadData();
@@ -891,7 +896,7 @@
                 beschikbareVerpleging.push(naam);
                 input.value = '';
                 vulVerplegingDropdown();
-                slaNaarBin(); // Direct naar cloud
+                slaNaarBin();
                 alert(`Verpleegkundige '${naam}' succesvol toegevoegd en gesynchroniseerd.`);
             }
         }
@@ -907,7 +912,7 @@
                 beschikbareVerpleging = beschikbareVerpleging.filter(n => n !== naam);
                 geselecteerdeVerpleging = geselecteerdeVerpleging.filter(n => n !== naam);
                 vulVerplegingDropdown();
-                slaNaarBin(); // Direct naar cloud
+                slaNaarBin();
             }
         }
 
@@ -1100,7 +1105,7 @@
                 }
                 gebruikerProfielen[actieveGebruiker].droogGewicht = nieuwDroog;
 
-                slaNaarBin(); // Direct naar cloud
+                slaNaarBin();
             }, 800);
         }
 
