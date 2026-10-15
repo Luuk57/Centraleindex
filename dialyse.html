@@ -585,7 +585,7 @@
                 <div class="sub-section-box" id="tijdBox">
                     <div class="form-group">
                         <label>Duur (Uur)</label>
-                        <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); berekenUF(); slaLokaalOp();">
+                        <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp();">
                     </div>
                     <div class="form-group">
                         <label>Start Datum & Tijd</label>
@@ -597,7 +597,7 @@
                     </div>
                 </div>
 
-                <!-- 2. UF BOX (BEVAT NU UF INGESTELD & WERKELIJKER UF) -->
+                <!-- 2. UF BOX (AUTOMATISCH GEVULD MAAR AANPASBAAR) -->
                 <div class="sub-section-box" id="ufBox">
                     <div class="form-group">
                         <label>Soort Dialyse</label>
@@ -608,8 +608,8 @@
                     </div>
                     <div class="row-inputs">
                         <div class="form-group">
-                            <label>UF Ingesteld (l)</label>
-                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="slaLokaalOp();">
+                            <label>UF Ingesteld (l) [Aanpasbaar]</label>
+                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="this.dataset.autoFilled='false'; bepaalTotaalDoelVanIngesteld(); slaLokaalOp();">
                         </div>
                         <div class="form-group">
                             <label>Werkelijke UF (kg)</label>
@@ -621,12 +621,12 @@
                         <input type="text" id="valUfAdvies" readonly style="background: #fff; font-weight: bold;" placeholder="Berekend...">
                     </div>
                     <div class="form-group">
-                        <label>Uitgerekende UF (ml) → Naar UF Doel</label>
+                        <label>Uitgerekende UF (ml)</label>
                         <input type="text" id="valUitgerekendeUf" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="0 ml">
                     </div>
                 </div>
 
-                <!-- 3. GEWICHT BOX (BEVAT NU PRE, POST & DROOG GEWICHT) -->
+                <!-- 3. GEWICHT BOX -->
                 <div class="sub-section-box" id="gewichtBox">
                     <div class="form-group">
                         <label>Pre Gewicht (kg)</label>
@@ -951,7 +951,11 @@
                 if (d.pre) document.getElementById('valPreGewicht').value = d.pre;
                 if (d.post) document.getElementById('valPostGewicht').value = d.post;
                 if (d.droog) document.getElementById('valDroogGewicht').value = d.droog;
-                if (d.ufIngesteld) document.getElementById('valUfIngesteld').value = d.ufIngesteld;
+                if (d.ufIngesteld) {
+                    let ufIngesteldEl = document.getElementById('valUfIngesteld');
+                    ufIngesteldEl.value = d.ufIngesteld;
+                    ufIngesteldEl.dataset.autoFilled = 'false';
+                }
                 if (d.frag25) document.getElementById('valFragmin2500').value = d.frag25;
                 if (d.frag50) document.getElementById('valFragmin5000').value = d.frag50;
                 if (d.epo !== undefined) document.getElementById('checkEpo').checked = d.epo;
@@ -1146,6 +1150,7 @@
             let nu = new Date();
             document.getElementById('valStartTijd').value = formatDatetimeLocal(nu);
             berekenAutomatischeEindtijd();
+            bepaalTotaalDoelVanIngesteld();
             slaLokaalOp();
 
             let stopVal = document.getElementById('valStopTijd').value;
@@ -1305,21 +1310,37 @@
             if (!isNaN(pre) && !isNaN(droog)) {
                 let ufAdviesKg = (pre - droog) + factor;
                 let doelMl = Math.round(ufAdviesKg * 1000);
-                totaalUfDoelMl = doelMl;
 
                 document.getElementById('valUfAdvies').value = ufAdviesKg.toFixed(2) + " kg";
                 document.getElementById('valUitgerekendeUf').value = doelMl + " ml";
                 
-                if (!isTimerRunning) {
-                    document.getElementById('dispUfGoal').innerText = doelMl;
+                let ufIngesteldEl = document.getElementById('valUfIngesteld');
+                if (!ufIngesteldEl.value || ufIngesteldEl.dataset.autoFilled === "true") {
+                    ufIngesteldEl.value = ufAdviesKg.toFixed(2);
+                    ufIngesteldEl.dataset.autoFilled = "true";
                 }
-                
-                let duur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
-                document.getElementById('dispUfPerUur').innerText = Math.round(doelMl / duur) + " ml";
+
+                bepaalTotaalDoelVanIngesteld();
             } else {
                 document.getElementById('valUfAdvies').value = "";
                 document.getElementById('valUitgerekendeUf').value = "";
             }
+        }
+
+        function bepaalTotaalDoelVanIngesteld() {
+            let ingesteldL = parseFloat(document.getElementById('valUfIngesteld').value);
+            if (!isNaN(ingesteldL)) {
+                totaalUfDoelMl = Math.round(ingesteldL * 1000);
+            } else {
+                totaalUfDoelMl = 0;
+            }
+
+            if (!isTimerRunning) {
+                document.getElementById('dispUfGoal').innerText = totaalUfDoelMl;
+            }
+
+            let duur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
+            document.getElementById('dispUfPerUur').innerText = Math.round(totaalUfDoelMl / duur) + " ml";
         }
 
         function getUfKleurBadge(ufWaarde) {
