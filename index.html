@@ -97,7 +97,7 @@
         @media (max-width: 550px) {
             .win-desktop { padding: 8px; align-items: flex-start; }
             .win-window { max-width: 100%; padding: 18px; border-radius: 6px; }
-            .win-clock { display: none; /* Verberg klok op heel kleine schermen zodat knoppen passen */ }
+            .win-clock { display: none; }
         }
 
         .brand-section {
@@ -264,6 +264,12 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             startKlok();
+            
+            // Automatisch volledig scherm herstellen als dat voor de refresh actief was
+            if (localStorage.getItem('rollodex_fullscreen') === 'true') {
+                document.documentElement.requestFullscreen().catch(err => {});
+            }
+
             let actieveGebruiker = localStorage.getItem('actieve_gebruiker');
             if (actieveGebruiker) {
                 toonDashboard(actieveGebruiker);
@@ -305,10 +311,14 @@
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {});
+                document.documentElement.requestFullscreen().then(() => {
+                    localStorage.setItem('rollodex_fullscreen', 'true');
+                }).catch(err => {});
             } else {
                 if (document.exitFullscreen) {
-                    document.exitFullscreen();
+                    document.exitFullscreen().then(() => {
+                        localStorage.setItem('rollodex_fullscreen', 'false');
+                    });
                 }
             }
         }
@@ -371,6 +381,7 @@
         function uitloggen() {
             localStorage.removeItem('actieve_gebruiker');
             localStorage.removeItem('gebruiker_rol');
+            localStorage.removeItem('rollodex_fullscreen');
             location.reload();
         }
     </script>
