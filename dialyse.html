@@ -218,7 +218,6 @@
         .clock-btn-stop { background: var(--red-alert); }
         .clock-btn-stop:hover { background: #a80000; }
 
-        /* WEERGAVE LAATSTE BLOEDDRUK ONDERIN KLOK */
         .clock-bp-footer {
             width: 100%;
             text-align: right;
@@ -347,7 +346,6 @@
         }
         .btn-toggle.active { background: var(--win-blue); color: #ffffff; border-color: var(--win-blue); }
 
-        /* LIST VOOR BLOEDDRUK METINGEN */
         .bp-list-container {
             margin-top: 10px;
             background: #ffffff;
@@ -368,7 +366,6 @@
         }
         .bp-item:last-child { border-bottom: none; }
 
-        /* NURSE MULTI-SELECT & TAGS */
         .nurse-tags-container {
             display: flex;
             flex-wrap: wrap;
@@ -400,7 +397,6 @@
             margin-top: 8px;
         }
 
-        /* NUMERIEK TOUCHPAD */
         .numeric-pad-container {
             background: #202020; border: 2px solid #0078d4; border-radius: 8px; padding: 10px;
             margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none;
@@ -475,7 +471,7 @@
                     </div>
                 </div>
 
-                <!-- Links boven: BLOEDDRUK (KLIKBAAR) -->
+                <!-- Links boven: BLOEDDRUK -->
                 <div class="med-box interactive" style="grid-column: 1; grid-row: 1;" onclick="springNaarBloeddrukVeld()">
                     <div class="label">🩺 BLOEDDRUK</div>
                     <div class="value" id="dispArt">---/---</div>
@@ -496,10 +492,10 @@
                     </div>
                 </div>
 
-                <!-- Rechts boven: UF DOEL -->
+                <!-- Rechts boven: UF DOEL (LOOPT AF) -->
                 <div class="med-box" style="grid-column: 3; grid-row: 1;">
-                    <div class="label">UF DOEL</div>
-                    <div class="value" id="dispUfGoal">3000</div>
+                    <div class="label">UF DOEL ml</div>
+                    <div class="value" id="dispUfGoal">0</div>
                 </div>
 
                 <!-- Links midden: KNOP HOOFDSCHERM -->
@@ -511,7 +507,7 @@
                 <!-- Rechts midden: UF PER UUR -->
                 <div class="med-box" style="grid-column: 3; grid-row: 2;">
                     <div class="label">UF PER UUR</div>
-                    <div class="value" id="dispUfPerUur">750 ml</div>
+                    <div class="value" id="dispUfPerUur">0 ml</div>
                 </div>
 
                 <!-- Links onder: KNOP OPSLAAN IN CLOUD -->
@@ -520,35 +516,30 @@
                     <div class="value" style="color:#fff;">💾 OPSLAAN</div>
                 </div>
 
-                <!-- Rechts onder: UF volume -->
+                <!-- Rechts onder: UF VOLUME ML (LOOPT OP) -->
                 <div class="med-box" style="grid-column: 3; grid-row: 3;">
                     <div class="label">UF volume ml</div>
-                    <div class="value" id="dispUfVol">2000</div>
+                    <div class="value" id="dispUfVol">0</div>
                 </div>
 
                 <!-- 5 KNOPPEN RIJ ONDER DE KLOK -->
                 <div class="bottom-buttons-row">
-                    <!-- Knop 1 = Tijd -->
                     <div class="med-box interactive" onclick="springNaarTijdVeld()">
                         <div class="label">KNOP 1</div>
                         <div class="value">⏱️ TIJD</div>
                     </div>
-                    <!-- Knop 2 = UF -->
                     <div class="med-box interactive" onclick="springNaarUfVeld()">
                         <div class="label">KNOP 2</div>
                         <div class="value">💧 UF</div>
                     </div>
-                    <!-- Knop 3 = Gewicht -->
                     <div class="med-box interactive" onclick="springNaarGewichtVeld()">
                         <div class="label">KNOP 3</div>
                         <div class="value">⚖️ GEWICHT</div>
                     </div>
-                    <!-- Knop 4 = Verpleging -->
                     <div class="med-box interactive" onclick="springNaarVerplegingVeld()">
                         <div class="label">KNOP 4</div>
                         <div class="value">👩‍⚕️ VERPLEGING</div>
                     </div>
-                    <!-- Knop 5 = Toedieningen -->
                     <div class="med-box interactive" onclick="springNaarToedieningenVeld()">
                         <div class="label">KNOP 5</div>
                         <div class="value">💊 TOEDIENING</div>
@@ -594,7 +585,7 @@
                 <div class="sub-section-box" id="tijdBox">
                     <div class="form-group">
                         <label>Duur (Uur)</label>
-                        <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); slaLokaalOp();">
+                        <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); berekenUF(); slaLokaalOp();">
                     </div>
                     <div class="form-group">
                         <label>Start Datum & Tijd</label>
@@ -624,7 +615,7 @@
                         <input type="text" id="valUfAdvies" readonly style="background: #fff; font-weight: bold;" placeholder="Berekend...">
                     </div>
                     <div class="form-group">
-                        <label>Uitgerekende UF (ml) → Naار UF Doel</label>
+                        <label>Uitgerekende UF (ml) → Naar UF Doel</label>
                         <input type="text" id="valUitgerekendeUf" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="0 ml">
                     </div>
                 </div>
@@ -789,10 +780,13 @@
         let beschikbareVerpleging = ["Jan Jansen", "Marie de Vries", "Ahmed el Amrani", "Lisa Bakker"];
         let geselecteerdeVerpleging = [];
 
-        // Timer variabelen
+        // UF Simulatie & Timer variabelen
         let isTimerRunning = false;
         let timerTargetTime = null;
         let isDoorgaanGekozen = false;
+        let totaalUfDoelMl = 0;
+        let huidigUfGeweestMl = 0;
+        let timerStartTimestamp = null;
 
         let huidigInputVeld = null;
 
@@ -939,7 +933,8 @@
                 notitie: document.getElementById('valNotitie').value,
                 geselecteerdeVerpleging: geselecteerdeVerpleging,
                 bloeddrukMetingen: bloeddrukMetingen,
-                soortDialyse: actieveSoortDialyse
+                soortDialyse: actieveSoortDialyse,
+                huidigUfGeweestMl: huidigUfGeweestMl
             };
             localStorage.setItem('dialyse_form_concept', JSON.stringify(data));
         }
@@ -962,6 +957,7 @@
                 if (d.shuntCheck !== undefined) document.getElementById('checkShuntflow').checked = d.shuntCheck;
                 if (d.shuntVal) document.getElementById('valShuntflow').value = d.shuntVal;
                 if (d.notitie) document.getElementById('valNotitie').value = d.notitie;
+                if (d.huidigUfGeweestMl) huidigUfGeweestMl = d.huidigUfGeweestMl;
                 if (d.geselecteerdeVerpleging) geselecteerdeVerpleging = d.geselecteerdeVerpleging;
                 if (d.bloeddrukMetingen) {
                     bloeddrukMetingen = d.bloeddrukMetingen;
@@ -976,10 +972,10 @@
         function wisLokaalConcept() {
             localStorage.removeItem('dialyse_form_concept');
             bloeddrukMetingen = [];
+            huidigUfGeweestMl = 0;
             updateBloeddrukLijstEnScherm();
         }
 
-        // Volledig scherm toggle logica
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().then(() => {
@@ -994,7 +990,6 @@
             }
         }
 
-        // Verpleging logica
         function vulVerplegingDropdown() {
             let select = document.getElementById('selectVerplegingDropdown');
             select.innerHTML = '<option value="">-- Kies verpleegkundige --</option>';
@@ -1071,7 +1066,6 @@
             }
         }
 
-        // Numeriek Touchpad logica
         function activeerTouchpad(inputEl) {
             huidigInputVeld = inputEl;
             let labelTekst = inputEl.previousElementSibling ? inputEl.previousElementSibling.innerText : 'Invoer';
@@ -1155,6 +1149,7 @@
             let stopVal = document.getElementById('valStopTijd').value;
             if (stopVal) {
                 timerTargetTime = new Date(stopVal).getTime();
+                timerStartTimestamp = nu.getTime();
                 isTimerRunning = true;
                 isDoorgaanGekozen = false;
                 document.getElementById('analogueClock').classList.remove('alarm-state');
@@ -1206,6 +1201,22 @@
 
             if (isTimerRunning && timerTargetTime) {
                 let overms = timerTargetTime - nu.getTime();
+
+                // UF VOLUME OMHOOG & UF DOEL OMLAAG BEREKENEN
+                let duurUur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
+                let totaleDuurMs = duurUur * 3600 * 1000;
+                let verlopenMs = nu.getTime() - timerStartTimestamp;
+                if (verlopenMs < 0) verlopenMs = 0;
+
+                let voortgangFractie = verlopenMs / totaleDuurMs;
+                if (voortgangFractie > 1) voortgangFractie = 1;
+
+                huidigUfGeweestMl = Math.round(totaalUfDoelMl * voortgangFractie);
+                let overgeblevenUfDoel = totaalUfDoelMl - huidigUfGeweestMl;
+                if (overgeblevenUfDoel < 0) overgeblevenUfDoel = 0;
+
+                document.getElementById('dispUfVol').innerText = huidigUfGeweestMl;
+                document.getElementById('dispUfGoal').innerText = overgeblevenUfDoel;
 
                 if (overms <= 0) {
                     countdownEl.innerText = "00:00:00";
@@ -1293,11 +1304,14 @@
             if (!isNaN(pre) && !isNaN(droog)) {
                 let ufAdviesKg = (pre - droog) + factor;
                 let doelMl = Math.round(ufAdviesKg * 1000);
+                totaalUfDoelMl = doelMl;
 
                 document.getElementById('valUfAdvies').value = ufAdviesKg.toFixed(2) + " kg";
                 document.getElementById('valUitgerekendeUf').value = doelMl + " ml";
                 
-                document.getElementById('dispUfGoal').innerText = doelMl;
+                if (!isTimerRunning) {
+                    document.getElementById('dispUfGoal').innerText = doelMl;
+                }
                 
                 let duur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
                 document.getElementById('dispUfPerUur').innerText = Math.round(doelMl / duur) + " ml";
@@ -1392,6 +1406,7 @@
                 ufIngesteld: document.getElementById('valUfIngesteld').value || '-',
                 werkelijkUf: document.getElementById('valWerkelijkUf').value || '-',
                 ufAdvies: ufVal,
+                ufVolumeGeweestMl: huidigUfGeweestMl,
                 fragmin2500: document.getElementById('valFragmin2500').value || '0',
                 fragmin5000: document.getElementById('valFragmin5000').value || '0',
                 epo: document.getElementById('checkEpo').checked ? 'Ja' : 'Nee',
