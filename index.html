@@ -300,6 +300,7 @@
         </div>
         <div class="appbar-actions">
             <div id="liveClock" class="android-clock">--:--</div>
+            <button type="button" class="icon-btn" onclick="verversCloudData()" title="Cloud Vernieuwen">🔄</button>
             <button type="button" class="icon-btn" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
         </div>
     </div>
@@ -347,7 +348,7 @@
     <!-- BEHEER MODAL -->
     <div class="modal-overlay" id="beheerModal">
         <div class="modal-card">
-            <div class="modal-title">⚙️ Gebruikersbeheer</div>
+            <div class="modal-title">⚙️ Gebruikersbeheer (Cloud Gesynchroniseerd)</div>
             
             <div style="margin-bottom: 16px;">
                 <label style="font-size:12px; font-weight:500; color:var(--android-subtext); margin-bottom:6px; display:block;">Bestaande Gebruikers:</label>
@@ -368,7 +369,7 @@
 
             <div class="modal-buttons">
                 <button type="button" class="btn-secondary" onclick="sluitBeheerModal()">Sluiten</button>
-                <button type="button" class="btn-primary" onclick="voegGebruikerToe()">Toevoegen</button>
+                <button type="button" class="btn-primary" onclick="voegGebruikerToe()">Toevoegen & Opslaan</button>
             </div>
         </div>
     </div>
@@ -388,23 +389,18 @@
     </div>
 
     <script>
+        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
         const MASTER_PIN = "1234"; // Beveiligingspincode voor gebruikersbeheer
-        let pinDoelActie = ""; // 'wissel' of 'beheer'
 
-        let gebruikersData = JSON.parse(localStorage.getItem('rollodex_gebruikers')) || [
-            { naam: 'Gast', pin: '' }
-        ];
-
+        let pinDoelActie = ""; 
+        let gebruikersData = [{ naam: 'Gast', pin: '' }];
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
         let doelGebruiker = '';
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (!gebruikersData.some(g => g.naam.toLowerCase() === actieveGebruiker.toLowerCase())) {
-                actieveGebruiker = 'Gast';
-                localStorage.setItem('actieve_gebruiker', 'Gast');
-            }
-            updateUI();
             startKlok();
+            laadCloudData();
         });
 
         function startKlok() {
@@ -412,6 +408,50 @@
                 let nu = new Date();
                 document.getElementById('liveClock').innerText = nu.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             }, 1000);
+        }
+
+        function laadCloudData() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let record = data.record || {};
+                if (record.gebruikersData && Array.isArray(record.gebruikersData) && record.gebruikersData.length > 0) {
+                    gebruikersData = record.gebruikersData;
+                } else {
+                    gebruikersData = [{ naam: 'Gast', pin: '' }];
+                }
+
+                if (!gebruikersData.some(g => g.naam.toLowerCase() === actieveGebruiker.toLowerCase())) {
+                    actieveGebruiker = 'Gast';
+                    localStorage.setItem('actieve_gebruiker', 'Gast');
+                }
+                updateUI();
+            })
+            .catch(err => {
+                console.error("Fout bij laden cloud gebruikers:", err);
+                updateUI();
+            });
+        }
+
+        function verversCloudData() {
+            laadCloudData();
+            alert('Gegevens ververst vanuit de cloud!');
+        }
+
+        function slaCloudDataOp() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let record = data.record || {};
+                record.gebruikersData = gebruikersData;
+
+                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(record)
+                });
+            })
+            .catch(err => console.error("Fout bij opslaan cloud gebruikers:", err));
         }
 
         function updateUI() {
@@ -522,12 +562,12 @@
             }
 
             if (gebruikersData.some(g => g.naam.toLowerCase() === naam.toLowerCase())) {
-                alert('Deze gebruiker bestaat al.');
+                alert(' Deze gebruiker bestaat al.');
                 return;
             }
 
             gebruikersData.push({ naam: naam, pin: pin });
-            localStorage.setItem('rollodex_gebruikers', JSON.stringify(gebruikersData));
+            slaCloudDataOp();
 
             document.getElementById('nieuwNaamInput').value = '';
             document.getElementById('nieuwPinInput').value = '';
@@ -538,7 +578,7 @@
             if (confirm(`Weet je zeker dat je deze gebruiker wilt verwijderen?`)) {
                 let verwijderdeNaam = gebruikersData[index].naam;
                 gebruikersData.splice(index, 1);
-                localStorage.setItem('rollodex_gebruikers', JSON.stringify(gebruikersData));
+                slaCloudDataOp();
 
                 if (actieveGebruiker.toLowerCase() === verwijderdeNaam.toLowerCase()) {
                     wisselActieveGebruiker('Gast');
