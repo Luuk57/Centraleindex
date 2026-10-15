@@ -318,7 +318,7 @@
                     <select id="selectGebruiker" class="patient-select" onchange="vraagPincodeEnWissel(this.value)">
                         <option value="Gast">Gast</option>
                     </select>
-                    <button type="button" class="btn-text" onclick="openBeheerModal()">⚙️ Beheer</button>
+                    <button type="button" class="btn-text" onclick="vraagAdminPinVoorBeheer()">⚙️ Beheer</button>
                 </div>
             </div>
 
@@ -388,7 +388,9 @@
     </div>
 
     <script>
-        // Opslagstructuur: [{naam: 'Gast', pin: ''}, {naam: 'Jan', pin: '1234'}]
+        const MASTER_PIN = "1234"; // Beveiligingspincode voor gebruikersbeheer
+        let pinDoelActie = ""; // 'wissel' of 'beheer'
+
         let gebruikersData = JSON.parse(localStorage.getItem('rollodex_gebruikers')) || [
             { naam: 'Gast', pin: '' }
         ];
@@ -426,11 +428,20 @@
             });
         }
 
+        function vraagAdminPinVoorBeheer() {
+            pinDoelActie = "beheer";
+            document.getElementById('pinModalTitle').innerText = "🔒 Voer Beheer Pincode in";
+            document.getElementById('pinInvoerInput').value = '';
+            document.getElementById('pinModal').style.display = 'flex';
+            document.getElementById('pinInvoerInput').focus();
+        }
+
         function vraagPincodeEnWissel(nieuweNaam) {
             if (nieuweNaam === actieveGebruiker) return;
 
             let target = gebruikersData.find(g => g.naam.toLowerCase() === nieuweNaam.toLowerCase());
             if (target && target.pin && target.pin.trim() !== '') {
+                pinDoelActie = "wissel";
                 doelGebruiker = target.naam;
                 document.getElementById('pinModalTitle').innerText = `🔒 Pincode voor ${target.naam}`;
                 document.getElementById('pinInvoerInput').value = '';
@@ -443,20 +454,30 @@
 
         function verifieerPincode() {
             let ingevoerdePin = document.getElementById('pinInvoerInput').value;
-            let target = gebruikersData.find(g => g.naam.toLowerCase() === doelGebruiker.toLowerCase());
 
-            if (target && target.pin === ingevoerdePin) {
-                document.getElementById('pinModal').style.display = 'none';
-                wisselActieveGebruiker(doelGebruiker);
-            } else {
-                alert('Onjuiste pincode!');
-                document.getElementById('pinInvoerInput').value = '';
+            if (pinDoelActie === "beheer") {
+                if (ingevoerdePin === MASTER_PIN) {
+                    document.getElementById('pinModal').style.display = 'none';
+                    openBeheerModal();
+                } else {
+                    alert('Onjuiste beheer pincode! (Standaard is 1234)');
+                    document.getElementById('pinInvoerInput').value = '';
+                }
+            } else if (pinDoelActie === "wissel") {
+                let target = gebruikersData.find(g => g.naam.toLowerCase() === doelGebruiker.toLowerCase());
+                if (target && target.pin === ingevoerdePin) {
+                    document.getElementById('pinModal').style.display = 'none';
+                    wisselActieveGebruiker(doelGebruiker);
+                } else {
+                    alert('Onjuiste pincode!');
+                    document.getElementById('pinInvoerInput').value = '';
+                }
             }
         }
 
         function annuleerPincode() {
             document.getElementById('pinModal').style.display = 'none';
-            updateUI(); // Zet dropdown terug op huidige actieve gebruiker
+            updateUI(); 
         }
 
         function wisselActieveGebruiker(naam) {
@@ -465,11 +486,11 @@
             updateUI();
         }
 
-        // BEHEER MODAL FUNCTIES
         function openBeheerModal() {
             laadBeheerLijst();
             document.getElementById('beheerModal').style.display = 'flex';
         }
+
         function sluitBeheerModal() {
             document.getElementById('beheerModal').style.display = 'none';
             document.getElementById('nieuwNaamInput').value = '';
