@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Medische Suite • Windows Omgeving</title>
+    <title>Rollodex • Windows Omgeving</title>
     <style>
         :root {
             --win-blue: #0078d4;
@@ -33,7 +33,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -41,15 +41,26 @@
         }
 
         .win-title-left { display: flex; align-items: center; gap: 8px; }
+        .win-title-right { display: flex; align-items: center; gap: 10px; }
         .win-title-actions { display: flex; gap: 4px; }
+
+        .win-clock {
+            font-size: 11px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.08);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+            white-space: nowrap;
+        }
 
         .win-btn {
             background: rgba(255,255,255,0.12);
             border: 1px solid rgba(255,255,255,0.1);
             color: white;
-            padding: 5px 10px;
+            padding: 5px 8px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
@@ -83,9 +94,10 @@
             overflow-y: auto;
         }
 
-        @media (max-width: 500px) {
+        @media (max-width: 550px) {
             .win-desktop { padding: 8px; align-items: flex-start; }
             .win-window { max-width: 100%; padding: 18px; border-radius: 6px; }
+            .win-clock { display: none; /* Verberg klok op heel kleine schermen zodat knoppen passen */ }
         }
 
         .brand-section {
@@ -161,12 +173,15 @@
     <!-- WINDOWS TITLEBAR / TASKBAR -->
     <div class="win-titlebar">
         <div class="win-title-left">
-            <span>🎛️ Windows Medische Suite</span>
+            <span>🎛️ Rollodex Suite</span>
             <span id="titleSyncStatus" style="font-size: 10px; opacity: 0.7; font-weight: normal;">• Cloud Verbonden</span>
         </div>
-        <div class="win-title-actions">
-            <button type="button" class="win-btn" onclick="verversPagina()" title="Systeem Herladen">🔄 Refresh</button>
-            <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm">⛶ Scherm</button>
+        <div class="win-title-right">
+            <div id="liveClock" class="win-clock">Laden...</div>
+            <div class="win-title-actions">
+                <button type="button" class="win-btn" onclick="verversPagina()" title="Systeem Herladen">🔄 Refresh</button>
+                <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm">⛶ Scherm</button>
+            </div>
         </div>
     </div>
 
@@ -177,8 +192,8 @@
             <!-- ================= INLOGVENSTER (NAAM + PINCODE) ================= -->
             <div id="loginSectie">
                 <div class="brand-section">
-                    <div class="brand-icon">🔐</div>
-                    <div class="brand-title">Windows Inlog</div>
+                    <div class="brand-icon">📂</div>
+                    <div class="brand-title">Rollodex Inlog</div>
                     <div class="brand-subtitle">Voer uw naam en pincode in</div>
                 </div>
 
@@ -187,7 +202,7 @@
                     <input type="text" id="gebruikerNaam" placeholder="Bijv. jan of admin" autocomplete="username">
                 </div>
                 <div class="form-group">
-                    <label>Pincode (4 cijfers)</label>
+                    <label>Pincode</label>
                     <input type="password" id="gebruikerPin" placeholder="••••" maxlength="6" inputmode="numeric" autocomplete="current-password" onkeypress="handleEnter(event)">
                 </div>
                 
@@ -200,12 +215,12 @@
                 <div class="user-banner">
                     <div class="user-info">
                         <div class="name" id="welkomNaam">Gebruiker</div>
-                        <div class="sub">Windows Sessie Actief</div>
+                        <div class="sub">Rollodex Sessie Actief</div>
                     </div>
                     <div id="rolBadge" class="badge badge-user">Gebruiker</div>
                 </div>
 
-                <div class="section-label">Windows Programma's</div>
+                <div class="section-label">Rollodex Programma's</div>
                 <div class="apps-grid" id="appsGridContainer">
                     <a href="dialyse.html" class="app-tile">
                         <div class="app-tile-icon">🩺</div>
@@ -239,7 +254,6 @@
     </div>
 
     <script>
-        // Jouw JSONBin ID voor gebruikersbeheer
         const JSONBIN_ID = "6ad06e3cffd5d160536c7baa"; 
         const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
 
@@ -249,12 +263,36 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => {
+            startKlok();
             let actieveGebruiker = localStorage.getItem('actieve_gebruiker');
             if (actieveGebruiker) {
                 toonDashboard(actieveGebruiker);
             }
             laadGebruikersVanBin();
         });
+
+        // Live klok: dag dd/mm/yyyy 00:00:00
+        function startKlok() {
+            updateKlok();
+            setInterval(updateKlok, 1000);
+        }
+
+        function updateKlok() {
+            let nu = new Date();
+            let dagen = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+            let dagNaam = dagen[nu.getDay()];
+            
+            let dd = String(nu.getDate()).padStart(2, '0');
+            let mm = String(nu.getMonth() + 1).padStart(2, '0');
+            let yyyy = nu.getFullYear();
+            
+            let uuu = String(nu.getHours()).padStart(2, '0');
+            let mmm = String(nu.getMinutes()).padStart(2, '0');
+            let sss = String(nu.getSeconds()).padStart(2, '0');
+
+            let tijdString = `${dagNaam} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
+            document.getElementById('liveClock').innerText = tijdString;
+        }
 
         function handleEnter(e) {
             if (e.key === 'Enter') controleerLogin();
@@ -269,7 +307,9 @@
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {});
             } else {
-                if (document.exitFullscreen) document.exitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
         }
 
@@ -295,7 +335,6 @@
             let pin = document.getElementById('gebruikerPin').value.trim();
             let errorDiv = document.getElementById('loginError');
 
-            // Ondersteunt zowel 'pincode' als 'wachtwoord' eigenschap uit je eerdere database structuur
             let gebruikerInfo = gebruikersDatabase[naam];
             let opgeslagenCode = gebruikerInfo ? (gebruikerInfo.pincode || gebruikerInfo.wachtwoord) : null;
 
