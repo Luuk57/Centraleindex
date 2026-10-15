@@ -524,15 +524,15 @@
                 <div class="sub-section-box" id="tijdBox">
                     <div class="form-group">
                         <label>Duur (Uur)</label>
-                        <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd();">
+                        <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); slaLokaalOp();">
                     </div>
                     <div class="form-group">
                         <label>Start Datum & Tijd</label>
-                        <input type="datetime-local" id="valStartTijd">
+                        <input type="datetime-local" id="valStartTijd" oninput="slaLokaalOp();">
                     </div>
                     <div class="form-group">
                         <label>Stop Datum & Tijd (Start + Duur)</label>
-                        <input type="datetime-local" id="valStopTijd">
+                        <input type="datetime-local" id="valStopTijd" oninput="slaLokaalOp();">
                     </div>
                 </div>
 
@@ -547,7 +547,7 @@
                     </div>
                     <div class="form-group">
                         <label>Droog Gewicht Aanpasbaar (kg)</label>
-                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); opslaanNieuwDroogGewichtBin();">
+                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); opslaanNieuwDroogGewichtBin(); slaLokaalOp();">
                     </div>
                     <div class="form-group">
                         <label>UF Advies (kg)</label>
@@ -563,16 +563,16 @@
                 <div class="sub-section-box" id="gewichtBox">
                     <div class="form-group">
                         <label>Pre Gewicht (kg)</label>
-                        <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF();">
+                        <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF(); slaLokaalOp();">
                     </div>
                     <div class="form-group">
                         <label>Post Gewicht (kg)</label>
-                        <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF();">
+                        <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF(); slaLokaalOp();">
                     </div>
                     <div class="row-inputs">
                         <div class="form-group">
                             <label>UF Ingesteld (l)</label>
-                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)">
+                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="slaLokaalOp();">
                         </div>
                         <div class="form-group">
                             <label>Werkelijke UF (kg)</label>
@@ -607,40 +607,38 @@
                     </div>
                 </div>
 
-                <!-- 5. TOEDIENINGEN BOX (GEUPDATE NAAST ELKAAR) -->
+                <!-- 5. TOEDIENINGEN BOX -->
                 <div class="sub-section-box" id="toedieningenBox">
                     <div class="row-inputs" style="margin-bottom: 8px;">
                         <div class="form-group">
                             <label>Fragmin 2500 (max 1 digit)</label>
-                            <input type="text" inputmode="none" maxlength="1" id="valFragmin2500" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1)">
+                            <input type="text" inputmode="none" maxlength="1" id="valFragmin2500" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalOp();">
                         </div>
                         <div class="form-group">
                             <label>Fragmin 5000 (max 1 digit)</label>
-                            <input type="text" inputmode="none" maxlength="1" id="valFragmin5000" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1)">
+                            <input type="text" inputmode="none" maxlength="1" id="valFragmin5000" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalOp();">
                         </div>
                     </div>
 
-                    <!-- EPO & IJZER NAAST ELKAAR -->
                     <div style="border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px;">
                         <div class="row-inputs">
                             <label class="checkbox-group" style="flex:1;">
-                                <input type="checkbox" id="checkEpo"> Epo toegediend
+                                <input type="checkbox" id="checkEpo" onchange="slaLokaalOp();"> Epo toegediend
                             </label>
                             <label class="checkbox-group" style="flex:1;">
-                                <input type="checkbox" id="checkIjzer"> IJzer toegediend
+                                <input type="checkbox" id="checkIjzer" onchange="slaLokaalOp();"> IJzer toegediend
                             </label>
                         </div>
                     </div>
 
-                    <!-- SHUNTFLOW METING EN WAARDE NAAST ELKAAR -->
                     <div style="border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px;">
                         <div class="row-inputs">
                             <label class="checkbox-group" style="flex: 1;">
-                                <input type="checkbox" id="checkShuntflow"> Shuntflow meting
+                                <input type="checkbox" id="checkShuntflow" onchange="slaLokaalOp();"> Shuntflow meting
                             </label>
                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                 <label>Waarde (max 4 digits)</label>
-                                <input type="text" inputmode="none" maxlength="4" id="valShuntflow" placeholder="Bijv. 1200" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 4)">
+                                <input type="text" inputmode="none" maxlength="4" id="valShuntflow" placeholder="Bijv. 1200" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 4); slaLokaalOp();">
                             </div>
                         </div>
                     </div>
@@ -670,7 +668,7 @@
 
                 <div class="form-group" style="margin-top: 8px;">
                     <label>Notitie / Bijzonderheden</label>
-                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, bijzonderheden">
+                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, bijzonderheden" oninput="slaLokaalOp();">
                 </div>
             </div>
         </div>
@@ -776,6 +774,57 @@
             activeerTouchpad(document.getElementById('valFragmin2500'));
         }
 
+        // Lokale opslag helper tijdens typen
+        function slaLokaalOp() {
+            let data = {
+                duur: document.getElementById('valDuurUur').value,
+                start: document.getElementById('valStartTijd').value,
+                stop: document.getElementById('valStopTijd').value,
+                pre: document.getElementById('valPreGewicht').value,
+                post: document.getElementById('valPostGewicht').value,
+                ufIngesteld: document.getElementById('valUfIngesteld').value,
+                frag25: document.getElementById('valFragmin2500').value,
+                frag50: document.getElementById('valFragmin5000').value,
+                epo: document.getElementById('checkEpo').checked,
+                ijzer: document.getElementById('checkIjzer').checked,
+                shuntCheck: document.getElementById('checkShuntflow').checked,
+                shuntVal: document.getElementById('valShuntflow').value,
+                notitie: document.getElementById('valNotitie').value,
+                geselecteerdeVerpleging: geselecteerdeVerpleging,
+                soortDialyse: actieveSoortDialyse
+            };
+            localStorage.setItem('dialyse_form_concept', JSON.stringify(data));
+        }
+
+        function herstelLokaalOp() {
+            let saved = localStorage.getItem('dialyse_form_concept');
+            if (!saved) return;
+            try {
+                let d = JSON.parse(saved);
+                if (d.duur) document.getElementById('valDuurUur').value = d.duur;
+                if (d.start) document.getElementById('valStartTijd').value = d.start;
+                if (d.stop) document.getElementById('valStopTijd').value = d.stop;
+                if (d.pre) document.getElementById('valPreGewicht').value = d.pre;
+                if (d.post) document.getElementById('valPostGewicht').value = d.post;
+                if (d.ufIngesteld) document.getElementById('valUfIngesteld').value = d.ufIngesteld;
+                if (d.frag25) document.getElementById('valFragmin2500').value = d.frag25;
+                if (d.frag50) document.getElementById('valFragmin5000').value = d.frag50;
+                if (d.epo !== undefined) document.getElementById('checkEpo').checked = d.epo;
+                if (d.ijzer !== undefined) document.getElementById('checkIjzer').checked = d.ijzer;
+                if (d.shuntCheck !== undefined) document.getElementById('checkShuntflow').checked = d.shuntCheck;
+                if (d.shuntVal) document.getElementById('valShuntflow').value = d.shuntVal;
+                if (d.notitie) document.getElementById('valNotitie').value = d.notitie;
+                if (d.geselecteerdeVerpleging) geselecteerdeVerpleging = d.geselecteerdeVerpleging;
+                if (d.soortDialyse) setSoortDialyse(d.soortDialyse);
+                berekenUF();
+                berekenWerkelijkeUF();
+            } catch (e) {}
+        }
+
+        function wisLokaalConcept() {
+            localStorage.removeItem('dialyse_form_concept');
+        }
+
         // Volledig scherm toggle logica
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
@@ -810,12 +859,14 @@
             if (naam && !geselecteerdeVerpleging.includes(naam)) {
                 geselecteerdeVerpleging.push(naam);
                 updateVerplegingTags();
+                slaLokaalOp();
             }
         }
 
         function verwijderVerplegingTag(naam) {
             geselecteerdeVerpleging = geselecteerdeVerpleging.filter(n => n !== naam);
             updateVerplegingTags();
+            slaLokaalOp();
         }
 
         function updateVerplegingTags() {
@@ -840,7 +891,8 @@
                 beschikbareVerpleging.push(naam);
                 input.value = '';
                 vulVerplegingDropdown();
-                alert(`Verpleegkundige '${naam}' succesvol toegevoegd.`);
+                slaNaarBin(); // Direct naar cloud
+                alert(`Verpleegkundige '${naam}' succesvol toegevoegd en gesynchroniseerd.`);
             }
         }
 
@@ -855,6 +907,7 @@
                 beschikbareVerpleging = beschikbareVerpleging.filter(n => n !== naam);
                 geselecteerdeVerpleging = geselecteerdeVerpleging.filter(n => n !== naam);
                 vulVerplegingDropdown();
+                slaNaarBin(); // Direct naar cloud
             }
         }
 
@@ -915,6 +968,7 @@
                 document.getElementById('btnDialyseDag').classList.remove('active');
             }
             berekenUF();
+            slaLokaalOp();
         }
 
         function berekenWerkelijkeUF() {
@@ -943,6 +997,7 @@
             let nu = new Date();
             document.getElementById('valStartTijd').value = formatDatetimeLocal(nu);
             berekenAutomatischeEindtijd();
+            slaLokaalOp();
 
             let stopVal = document.getElementById('valStopTijd').value;
             if (stopVal) {
@@ -960,6 +1015,7 @@
             isTimerRunning = false;
             document.getElementById('analogueClock').classList.remove('alarm-state');
             document.getElementById('alarmModal').style.display = 'none';
+            slaLokaalOp();
         }
 
         function berekenAutomatischeEindtijd() {
@@ -1044,7 +1100,7 @@
                 }
                 gebruikerProfielen[actieveGebruiker].droogGewicht = nieuwDroog;
 
-                slaNaarBin();
+                slaNaarBin(); // Direct naar cloud
             }, 800);
         }
 
@@ -1133,6 +1189,7 @@
                     document.getElementById('valDroogGewicht').value = gebruikerProfielen[actieveGebruiker].droogGewicht;
                 }
 
+                herstelLokaalOp();
                 vulHistorieTabel();
             })
             .catch(err => console.error("Fout bij laden:", err));
@@ -1195,6 +1252,7 @@
 
             sessies.unshift(nieuweSessie);
             slaNaarBin();
+            wisLokaalConcept();
             vulHistorieTabel();
 
             alert('Dialyse sessie succesvol opgeslagen in de cloud!');
