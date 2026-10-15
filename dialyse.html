@@ -7,26 +7,24 @@
     <style>
         :root {
             --win-blue: #0078d4;
-            --win-blue-hover: #106ebe;
-            --win-bg: #e0e0e0;
             --win-header-bg: #202020;
             --card-bg: #ffffff;
             --text-main: #1b1b1b;
-            --text-secondary: #5f5f5f;
-            --border-color: #d1d1d1;
             --font-ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             --red-alert: #d13438;
-            --red-bg: #fde7e9;
-            --orange-alert: #ca5010;
-            --orange-bg: #fff4ce;
             --green-ok: #107c41;
-            --green-bg: #dff6dd;
+            
+            /* Fresenius medische blauwe stijl uit de foto */
+            --dialysis-blue: #1c5c96;
+            --dialysis-panel-bg: #144775;
+            --dialysis-screen-bg: #236fae;
+            --dialysis-yellow: #f8e71c;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
         body, html { width: 100%; height: 100%; background: var(--win-bg); color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
 
-        /* WINDOWS TITLEBAR / TASKBAR */
+        /* WINDOWS TITLEBAR */
         .win-titlebar {
             background: var(--win-header-bg);
             color: #ffffff;
@@ -73,72 +71,123 @@
         .win-btn:hover { background: rgba(255,255,255,0.25); }
 
         /* TAB BAR */
-        .tab-bar { display: flex; background: #dcdcdc; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; background: #cccccc; border: none; cursor: pointer; text-align: center; color: #444; transition: background 0.15s; }
-        .tab-btn.active { background: var(--card-bg); color: var(--win-blue); border-bottom: 3px solid var(--win-blue); }
+        .tab-bar { display: flex; background: #dcdcdc; border-bottom: 1px solid #d1d1d1; flex-shrink: 0; }
+        .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; background: #cccccc; border: none; cursor: pointer; text-align: center; color: #444; }
+        .tab-btn.active { background: #ffffff; color: var(--win-blue); border-bottom: 3px solid var(--win-blue); }
 
-        /* WORKSPACE CONTAINER */
-        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 14px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; }
+        /* WORKSPACE */
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; padding: 10px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; }
         
-        .tab-pane { display: none; width: 100%; max-width: 650px; }
+        .tab-pane { display: none; width: 100%; max-width: 780px; }
         .tab-pane.active { display: block; }
 
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-        .section-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--win-blue); padding-bottom: 3px; letter-spacing: 0.5px; }
+        /* EXACTE DIALYSE MONITOR SCHERM STIJL (FRESENIUS LOOK)[span_3](start_span)[span_3](end_span) */
+        .dialysis-console {
+            background: var(--dialysis-panel-bg);
+            border: 4px solid #0d3254;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            display: grid;
+            grid-template-columns: 140px 1fr 140px;
+            grid-template-rows: auto auto auto;
+            gap: 12px;
+            align-items: center;
+            justify-items: center;
+        }
 
-        /* BLAUWE CIRKEL KLOK MET COUNTDOWN DIGITAAL IN MIDDEN */
-        .clock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .med-box {
+            background: var(--dialysis-screen-bg);
+            border: 2px solid #0f4b82;
+            border-radius: 6px;
+            padding: 8px;
+            color: #fff;
+            text-align: center;
+            width: 100%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .med-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
+        .med-box .value { font-size: 16px; font-weight: 700; color: var(--dialysis-yellow); margin-top: 2px; }
+
+        /* DE GROTE RONDE KLOK IN HET MIDDEN[span_4](start_span)[span_4](end_span) */
+        .center-clock-panel {
+            grid-column: 2;
+            grid-row: 1 / span 3;
+            background: var(--dialysis-screen-bg);
+            border: 3px solid #0f4b82;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            min-height: 280px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.25);
+            position: relative;
+        }
+
         .analogue-clock {
-            width: 180px; height: 180px; 
-            border: 5px solid var(--win-blue); 
+            width: 190px; height: 190px;
+            border: 6px solid #144775;
             border-radius: 50%;
-            position: relative; 
-            background: #f0f7ff; 
-            box-shadow: inset 0 4px 12px rgba(0,120,212,0.15), 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+            background: #1c5c96;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
         }
+
         .hour-mark {
-            position: absolute; width: 3px; height: 12px; background: var(--win-blue); top: 8px; left: calc(50% - 1.5px);
-            transform-origin: 50% 82px; /* Straal = 90px - padding */
+            position: absolute; width: 4px; height: 14px; background: #ffffff; top: 8px; left: calc(50% - 2px);
+            transform-origin: 50% 87px;
             border-radius: 1px;
-        }
-        .clock-center-digital {
-            position: absolute;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--win-blue);
-            text-align: center;
-            letter-spacing: -0.5px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid #bce0fd;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            opacity: 0.8;
         }
 
-        /* FORM ELEMENTS */
-        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-        .form-group label { font-size: 11px; font-weight: 700; color: var(--text-secondary); }
-        .form-group input, .form-group select { width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; background: #fff; }
-        .form-group input:focus { outline: none; border-color: var(--win-blue); box-shadow: 0 0 0 2px rgba(0,120,212,0.15); }
+        .clock-center-digital {
+            position: absolute;
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            letter-spacing: -0.5px;
+        }
+
+        /* EXTRA INPUT KAART ONDER HET SCHERM */
+        .controls-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .section-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 8px; border-bottom: 2px solid var(--win-blue); padding-bottom: 2px; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+        .form-group label { font-size: 11px; font-weight: 700; color: #5f5f5f; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 13px; }
 
         .row-inputs { display: flex; gap: 8px; }
         .row-inputs .form-group { flex: 1; }
 
-        .action-btn { background: var(--win-blue); color: white; border: none; padding: 11px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 8px; text-align: center; }
-        .action-btn:hover { background: var(--win-blue-hover); }
+        .action-btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; margin-top: 4px; }
+        .action-btn:hover { background: #106ebe; }
 
-        /* TABLES & BADGES */
         table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
-        table.dialyse-table th, table.dialyse-table td { border: 1px solid #ddd; padding: 7px; text-align: left; vertical-align: middle; }
-        table.dialyse-table th { background: var(--win-header-bg); color: white; font-weight: 600; }
+        table.dialyse-table th, table.dialyse-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+        table.dialyse-table th { background: var(--win-header-bg); color: white; }
 
-        .badge-red { background: var(--red-bg); color: var(--red-alert); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
-        .badge-orange { background: var(--orange-bg); color: var(--orange-alert); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
-        .badge-green { background: var(--green-bg); color: var(--green-ok); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
+        .badge-red { background: #fde7e9; color: var(--red-alert); padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+        .badge-orange { background: #fff4ce; color: #ca5010; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+        .badge-green { background: #dff6dd; color: var(--green-ok); padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+        .btn-small-del { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; background: var(--red-alert); }
 
-        .btn-small-del { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; font-weight: bold; background: var(--red-alert); }
-        .back-link { display: inline-block; margin-bottom: 10px; font-size: 11px; font-weight: 600; color: #ffffff; text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .back-link { display: inline-block; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: #ffffff; text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
         .back-link:hover { text-decoration: underline; }
     </style>
 </head>
@@ -147,7 +196,7 @@
     <!-- WINDOWS TITLEBAR -->
     <div class="win-titlebar">
         <div class="win-title-left">
-            <span>🩺 Rollodex • Dialyse Monitor</span>
+            <span>🩺 Rollodex • Dialyse Monitor (Fresenius Stijl)</span>
             <span id="gebruikerLabel" style="font-size: 10px; opacity: 0.8; font-weight: normal;"></span>
         </div>
         <div class="win-title-right">
@@ -161,31 +210,78 @@
 
     <!-- TABBALK -->
     <div class="tab-bar">
-        <button type="button" class="tab-btn active" id="btnInvoer" onclick="toonTab('invoer')">📝 Nieuwe Dialyse Sessie</button>
+        <button type="button" class="tab-btn active" id="btnInvoer" onclick="toonTab('invoer')">🖥️ Monitor & Invoer</button>
         <button type="button" class="tab-btn" id="btnHistorie" onclick="toonTab('historie')">📊 Historie & Advies</button>
     </div>
 
     <!-- WORKSPACE -->
     <div class="workspace">
         
-        <!-- TAB 1: INVOER & BLAUWE CIRKEL KLOK MET COUNTDOWN -->
+        <!-- TAB 1: MONITOR SCHERM -->
         <div id="invoerPane" class="tab-pane active">
             <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
 
-            <!-- Blauwe cirkel klok met uurstrepen en digitale countdown in het midden -->
-            <div class="card clock-container">
-                <div class="analogue-clock" id="analogueClock">
-                    <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
+            <!-- DIALYSIS CONSOLE SCHERM (LAYOUT UIT AFBEELDING)[span_5](start_span)[span_5](end_span) -->
+            <div class="dialysis-console">
+                
+                <!-- Links boven: ART -->
+                <div class="med-box" style="grid-column: 1; grid-row: 1;">
+                    <div class="label">ART mmHg</div>
+                    <div class="value" id="dispArt">-80</div>
                 </div>
+
+                <!-- Midden: De grote ronde klok met countdown in het midden[span_6](start_span)[span_6](end_span) -->
+                <div class="center-clock-panel">
+                    <div class="analogue-clock" id="analogueClock">
+                        <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
+                    </div>
+                </div>
+
+                <!-- Rechts boven: UF goal[span_7](start_span)[span_7](end_span) -->
+                <div class="med-box" style="grid-column: 3; grid-row: 1;">
+                    <div class="label">UF goal ml</div>
+                    <div class="value" id="dispUfGoal">3000</div>
+                </div>
+
+                <!-- Links midden: VEN -->
+                <div class="med-box" style="grid-column: 1; grid-row: 2;">
+                    <div class="label">VEN mmHg</div>
+                    <div class="value" id="dispVen">120</div>
+                </div>
+
+                <!-- Rechts midden: Blood flow[span_8](start_span)[span_8](end_span) -->
+                <div class="med-box" style="grid-column: 3; grid-row: 2;">
+                    <div class="label">Blood flow</div>
+                    <div class="value" style="color: #fff; font-size: 13px;">300 ml/min</div>
+                </div>
+
+                <!-- Links onder: UF rate -->
+                <div class="med-box" style="grid-column: 1; grid-row: 3;">
+                    <div class="label">UF rate ml/h</div>
+                    <div class="value" id="dispUfRate">750</div>
+                </div>
+
+                <!-- Rechts onder: UF volume -->
+                <div class="med-box" style="grid-column: 3; grid-row: 3;">
+                    <div class="label">UF volume ml</div>
+                    <div class="value" id="dispUfVol">2000</div>
+                </div>
+
             </div>
 
-            <!-- Invoerformulier -->
-            <div class="card">
-                <div class="section-title">🩺 Dialyse & Vocht Invoer</div>
+            <!-- INVOER & BEREKENINGEN -->
+            <div class="controls-card">
+                <div class="section-title">🩺 Sessie Invoer & Gegevens</div>
                 
-                <div class="form-group">
-                    <label>Patiënt / Actieve Gebruiker</label>
-                    <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>Actieve Patiënt</label>
+                        <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
+                    </div>
+                    <div class="form-group">
+                        <label>Droog Gewicht (kg)</label>
+                        <input type="number" step="0.1" id="valDroogGewicht" value="109" oninput="berekenUF()">
+                    </div>
                 </div>
 
                 <div class="row-inputs">
@@ -194,14 +290,9 @@
                         <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF()">
                     </div>
                     <div class="form-group">
-                        <label>Droog Gewicht (kg)</label>
-                        <input type="number" step="0.1" id="valDroogGewicht" value="109" placeholder="Bijv. 109" oninput="berekenUF()">
+                        <label>Automatisch UF-Advies (Pre - Droog + 0.3)</label>
+                        <input type="text" id="valUfAdvies" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="Wordt berekend...">
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Automatisch UF-Advies (Pre - Droog + 0.3)</label>
-                    <input type="text" id="valUfAdvies" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="Wordt berekend...">
                 </div>
 
                 <div class="row-inputs">
@@ -216,8 +307,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Notitie / Bijzonderheden</label>
-                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, moeheid, etc.">
+                    <label>Notitie</label>
+                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, bijzonderheden">
                 </div>
 
                 <button type="button" class="action-btn" onclick="slaDialyseOp()">💾 SESSIE OPSLAAN IN CLOUD</button>
@@ -228,7 +319,7 @@
         <div id="historiePane" class="tab-pane">
             <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
 
-            <div class="card">
+            <div class="controls-card">
                 <div class="section-title">📊 Dialyse Historie & Kleurcodering</div>
                 <table class="dialyse-table">
                     <thead>
@@ -272,10 +363,8 @@
             laadData();
         });
 
-        // Genereer de 12 uurstrepen rondom de cirkel
         function genereerUurStrepen() {
             let clock = document.getElementById('analogueClock');
-            // Behoud de countdown display in het midden
             let countdownEl = document.getElementById('countdownDisplay');
             clock.innerHTML = '';
             clock.appendChild(countdownEl);
@@ -288,7 +377,6 @@
             }
         }
 
-        // Live klok en countdown in het midden
         function startKlok() {
             updateKlok();
             setInterval(updateKlok, 1000);
@@ -296,15 +384,10 @@
 
         function updateKlok() {
             let nu = new Date();
-            let uren = nu.getHours();
-            let minuten = nu.getMinutes();
-            let seconden = nu.getSeconds();
+            let uuu = String(nu.getHours()).padStart(2, '0');
+            let mmm = String(nu.getMinutes()).padStart(2, '0');
+            let sss = String(nu.getSeconds()).padStart(2, '0');
 
-            let uuu = String(uren).padStart(2, '0');
-            let mmm = String(minuten).padStart(2, '0');
-            let sss = String(seconden).padStart(2, '0');
-
-            // Countdown / huidige tijd weergave in het midden van de blauwe cirkel
             document.getElementById('countdownDisplay').innerText = `${uuu}:${mmm}:${sss}`;
 
             let dagen = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
@@ -336,6 +419,7 @@
             if (!isNaN(pre) && !isNaN(droog)) {
                 let uf = (pre - droog) + 0.3;
                 ufInput.value = uf.toFixed(2) + " kg";
+                document.getElementById('dispUfGoal').innerText = Math.round(uf * 1000);
             } else {
                 ufInput.value = "";
             }
