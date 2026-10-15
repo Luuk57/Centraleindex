@@ -428,6 +428,19 @@
         .alpha-key:hover { background: #0078d4; border-color: #0078d4; }
         .alpha-key:active { background: #106ebe; }
 
+        /* FILTER BALK PERIODE */
+        .filter-bar {
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
         table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
         table.dialyse-table th, table.dialyse-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
         table.dialyse-table th { background: var(--win-header-bg); color: white; }
@@ -436,9 +449,20 @@
         .badge-orange { background: #fff4ce; color: #ca5010; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
         .badge-green { background: #dff6dd; color: var(--green-ok); padding: 2px 6px; border-radius: 4px; font-weight: 700; }
         .btn-small-del { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; background: var(--red-alert); }
+        .btn-small-edit { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; background: var(--win-blue); margin-right: 3px; }
 
         .back-link { display: inline-block; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: #ffffff; text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
         .back-link:hover { text-decoration: underline; }
+
+        /* PRINT STIJLEN ENKEL VOOR PDF EXPORT */
+        @media print {
+            body { background: white !important; color: black !important; overflow: visible !important; }
+            .win-titlebar, .tab-bar, .back-link, .filter-bar, .btn-small-del, .btn-small-edit, #invoerPane { display: none !important; }
+            .workspace { padding: 0 !important; background: none !important; }
+            #historiePane { display: block !important; width: 100% !important; max-width: 100% !important; }
+            .controls-card { box-shadow: none !important; border: none !important; padding: 0 !important; }
+            table.dialyse-table th { background: #333 !important; color: white !important; }
+        }
     </style>
 </head>
 <body>
@@ -807,6 +831,21 @@
 
             <div class="controls-card" style="display: block;">
                 <div class="section-title">📊 Dialyse Historie & Kleurcodering</div>
+                
+                <!-- PERIODE FILTER EN PRINT OPTIE -->
+                <div class="filter-bar">
+                    <div class="form-group" style="margin-bottom:0; flex:1;">
+                        <label>Van Datum:</label>
+                        <input type="date" id="filterVanDatum" onchange="vulHistorieTabel()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0; flex:1;">
+                        <label>Tot Datum:</label>
+                        <input type="date" id="filterTotDatum" onchange="vulHistorieTabel()">
+                    </div>
+                    <button type="button" class="win-btn" style="background:#5c2d91; padding:8px 12px;" onclick="resetteerDatumFilter()">🔄 Reset Periode</button>
+                    <button type="button" class="win-btn" style="background:var(--green-ok); padding:8px 12px;" onclick="printHistoriePdf()">🖨️ Exporteer PDF / Print</button>
+                </div>
+
                 <table class="dialyse-table">
                     <thead>
                         <tr>
@@ -818,7 +857,7 @@
                             <th>UF Advies / Ingesteld</th>
                             <th>Toedieningen</th>
                             <th>Start / Stop / Duur</th>
-                            <th style="width: 45px; text-align: center;">Actie</th>
+                            <th style="width: 85px; text-align: center;">Actie</th>
                         </tr>
                     </thead>
                     <tbody id="historieTabelBody">
@@ -839,6 +878,7 @@
         let actieveSoortDialyse = 'nacht'; 
         let sessies = [];
         let gebruikerProfielen = {};
+        let huidigeBewerkingSessieId = null;
 
         // Bloeddruk state
         let bloeddrukMetingen = [];
@@ -1013,7 +1053,8 @@
                 huidigUfGeweestMl: huidigUfGeweestMl,
                 isTimerRunning: isTimerRunning,
                 timerStartTimestamp: timerStartTimestamp,
-                timerTargetTime: timerTargetTime
+                timerTargetTime: timerTargetTime,
+                huidigeBewerkingSessieId: huidigeBewerkingSessieId
             };
             localStorage.setItem('dialyse_form_concept', JSON.stringify(data));
         }
@@ -1048,7 +1089,8 @@
                     updateBloeddrukLijstEnScherm();
                 }
                 if (d.soortDialyse) setSoortDialyse(d.soortDialyse);
-                
+                if (d.huidigeBewerkingSessieId) huidigeBewerkingSessieId = d.huidigeBewerkingSessieId;
+
                 berekenUF();
                 berekenWerkelijkeUF();
 
@@ -1067,6 +1109,7 @@
             isTimerRunning = false;
             timerStartTimestamp = null;
             timerTargetTime = null;
+            huidigeBewerkingSessieId = null;
             document.getElementById('analogueClock').style.backgroundColor = '#1c5c96';
             updateBloeddrukLijstEnScherm();
         }
@@ -1551,8 +1594,8 @@
             let urenDuur = document.getElementById('valDuurUur').value || '0';
             let minDuur = document.getElementById('valDuurMin').value || '0';
 
-            let nieuweSessie = {
-                id: Date.now(),
+            let sessieObject = {
+                id: huidigeBewerkingSessieId ? huidigeBewerkingSessieId : Date.now(),
                 persoon: actieveGebruiker,
                 verpleging: geselecteerdeVerpleging.join(', ') || '-',
                 bloeddrukken: bloeddrukMetingen,
@@ -1578,15 +1621,65 @@
                 notitie: document.getElementById('valNotitie').value.trim() || '-'
             };
 
-            sessies.unshift(nieuweSessie);
+            if (huidigeBewerkingSessieId) {
+                // Vervang bestaande sessie bij bewerken
+                let idx = sessies.findIndex(s => s.id === huidigeBewerkingSessieId);
+                if (idx !== -1) sessies[idx] = sessieObject;
+            } else {
+                // Nieuwe toevoegen
+                sessies.unshift(sessieObject);
+            }
+
             slaNaarBin();
-            
             wisLokaalConcept();
             vulHistorieTabel();
 
             alert('Dialyse sessie succesvol opgeslagen in de cloud!');
             toonTab('historie');
         }
+
+        window.bewerkSessie = function(id) {
+            let s = sessies.find(x => x.id === id);
+            if (!s) return;
+
+            huidigeBewerkingSessieId = s.id;
+            
+            // Inladen in de velden
+            document.getElementById('valPreGewicht').value = s.preGewicht !== '-' ? s.preGewicht : '';
+            document.getElementById('valPostGewicht').value = s.postGewicht !== '-' ? s.postGewicht : '';
+            document.getElementById('valDroogGewicht').value = s.droogGewicht;
+            document.getElementById('valUfIngesteld').value = s.ufIngesteld !== '-' ? s.ufIngesteld : '';
+            document.getElementById('valFragmin2500').value = s.fragmin2500 !== '0' ? s.fragmin2500 : '';
+            document.getElementById('valFragmin5000').value = s.fragmin5000 !== '0' ? s.fragmin5000 : '';
+            document.getElementById('checkEpo').checked = (s.epo === 'Ja');
+            document.getElementById('checkIjzer').checked = (s.ijzer === 'Ja');
+            document.getElementById('checkShuntflow').checked = (s.shuntflowCheck === 'Ja');
+            document.getElementById('valShuntflow').value = s.shuntflowWaarde !== '-' ? s.shuntflowWaarde : '';
+            document.getElementById('valStartTijd').value = s.startTijd !== '-' ? s.startTijd : '';
+            document.getElementById('valStopTijd').value = s.stopTijd !== '-' ? s.stopTijd : '';
+            document.getElementById('valNotitie').value = s.notitie !== '-' ? s.notitie : '';
+
+            if (s.verpleging && s.verpleging !== '-') {
+                geselecteerdeVerpleging = s.verpleging.split(', ').map(n => n.trim());
+            } else {
+                geselecteerdeVerpleging = [];
+            }
+            updateVerplegingTags();
+
+            if (s.bloeddrukken) {
+                bloeddrukMetingen = s.bloeddrukken;
+                updateBloeddrukLijstEnScherm();
+            }
+
+            if (s.soortDialyse) setSoortDialyse(s.soortDialyse);
+
+            berekenUF();
+            berekenWerkelijkeUF();
+            slaLokaalOp();
+
+            alert('Sessie gegevens ingeladen! Je kunt nu aanpassingen maken en op 💾 OPSLAAN drukken.');
+            toonTab('invoer');
+        };
 
         window.verwijderSessie = function(id) {
             if (confirm('Weet je zeker dat je deze sessie wilt verwijderen?')) {
@@ -1596,14 +1689,35 @@
             }
         };
 
+        function resetteerDatumFilter() {
+            document.getElementById('filterVanDatum').value = '';
+            document.getElementById('filterTotDatum').value = '';
+            vulHistorieTabel();
+        }
+
+        function printHistoriePdf() {
+            window.print();
+        }
+
         function vulHistorieTabel() {
             let tbody = document.getElementById('historieTabelBody');
             tbody.innerHTML = '';
 
             let gefilterd = (gebruikerRol === 'admin') ? sessies : sessies.filter(s => s.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
 
+            // Periode Filter
+            let vanDatum = document.getElementById('filterVanDatum').value;
+            let totDatum = document.getElementById('filterTotDatum').value;
+
+            if (vanDatum) {
+                gefilterd = gefilterd.filter(s => s.datum >= vanDatum);
+            }
+            if (totDatum) {
+                gefilterd = gefilterd.filter(s => s.datum <= totDatum);
+            }
+
             if (gefilterd.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="color: #888; text-align: center;">Geen dialyse historie gevonden.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="color: #888; text-align: center;">Geen dialyse historie gevonden voor deze periode.</td></tr>';
                 return;
             }
 
@@ -1624,7 +1738,10 @@
                     <td>Advies: <b>${getUfKleurBadge(s.ufAdvies)}</b><br>Ingesteld: ${s.ufIngesteld}L</td>
                     <td><small>${toedieningTekst}</small></td>
                     <td>Start: ${s.startTijd ? s.startTijd.replace('T', ' ') : '-'}<br>Stop: ${s.stopTijd ? s.stopTijd.replace('T', ' ') : '-'}<br>Duur: ${s.duurUur}</td>
-                    <td style="text-align: center;"><button type="button" class="btn-small-del" onclick="verwijderSessie(${s.id})">Wis</button></td>
+                    <td style="text-align: center;">
+                        <button type="button" class="btn-small-edit" onclick="bewerkSessie(${s.id})">✏️</button>
+                        <button type="button" class="btn-small-del" onclick="verwijderSessie(${s.id})">🗑️</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
