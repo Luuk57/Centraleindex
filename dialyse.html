@@ -86,22 +86,34 @@
         .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
         .section-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--win-blue); padding-bottom: 3px; letter-spacing: 0.5px; }
 
-        /* MINIMALISTISCHE KLOK ZONDER WIJZERS */
+        /* BLAUWE CIRKEL KLOK MET COUNTDOWN DIGITAAL IN MIDDEN */
         .clock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; }
         .analogue-clock {
-            width: 140px; height: 140px; border: 3px solid var(--win-blue); border-radius: 50%;
-            position: relative; background: #fafafa; box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+            width: 180px; height: 180px; 
+            border: 5px solid var(--win-blue); 
+            border-radius: 50%;
+            position: relative; 
+            background: #f0f7ff; 
+            box-shadow: inset 0 4px 12px rgba(0,120,212,0.15), 0 4px 12px rgba(0,0,0,0.1);
             display: flex; align-items: center; justify-content: center;
         }
         .hour-mark {
-            position: absolute; width: 3px; height: 10px; background: #333; top: 6px; left: calc(50% - 1.5px);
-            transform-origin: 50% 64px; /* Straal van de cirkel */
+            position: absolute; width: 3px; height: 12px; background: var(--win-blue); top: 8px; left: calc(50% - 1.5px);
+            transform-origin: 50% 82px; /* Straal = 90px - padding */
             border-radius: 1px;
         }
-        .hour-mark.active {
-            background: var(--win-blue);
-            height: 12px;
-            width: 4px;
+        .clock-center-digital {
+            position: absolute;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--win-blue);
+            text-align: center;
+            letter-spacing: -0.5px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #bce0fd;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
         /* FORM ELEMENTS */
@@ -156,14 +168,14 @@
     <!-- WORKSPACE -->
     <div class="workspace">
         
-        <!-- TAB 1: INVOER & WIJZERLOZE KLOK -->
+        <!-- TAB 1: INVOER & BLAUWE CIRKEL KLOK MET COUNTDOWN -->
         <div id="invoerPane" class="tab-pane active">
             <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
 
-            <!-- Minimalistische klok met alleen uurstrepen en geen wijzers -->
+            <!-- Blauwe cirkel klok met uurstrepen en digitale countdown in het midden -->
             <div class="card clock-container">
                 <div class="analogue-clock" id="analogueClock">
-                    <!-- Geen wijzers, enkel uurstrepen die via JS worden ingeladen -->
+                    <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
                 </div>
             </div>
 
@@ -182,189 +194,278 @@
                         <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF()">
                     </div>
                     <div class="form-group">
-                        <label>Droog Gewicht (
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rollodex • Dialyse Monitor</title>
-    <style>
-        :root {
-            --win-blue: #0078d4;
-            --win-blue-hover: #106ebe;
-            --win-bg: #e0e0e0;
-            --win-header-bg: #202020;
-            --card-bg: #ffffff;
-            --text-main: #1b1b1b;
-            --text-secondary: #5f5f5f;
-            --border-color: #d1d1d1;
-            --font-ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            --red-alert: #d13438;
-            --red-bg: #fde7e9;
-            --orange-alert: #ca5010;
-            --orange-bg: #fff4ce;
-            --green-ok: #107c41;
-            --green-bg: #dff6dd;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
-        body, html { width: 100%; height: 100%; background: var(--win-bg); color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
-
-        /* WINDOWS TITLEBAR / TASKBAR */
-        .win-titlebar {
-            background: var(--win-header-bg);
-            color: #ffffff;
-            height: 42px;
-            padding: 0 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            z-index: 10;
-        }
-
-        .win-title-left { display: flex; align-items: center; gap: 8px; }
-        .win-title-right { display: flex; align-items: center; gap: 10px; }
-        .win-title-actions { display: flex; gap: 4px; }
-
-        .win-clock {
-            font-size: 11px;
-            opacity: 0.9;
-            background: rgba(255,255,255,0.08);
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.05);
-            white-space: nowrap;
-        }
-
-        .win-btn {
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: background 0.15s ease;
-        }
-        .win-btn:hover { background: rgba(255,255,255,0.25); }
-
-        /* TAB BAR */
-        .tab-bar { display: flex; background: #dcdcdc; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; background: #cccccc; border: none; cursor: pointer; text-align: center; color: #444; transition: background 0.15s; }
-        .tab-btn.active { background: var(--card-bg); color: var(--win-blue); border-bottom: 3px solid var(--win-blue); }
-
-        /* WORKSPACE CONTAINER */
-        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 14px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; }
-        
-        .tab-pane { display: none; width: 100%; max-width: 650px; }
-        .tab-pane.active { display: block; }
-
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-        .section-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--win-blue); padding-bottom: 3px; letter-spacing: 0.5px; }
-
-        /* MINIMALISTISCHE KLOK ZONDER WIJZERS */
-        .clock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; }
-        .analogue-clock {
-            width: 140px; height: 140px; border: 3px solid var(--win-blue); border-radius: 50%;
-            position: relative; background: #fafafa; box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .hour-mark {
-            position: absolute; width: 3px; height: 10px; background: #333; top: 6px; left: calc(50% - 1.5px);
-            transform-origin: 50% 64px; /* Straal van de cirkel */
-            border-radius: 1px;
-        }
-        .hour-mark.active {
-            background: var(--win-blue);
-            height: 12px;
-            width: 4px;
-        }
-
-        /* FORM ELEMENTS */
-        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-        .form-group label { font-size: 11px; font-weight: 700; color: var(--text-secondary); }
-        .form-group input, .form-group select { width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; background: #fff; }
-        .form-group input:focus { outline: none; border-color: var(--win-blue); box-shadow: 0 0 0 2px rgba(0,120,212,0.15); }
-
-        .row-inputs { display: flex; gap: 8px; }
-        .row-inputs .form-group { flex: 1; }
-
-        .action-btn { background: var(--win-blue); color: white; border: none; padding: 11px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 8px; text-align: center; }
-        .action-btn:hover { background: var(--win-blue-hover); }
-
-        /* TABLES & BADGES */
-        table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
-        table.dialyse-table th, table.dialyse-table td { border: 1px solid #ddd; padding: 7px; text-align: left; vertical-align: middle; }
-        table.dialyse-table th { background: var(--win-header-bg); color: white; font-weight: 600; }
-
-        .badge-red { background: var(--red-bg); color: var(--red-alert); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
-        .badge-orange { background: var(--orange-bg); color: var(--orange-alert); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
-        .badge-green { background: var(--green-bg); color: var(--green-ok); padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; }
-
-        .btn-small-del { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; font-weight: bold; background: var(--red-alert); }
-        .back-link { display: inline-block; margin-bottom: 10px; font-size: 11px; font-weight: 600; color: #ffffff; text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-        .back-link:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-
-    <!-- WINDOWS TITLEBAR -->
-    <div class="win-titlebar">
-        <div class="win-title-left">
-            <span>🩺 Rollodex • Dialyse Monitor</span>
-            <span id="gebruikerLabel" style="font-size: 10px; opacity: 0.8; font-weight: normal;"></span>
-        </div>
-        <div class="win-title-right">
-            <div id="liveClock" class="win-clock">Laden...</div>
-            <div class="win-title-actions">
-                <button type="button" class="win-btn" onclick="verversPagina()" title="Systeem Herladen">🔄 Refresh</button>
-                <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm">⛶ Scherm</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TABBALK -->
-    <div class="tab-bar">
-        <button type="button" class="tab-btn active" id="btnInvoer" onclick="toonTab('invoer')">📝 Nieuwe Dialyse Sessie</button>
-        <button type="button" class="tab-btn" id="btnHistorie" onclick="toonTab('historie')">📊 Historie & Advies</button>
-    </div>
-
-    <!-- WORKSPACE -->
-    <div class="workspace">
-        
-        <!-- TAB 1: INVOER & WIJZERLOZE KLOK -->
-        <div id="invoerPane" class="tab-pane active">
-            <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
-
-            <!-- Minimalistische klok met alleen uurstrepen en geen wijzers -->
-            <div class="card clock-container">
-                <div class="analogue-clock" id="analogueClock">
-                    <!-- Geen wijzers, enkel uurstrepen die via JS worden ingeladen -->
+                        <label>Droog Gewicht (kg)</label>
+                        <input type="number" step="0.1" id="valDroogGewicht" value="109" placeholder="Bijv. 109" oninput="berekenUF()">
+                    </div>
                 </div>
-            </div>
 
-            <!-- Invoerformulier -->
-            <div class="card">
-                <div class="section-title">🩺 Dialyse & Vocht Invoer</div>
-                
                 <div class="form-group">
-                    <label>Patiënt / Actieve Gebruiker</label>
-                    <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
+                    <label>Automatisch UF-Advies (Pre - Droog + 0.3)</label>
+                    <input type="text" id="valUfAdvies" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="Wordt berekend...">
                 </div>
 
                 <div class="row-inputs">
                     <div class="form-group">
-                        <label>Pre-Gewicht (kg)</label>
-                        <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF()">
+                        <label>Bloeddruk (Systool/Diastool)</label>
+                        <input type="text" id="valBloeddruk" placeholder="Bijv. 130/80">
                     </div>
                     <div class="form-group">
-                        <label>Droog Gewicht (
+                        <label>Hartslag (bpm)</label>
+                        <input type="number" id="valHartslag" placeholder="Bijv. 72">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notitie / Bijzonderheden</label>
+                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, moeheid, etc.">
+                </div>
+
+                <button type="button" class="action-btn" onclick="slaDialyseOp()">💾 SESSIE OPSLAAN IN CLOUD</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: HISTORIE -->
+        <div id="historiePane" class="tab-pane">
+            <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
+
+            <div class="card">
+                <div class="section-title">📊 Dialyse Historie & Kleurcodering</div>
+                <table class="dialyse-table">
+                    <thead>
+                        <tr>
+                            <th>Datum & Tijd</th>
+                            <th>Persoon</th>
+                            <th>Pre / Droog</th>
+                            <th>UF Advies</th>
+                            <th>Bloeddruk / HR</th>
+                            <th>Notitie</th>
+                            <th style="width: 45px; text-align: center;">Actie</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historieTabelBody">
+                        <tr><td colspan="7" style="color: #888; text-align: center;">Gegevens laden...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+
+        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
+        let gebruikerRol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
+        let sessies = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('rollodex_fullscreen') === 'true') {
+                document.documentElement.requestFullscreen().catch(err => {});
+            }
+
+            document.getElementById('valPersoon').value = actieveGebruiker;
+            document.getElementById('gebruikerLabel').innerText = `• Ingelogd als: ${actieveGebruiker}`;
+            
+            genereerUurStrepen();
+            startKlok();
+            laadData();
+        });
+
+        // Genereer de 12 uurstrepen rondom de cirkel
+        function genereerUurStrepen() {
+            let clock = document.getElementById('analogueClock');
+            // Behoud de countdown display in het midden
+            let countdownEl = document.getElementById('countdownDisplay');
+            clock.innerHTML = '';
+            clock.appendChild(countdownEl);
+
+            for (let i = 0; i < 12; i++) {
+                let mark = document.createElement('div');
+                mark.className = 'hour-mark';
+                mark.style.transform = `rotate(${i * 30}deg)`;
+                clock.appendChild(mark);
+            }
+        }
+
+        // Live klok en countdown in het midden
+        function startKlok() {
+            updateKlok();
+            setInterval(updateKlok, 1000);
+        }
+
+        function updateKlok() {
+            let nu = new Date();
+            let uren = nu.getHours();
+            let minuten = nu.getMinutes();
+            let seconden = nu.getSeconds();
+
+            let uuu = String(uren).padStart(2, '0');
+            let mmm = String(minuten).padStart(2, '0');
+            let sss = String(seconden).padStart(2, '0');
+
+            // Countdown / huidige tijd weergave in het midden van de blauwe cirkel
+            document.getElementById('countdownDisplay').innerText = `${uuu}:${mmm}:${sss}`;
+
+            let dagen = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+            let dd = String(nu.getDate()).padStart(2, '0');
+            let mm = String(nu.getMonth() + 1).padStart(2, '0');
+            let yyyy = nu.getFullYear();
+
+            document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
+        }
+
+        function toonTab(tab) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            if (tab === 'invoer') {
+                document.getElementById('invoerPane').classList.add('active');
+                document.getElementById('btnInvoer').classList.add('active');
+            } else {
+                document.getElementById('historiePane').classList.add('active');
+                document.getElementById('btnHistorie').classList.add('active');
+            }
+        }
+
+        function berekenUF() {
+            let pre = parseFloat(document.getElementById('valPreGewicht').value);
+            let droog = parseFloat(document.getElementById('valDroogGewicht').value);
+            let ufInput = document.getElementById('valUfAdvies');
+
+            if (!isNaN(pre) && !isNaN(droog)) {
+                let uf = (pre - droog) + 0.3;
+                ufInput.value = uf.toFixed(2) + " kg";
+            } else {
+                ufInput.value = "";
+            }
+        }
+
+        function getUfKleurBadge(ufWaarde) {
+            let val = parseFloat(ufWaarde);
+            if (isNaN(val)) return `<span>${ufWaarde}</span>`;
+
+            if (val >= 4.5) {
+                return `<span class="badge-red">${ufWaarde} (≥ 4.5)</span>`;
+            } else if (val >= 4.0) {
+                return `<span class="badge-orange">${ufWaarde} (≥ 4.0)</span>`;
+            } else {
+                return `<span class="badge-green">${ufWaarde} (< 4.0)</span>`;
+            }
+        }
+
+        function verversPagina() {
+            laadData();
+            location.reload();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    localStorage.setItem('rollodex_fullscreen', 'true');
+                }).catch(err => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        localStorage.setItem('rollodex_fullscreen', 'false');
+                    });
+                }
+            }
+        }
+
+        function laadData() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
+                headers: { 'X-Master-Key': API_KEY }
+            })
+            .then(res => res.json())
+            .then(data => {
+                sessies = (data.record && data.record.sessies) ? data.record.sessies : [];
+                vulHistorieTabel();
+            })
+            .catch(err => console.error("Fout bij laden:", err));
+        }
+
+        function slaNaarBin() {
+            let payload = { sessies: sessies };
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': API_KEY
+                },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Fout bij opslaan:", err));
+        }
+
+        function slaDialyseOp() {
+            let pre = parseFloat(document.getElementById('valPreGewicht').value);
+            let droog = parseFloat(document.getElementById('valDroogGewicht').value);
+            let bd = document.getElementById('valBloeddruk').value.trim();
+            let hr = document.getElementById('valHartslag').value.trim();
+            let notitie = document.getElementById('valNotitie').value.trim();
+
+            if (isNaN(pre)) {
+                alert('Vul alstublieft een geldig pre-gewicht in.');
+                return;
+            }
+
+            let ufVal = ((pre - droog) + 0.3).toFixed(2);
+            let nu = new Date();
+
+            let nieuweSessie = {
+                id: Date.now(),
+                persoon: actieveGebruiker,
+                datum: nu.toISOString().split('T')[0],
+                tijd: nu.toTimeString().slice(0, 5),
+                preGewicht: pre,
+                droogGewicht: droog,
+                ufAdvies: ufVal,
+                bloeddruk: bd || '-',
+                hartslag: hr || '-',
+                notitie: notitie || '-'
+            };
+
+            sessies.unshift(nieuweSessie);
+            slaNaarBin();
+            vulHistorieTabel();
+
+            alert('Dialyse sessie succesvol opgeslagen in de cloud!');
+            toonTab('historie');
+        }
+
+        window.verwijderSessie = function(id) {
+            if (confirm('Weet je zeker dat je deze sessie wilt verwijderen?')) {
+                sessies = sessies.filter(s => s.id !== id);
+                slaNaarBin();
+                vulHistorieTabel();
+            }
+        };
+
+        function vulHistorieTabel() {
+            let tbody = document.getElementById('historieTabelBody');
+            tbody.innerHTML = '';
+
+            let gefilterd = (gebruikerRol === 'admin') ? sessies : sessies.filter(s => s.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
+
+            if (gefilterd.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="color: #888; text-align: center;">Geen dialyse historie gevonden.</td></tr>';
+                return;
+            }
+
+            gefilterd.forEach(s => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${s.datum} ${s.tijd}</td>
+                    <td><b>${s.persoon}</b></td>
+                    <td>${s.preGewicht}kg / ${s.droogGewicht}kg</td>
+                    <td><b>${getUfKleurBadge(s.ufAdvies)}</b></td>
+                    <td>${s.bloeddruk} mmHg<br><span style="font-size:10px; color:#666;">HR: ${s.hartslag} bpm</span></td>
+                    <td>${s.notitie}</td>
+                    <td style="text-align: center;"><button type="button" class="btn-small-del" onclick="verwijderSessie(${s.id})">Wis</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
