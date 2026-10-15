@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rollodex • Consumptie Monitor</title>
+    <style>
+        :root {
+            --win-blue: #0078d4;
+            --win-header-bg: #202020;
+            --card-bg: #ffffff;
+            --text-main: #1b1b1b;
+            --font-ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            --red-alert: #d13438;
+            --orange-warn: #ca5010;
+            --green-ok: #107c41;
+            --fluid-blue: #0078d4;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
+        body, html { width: 100%; height: 100%; background: #005a9e; color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
+
+        /* WINDOWS TITLEBAR */
+        .win-titlebar {
+            background: var(--win-header-bg);
+            color: #ffffff;
+            height: 42px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .win-title-left { display: flex; align-items: center; gap: 8px; }
+        .win-title-right { display: flex; align-items: center; gap: 10px; }
+
+        .win-clock {
+            font-size: 11px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.08);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .win-btn {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .win-btn:hover { background: rgba(255,255,255,0.25); }
+
+        /* TAB BAR */
+        .tab-bar { display: flex; background: #dcdcdc; border-bottom: 1px solid #d1d1d1; flex-shrink: 0; }
+        .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; background: #cccccc; border: none; cursor: pointer; text-align: center; color: #444; }
+        .tab-btn.active { background: #ffffff; color: var(--win-blue); border-bottom: 3px solid var(--win-blue); }
+
+        /* WORKSPACE */
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 10px; background: linear-gradient(135deg, #005a9e 0%, #0078d4 100%); overflow-y: auto; position: relative; }
+        .tab-pane { display: none; width: 100%; max-width: 820px; }
+        .tab-pane.active { display: block; }
+
+        .back-link { display: inline-block; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: #ffffff; text-decoration: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        
+        .card { background: #ffffff; border-radius: 8px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 12px; }
+        .card-title { font-size: 13px; font-weight: 800; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--win-blue); padding-bottom: 4px; }
+
+        /* VOCHTBAND & METER */
+        .fluid-progress-container { background: #eef6fc; border: 2px solid #0078d4; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 12px; }
+        .fluid-values { display: flex; justify-content: space-between; font-weight: 800; font-size: 14px; margin-bottom: 6px; }
+        .progress-bar-bg { background: #e0e0e0; height: 22px; border-radius: 11px; overflow: hidden; position: relative; border: 1px solid #bbb; }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--green-ok); transition: width 0.4s ease, background-color 0.4s ease; }
+        .progress-text-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #000; text-shadow: 0 0 3px #fff; }
+
+        /* INVOER FORMULIER */
+        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+        .form-group label { font-size: 11px; font-weight: 700; color: #5f5f5f; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 13px; background: #fff; }
+        .row-inputs { display: flex; gap: 8px; align-items: center; }
+        .row-inputs .form-group { flex: 1; }
+
+        /* SNELKNOPPEN VOCHT */
+        .quick-ml-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+        .btn-quick-ml { background: #eef6fc; border: 1px solid #0078d4; color: #0078d4; font-weight: 700; padding: 8px; border-radius: 4px; cursor: pointer; text-align: center; font-size: 12px; }
+        .btn-quick-ml:hover { background: #0078d4; color: #fff; }
+
+        /* TOUCHPADS */
+        .numeric-pad-container, .alpha-pad-container { background: #202020; border: 2px solid #0078d4; border-radius: 8px; padding: 10px; margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none; }
+        .pad-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 11px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+        .numeric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .num-key { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; }
+        .num-key:hover { background: #0078d4; }
+        
+        .alpha-row { display: flex; gap: 4px; justify-content: center; margin-bottom: 4px; }
+        .alpha-key { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 10px 8px; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; flex: 1; }
+        .alpha-key:hover { background: #0078d4; }
+
+        /* TABEL STIJL */
+        .filter-bar { background: #f1f1f1; border: 1px solid #ddd; border-radius: 6px; padding: 10px; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+        table.consumptie-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
+        table.consumptie-table th, table.consumptie-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+        table.consumptie-table th { background: var(--win-header-bg); color: white; }
+
+        .btn-small-del { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; background: var(--red-alert); }
+        .btn-small-edit { padding: 3px 6px; font-size: 10px; border: none; border-radius: 3px; cursor: pointer; color: white; background: var(--win-blue); margin-right: 3px; }
+
+        /* MEDISCHE PRINT STYLING */
+        .print-only-header, .print-only-footer { display: none; }
+        @media print {
+            @page { size: A4 portrait; margin: 12mm 10mm; }
+            body, html { background: #fff !important; color: #000 !important; overflow: visible !important; }
+            .win-titlebar, .tab-bar, .back-link, .filter-bar, .btn-small-del, .btn-small-edit, #invoerPane, .card-title, .numeric-pad-container, .alpha-pad-container { display: none !important; }
+            .workspace { padding: 0 !important; background: none !important; }
+            #historiePane { display: block !important; width: 100% !important; max-width: 100% !important; }
+            .card { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+            .print-only-header { display: block !important; border-bottom: 3px solid #0078d4; padding-bottom: 8px; margin-bottom: 12px; }
+            .print-only-footer { display: block !important; margin-top: 24px; padding-top: 10px; border-top: 1px solid #aaa; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- WINDOWS TITLEBAR -->
+    <div class="win-titlebar">
+        <div class="win-title-left">
+            <span>🍵 Rollodex • Consumptie & Vocht Monitor</span>
+            <span id="gebruikerTitleBadge" style="font-size: 11px; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 12px; font-weight: bold; color: #f8e71c;">Patiënt: ...</span>
+        </div>
+        <div class="win-title-right">
+            <div id="liveClock" class="win-clock">Laden...</div>
+            <button type="button" class="win-btn" onclick="location.reload()">🔄 Refresh</button>
+        </div>
+    </div>
+
+    <!-- TABBALK -->
+    <div class="tab-bar">
+        <button type="button" class="tab-btn active" id="btnInvoer" onclick="toonTab('invoer')">➕ Invoer & Status</button>
+        <button type="button" class="tab-btn" id="btnHistorie" onclick="toonTab('historie')">📊 Historie & Rapportage</button>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div class="workspace">
+
+        <!-- TAB 1: INVOER & DAGSTATUS -->
+        <div id="invoerPane" class="tab-pane active">
+            <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
+
+            <!-- DAGELIJKSE VOCHTBAND -->
+            <div class="card">
+                <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>💧 Vochtinname Vandaag</span>
+                    <span style="font-size:10px; font-weight:normal; text-transform:none;">Daglimiet aanpasbaar</span>
+                </div>
+
+                <div class="fluid-progress-container">
+                    <div class="fluid-values">
+                        <span>Totaal: <span id="dispTotaalMl">0</span> ml</span>
+                        <span>Limiet: <span id="dispLimietMl">1500</span> ml</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                        <div class="progress-text-overlay" id="progressTextOverlay">0% van limiet</div>
+                    </div>
+                </div>
+
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>Vocht Max Limiet (ml/dag)</label>
+                        <input type="text" inputmode="none" id="valVochtLimiet" value="1500" onfocus="activeerTouchpad(this)" oninput="updateVochtBalk(); slaLokaalOp();">
+                    </div>
+                </div>
+            </div>
+
+            <!-- INVOER FORMULIER -->
+            <div class="card">
+                <div class="card-title" id="formTitle">Nieuwe Consumptie Invoeren</div>
+
+                <div class="form-group">
+                    <label>Snelkiezer Vocht (ml)</label>
+                    <div class="quick-ml-grid">
+                        <button type="button" class="btn-quick-ml" onclick="kiesSnelMl(100)">100 ml (Glas)</button>
+                        <button type="button" class="btn-quick-ml" onclick="kiesSnelMl(150)">150 ml (Kop)</button>
+                        <button type="button" class="btn-quick-ml" onclick="kiesSnelMl(200)">200 ml (Mug)</button>
+                        <button type="button" class="btn-quick-ml" onclick="kiesSnelMl(250)">250 ml (Flesje)</button>
+                    </div>
+                </div>
+
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>Vocht / Hoeveelheid (ml)</label>
+                        <input type="text" inputmode="none" id="valConsumptieMl" placeholder="Bijv. 150" onfocus="activeerTouchpad(this)">
+                    </div>
+                    <div class="form-group">
+                        <label>Categorie</label>
+                        <select id="valCategorie">
+                            <option value="Dranken">🍵 Dranken (Koffie/Thee/Water)</option>
+                            <option value="Soep/Zuivel">🍲 Soep / Vla / Yoghurt</option>
+                            <option value="Fruit/IJs">🍏 Fruit / IJs</option>
+                            <option value="Voeding">🍞 Vaste Voeding</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Omschrijving / Product</label>
+                    <input type="text" inputmode="none" id="valOmschrijving" placeholder="Bijv. Koppie koffie, schaaltje yoghurt" onfocus="activeerAlphaPad(this)">
+                </div>
+
+                <button type="button" class="win-btn" style="background:var(--green-ok); width:100%; padding:12px; font-size:13px; font-weight:bold;" onclick="slaConsumptieOp()">💾 Consumptie Opslaan</button>
+
+                <!-- NUMERIEK TOETSENBORD -->
+                <div class="numeric-pad-container" id="numericPad">
+                    <div class="pad-header">
+                        <span id="activeInputLabel">Numeriek Toetsenbord</span>
+                        <button type="button" class="win-btn" onclick="sluitTouchpad()">Sluiten ✕</button>
+                    </div>
+                    <div class="numeric-grid">
+                        <button type="button" class="num-key" onclick="voegNummerToe('1')">1</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('2')">2</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('3')">3</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('4')">4</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('5')">5</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('6')">6</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('7')">7</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('8')">8</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('9')">9</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('.')">.</button>
+                        <button type="button" class="num-key" onclick="voegNummerToe('0')">0</button>
+                        <button type="button" class="num-key" style="background:var(--red-alert);" onclick="wisLaatsteTeken()">⌫</button>
+                    </div>
+                </div>
+
+                <!-- ALFANUMERIEK TOETSENBORD -->
+                <div class="alpha-pad-container" id="alphaPad">
+                    <div class="pad-header">
+                        <span id="activeAlphaLabel">Alfanumeriek Toetsenbord</span>
+                        <button type="button" class="win-btn" onclick="sluitAlphaPad()">Sluiten ✕</button>
+                    </div>
+                    <div class="alpha-row">
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('Q')">Q</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('W')">W</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('E')">E</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('R')">R</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('T')">T</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('Y')">Y</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('U')">U</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('I')">I</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('O')">O</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('P')">P</button>
+                    </div>
+                    <div class="alpha-row">
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('A')">A</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('S')">S</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('D')">D</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('F')">F</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('G')">G</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('H')">H</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('J')">J</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('K')">K</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('L')">L</button>
+                    </div>
+                    <div class="alpha-row">
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('Z')">Z</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('X')">X</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('C')">C</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('V')">V</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('B')">B</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('N')">N</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('M')">M</button>
+                        <button type="button" class="alpha-key" style="background:var(--red-alert);" onclick="wisAlphaLaatsteTeken()">⌫</button>
+                    </div>
+                    <div class="alpha-row">
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe(' ')">Spatie</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('.')">.</button>
+                        <button type="button" class="alpha-key" onclick="voegAlphaToe('-')">-</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 2: HISTORIE -->
+        <div id="historiePane" class="tab-pane">
+            <a href="index.html" class="back-link">← Terug naar Rollodex Hoofdmenu</a>
+
+            <div class="card">
+                <div class="print-only-header">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h2 style="color:#0078d4;">📋 CLINICAL FLUID & INTAKE REPORT</h2>
+                            <p style="font-size:11px; color:#555;">Consumptie- & Vochtinname overzicht</p>
+                        </div>
+                        <div style="text-align:right; font-size:11px;">
+                            Patiënt: <strong id="printPatientName">...</strong><br>
+                            Afdrukdatum: <span id="printGeneratedDate">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-title">📊 Consumptie Historie & Vochtbalans</div>
+
+                <div class="filter-bar">
+                    <div class="form-group" style="margin-bottom:0; flex:1;">
+                        <label>Van Datum:</label>
+                        <input type="date" id="filterVanDatum" onchange="vulHistorieTabel()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0; flex:1;">
+                        <label>Tot Datum:</label>
+                        <input type="date" id="filterTotDatum" onchange="vulHistorieTabel()">
+                    </div>
+                    <button type="button" class="win-btn" style="background:#5c2d91; padding:8px 12px;" onclick="resetteerDatumFilter()">🔄 Reset</button>
+                    <button type="button" class="win-btn" style="background:var(--green-ok); padding:8px 12px;" onclick="printHistoriePdf()">🖨️ Exporteer PDF / Print</button>
+                </div>
+
+                <table class="consumptie-table">
+                    <thead>
+                        <tr>
+                            <th>Datum & Tijd</th>
+                            <th>Patiënt</th>
+                            <th>Categorie</th>
+                            <th>Omschrijving</th>
+                            <th>Vocht (ml)</th>
+                            <th style="width: 85px; text-align: center;">Actie</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historieTabelBody">
+                        <tr><td colspan="6" style="color: #888; text-align: center;">Laden...</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="print-only-footer">
+                    <p style="font-size:9px; color:#777; text-align:center;">* Geautomatiseerd rapport via Rollodex Consumptie Monitor.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+
+        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
+        let consumpties = [];
+        let huidigeBewerkingId = null;
+
+        let huidigInputVeld = null;
+        let huidigAlphaVeld = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
+            document.getElementById('gebruikerTitleBadge').innerText = `Patiënt: ${pNaam}`;
+            document.getElementById('printPatientName').innerText = pNaam;
+
+            startKlok();
+            laadData();
+        });
+
+        function startKlok() {
+            setInterval(() => {
+                let nu = new Date();
+                document.getElementById('liveClock').innerText = nu.toLocaleString('nl-NL');
+            }, 1000);
+        }
+
+        function toonTab(tab) {
+            sluitTouchpad(); sluitAlphaPad();
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            if (tab === 'invoer') {
+                document.getElementById('invoerPane').classList.add('active');
+                document.getElementById('btnInvoer').classList.add('active');
+            } else {
+                document.getElementById('historiePane').classList.add('active');
+                document.getElementById('btnHistorie').classList.add('active');
+            }
+        }
+
+        function kiesSnelMl(hoeveelheid) {
+            document.getElementById('valConsumptieMl').value = hoeveelheid;
+        }
+
+        function updateVochtBalk() {
+            let limiet = parseFloat(document.getElementById('valVochtLimiet').value) || 1500;
+            document.getElementById('dispLimietMl').innerText = limiet;
+
+            let vandaagStr = new Date().toISOString().split('T')[0];
+            let totaalVandaag = consumpties
+                .filter(c => c.persoon.toLowerCase() === actieveGebruiker.toLowerCase() && c.datum === vandaagStr)
+                .reduce((sum, c) => sum + (parseFloat(c.ml) || 0), 0);
+
+            document.getElementById('dispTotaalMl').innerText = totaalVandaag;
+
+            let percentage = Math.round((totaalVandaag / limiet) * 100);
+            let fillEl = document.getElementById('progressBarFill');
+            fillEl.style.width = Math.min(percentage, 100) + '%';
+
+            if (percentage >= 100) {
+                fillEl.style.backgroundColor = 'var(--red-alert)';
+            } else if (percentage >= 85) {
+                fillEl.style.backgroundColor = 'var(--orange-warn)';
+            } else {
+                fillEl.style.backgroundColor = 'var(--green-ok)';
+            }
+
+            document.getElementById('progressTextOverlay').innerText = `${percentage}% van limiet (${totaalVandaag} / ${limiet} ml)`;
+        }
+
+        function slaConsumptieOp() {
+            let ml = parseFloat(document.getElementById('valConsumptieMl').value) || 0;
+            let cat = document.getElementById('valCategorie').value;
+            let omschrijving = document.getElementById('valOmschrijving').value.trim() || '-';
+
+            if (ml === 0 && cat !== 'Voeding') {
+                alert('Vul a.u.b. het aantal ml vocht in.');
+                return;
+            }
+
+            let nu = new Date();
+            let item = {
+                id: huidigeBewerkingId ? huidigeBewerkingId : Date.now(),
+                persoon: actieveGebruiker,
+                datum: nu.toISOString().split('T')[0],
+                tijd: nu.toTimeString().slice(0, 5),
+                ml: ml,
+                categorie: cat,
+                omschrijving: omschrijving
+            };
+
+            if (huidigeBewerkingId) {
+                let idx = consumpties.findIndex(c => c.id === huidigeBewerkingId);
+                if (idx !== -1) consumpties[idx] = item;
+                huidigeBewerkingId = null;
+                document.getElementById('formTitle').innerText = 'Nieuwe Consumptie Invoeren';
+            } else {
+                consumpties.unshift(item);
+            }
+
+            slaNaarBin();
+            document.getElementById('valConsumptieMl').value = '';
+            document.getElementById('valOmschrijving').value = '';
+            sluitTouchpad(); sluitAlphaPad();
+
+            updateVochtBalk();
+            vulHistorieTabel();
+            alert('Consumptie opgeslagen!');
+        }
+
+        function bewerkConsumptie(id) {
+            let item = consumpties.find(c => c.id === id);
+            if (!item) return;
+
+            huidigeBewerkingId = item.id;
+            document.getElementById('valConsumptieMl').value = item.ml;
+            document.getElementById('valCategorie').value = item.categorie;
+            document.getElementById('valOmschrijving').value = item.omschrijving !== '-' ? item.omschrijving : '';
+            document.getElementById('formTitle').innerText = '✏️ Consumptie Bewerken';
+
+            toonTab('invoer');
+        }
+
+        function verwijderConsumptie(id) {
+            if (confirm('Weet je zeker dat je deze invoer wilt verwijderen?')) {
+                consumpties = consumpties.filter(c => c.id !== id);
+                slaNaarBin();
+                updateVochtBalk();
+                vulHistorieTabel();
+            }
+        }
+
+        function laadData() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
+                headers: { 'X-Master-Key': API_KEY }
+            })
+            .then(res => res.json())
+            .then(data => {
+                consumpties = (data.record && data.record.consumpties) ? data.record.consumpties : [];
+                updateVochtBalk();
+                vulHistorieTabel();
+            })
+            .catch(err => console.error(err));
+        }
+
+        function slaNaarBin() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let record = data.record || {};
+                record.consumpties = consumpties;
+
+                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(record)
+                });
+            });
+        }
+
+        function vulHistorieTabel() {
+            let tbody = document.getElementById('historieTabelBody');
+            tbody.innerHTML = '';
+
+            let gefilterd = consumpties.filter(c => c.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
+
+            let van = document.getElementById('filterVanDatum').value;
+            let tot = document.getElementById('filterTotDatum').value;
+            if (van) gefilterd = gefilterd.filter(c => c.datum >= van);
+            if (tot) gefilterd = gefilterd.filter(c => c.datum <= tot);
+
+            if (gefilterd.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Geen gegevens gevonden.</td></tr>';
+                return;
+            }
+
+            gefilterd.forEach(c => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${c.datum} ${c.tijd}</td>
+                    <td><b>${c.persoon}</b></td>
+                    <td>${c.categorie}</td>
+                    <td>${c.omschrijving}</td>
+                    <td><strong>${c.ml} ml</strong></td>
+                    <td style="text-align:center;">
+                        <button class="btn-small-edit" onclick="bewerkConsumptie(${c.id})">✏️</button>
+                        <button class="btn-small-del" onclick="verwijderConsumptie(${c.id})">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function resetteerDatumFilter() {
+            document.getElementById('filterVanDatum').value = '';
+            document.getElementById('filterTotDatum').value = '';
+            vulHistorieTabel();
+        }
+
+        function printHistoriePdf() {
+            document.getElementById('printGeneratedDate').innerText = new Date().toLocaleString('nl-NL');
+            window.print();
+        }
+
+        // TOUCHPAD LOGICA
+        function activeerTouchpad(el) {
+            sluitAlphaPad();
+            huidigInputVeld = el;
+            document.getElementById('numericPad').style.display = 'block';
+        }
+        function sluitTouchpad() { document.getElementById('numericPad').style.display = 'none'; }
+        function voegNummerToe(t) { if (huidigInputVeld) huidigInputVeld.value += t; }
+        function wisLaatsteTeken() { if (huidigInputVeld) huidigInputVeld.value = huidigInputVeld.value.slice(0, -1); }
+
+        function activeerAlphaPad(el) {
+            sluitTouchpad();
+            huidigAlphaVeld = el;
+            document.getElementById('alphaPad').style.display = 'block';
+        }
+        function sluitAlphaPad() { document.getElementById('alphaPad').style.display = 'none'; }
+        function voegAlphaToe(t) { if (huidigAlphaVeld) huidigAlphaVeld.value += t; }
+        function wisAlphaLaatsteTeken() { if (huidigAlphaVeld) huidigAlphaVeld.value = huidigAlphaVeld.value.slice(0, -1); }
+    </script>
+</body>
+</html>
