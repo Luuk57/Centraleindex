@@ -598,9 +598,15 @@
                 
                 <!-- 1. TIJD BOX -->
                 <div class="sub-section-box" id="tijdBox">
-                    <div class="form-group">
-                        <label>Duur (Uur)</label>
-                        <input type="text" inputmode="none" id="valDuurUur" value="4.0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp();">
+                    <div class="row-inputs">
+                        <div class="form-group">
+                            <label>Duur (Uur)</label>
+                            <input type="text" inputmode="none" maxlength="2" id="valDuurUur" value="4" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp();">
+                        </div>
+                        <div class="form-group">
+                            <label>Duur (Minuten)</label>
+                            <input type="text" inputmode="none" maxlength="2" id="valDuurMin" value="0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp();">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Start Datum & Tijd</label>
@@ -864,6 +870,12 @@
             laadData();
         });
 
+        function getTotaleDuurInUren() {
+            let u = parseFloat(document.getElementById('valDuurUur').value) || 0;
+            let m = parseFloat(document.getElementById('valDuurMin').value) || 0;
+            return u + (m / 60);
+        }
+
         function schakelHoofdscherm() {
             sluitTouchpad();
             sluitAlphaPad();
@@ -980,7 +992,8 @@
 
         function slaLokaalOp() {
             let data = {
-                duur: document.getElementById('valDuurUur').value,
+                duurUur: document.getElementById('valDuurUur').value,
+                duurMin: document.getElementById('valDuurMin').value,
                 start: document.getElementById('valStartTijd').value,
                 stop: document.getElementById('valStopTijd').value,
                 pre: document.getElementById('valPreGewicht').value,
@@ -1010,7 +1023,8 @@
             if (!saved) return;
             try {
                 let d = JSON.parse(saved);
-                if (d.duur) document.getElementById('valDuurUur').value = d.duur;
+                if (d.duurUur !== undefined) document.getElementById('valDuurUur').value = d.duurUur;
+                if (d.duurMin !== undefined) document.getElementById('valDuurMin').value = d.duurMin;
                 if (d.start) document.getElementById('valStartTijd').value = d.start;
                 if (d.stop) document.getElementById('valStopTijd').value = d.stop;
                 if (d.pre) document.getElementById('valPreGewicht').value = d.pre;
@@ -1286,11 +1300,11 @@
 
         function berekenAutomatischeEindtijd() {
             let startVal = document.getElementById('valStartTijd').value;
-            let duurUur = parseFloat(document.getElementById('valDuurUur').value);
+            let duurInUren = getTotaleDuurInUren();
 
-            if (startVal && !isNaN(duurUur)) {
+            if (startVal && duurInUren > 0) {
                 let startDatum = new Date(startVal);
-                let eindDatum = new Date(startDatum.getTime() + (duurUur * 60 * 60 * 1000));
+                let eindDatum = new Date(startDatum.getTime() + (duurInUren * 60 * 60 * 1000));
                 document.getElementById('valStopTijd').value = formatDatetimeLocal(eindDatum);
                 if (isTimerRunning) {
                     timerTargetTime = eindDatum.getTime();
@@ -1321,8 +1335,8 @@
             if (isTimerRunning && timerTargetTime && timerStartTimestamp) {
                 let overms = timerTargetTime - nu.getTime();
 
-                let duurUur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
-                let totaleDuurMs = duurUur * 3600 * 1000;
+                let duurInUren = getTotaleDuurInUren() || 4.0;
+                let totaleDuurMs = duurInUren * 3600 * 1000;
                 let verlopenMs = nu.getTime() - timerStartTimestamp;
                 if (verlopenMs < 0) verlopenMs = 0;
 
@@ -1459,8 +1473,8 @@
                 document.getElementById('dispUfGoal').innerText = totaalUfDoelMl;
             }
 
-            let duur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
-            document.getElementById('dispUfPerUur').innerText = Math.round(totaalUfDoelMl / duur) + " ml";
+            let duurInUren = getTotaleDuurInUren() || 4.0;
+            document.getElementById('dispUfPerUur').innerText = Math.round(totaalUfDoelMl / duurInUren) + " ml";
         }
 
         function getUfKleurBadge(ufWaarde) {
@@ -1534,6 +1548,8 @@
 
             let ufVal = ((pre - droog) + factor).toFixed(2);
             let nu = new Date();
+            let urenDuur = document.getElementById('valDuurUur').value || '0';
+            let minDuur = document.getElementById('valDuurMin').value || '0';
 
             let nieuweSessie = {
                 id: Date.now(),
@@ -1556,7 +1572,7 @@
                 ijzer: document.getElementById('checkIjzer').checked ? 'Ja' : 'Nee',
                 shuntflowCheck: document.getElementById('checkShuntflow').checked ? 'Ja' : 'Nee',
                 shuntflowWaarde: document.getElementById('valShuntflow').value || '-',
-                duurUur: document.getElementById('valDuurUur').value || '-',
+                duurUur: `${urenDuur}u ${minDuur}m`,
                 startTijd: document.getElementById('valStartTijd').value || '-',
                 stopTijd: document.getElementById('valStopTijd').value || '-',
                 notitie: document.getElementById('valNotitie').value.trim() || '-'
@@ -1607,7 +1623,7 @@
                     <td>Pre: ${s.preGewicht}kg<br>Post: ${s.postGewicht}kg<br>Droog: ${s.droogGewicht}kg</td>
                     <td>Advies: <b>${getUfKleurBadge(s.ufAdvies)}</b><br>Ingesteld: ${s.ufIngesteld}L</td>
                     <td><small>${toedieningTekst}</small></td>
-                    <td>Start: ${s.startTijd ? s.startTijd.replace('T', ' ') : '-'}<br>Stop: ${s.stopTijd ? s.stopTijd.replace('T', ' ') : '-'}<br>Duur: ${s.duurUur}u</td>
+                    <td>Start: ${s.startTijd ? s.startTijd.replace('T', ' ') : '-'}<br>Stop: ${s.stopTijd ? s.stopTijd.replace('T', ' ') : '-'}<br>Duur: ${s.duurUur}</td>
                     <td style="text-align: center;"><button type="button" class="btn-small-del" onclick="verwijderSessie(${s.id})">Wis</button></td>
                 `;
                 tbody.appendChild(tr);
