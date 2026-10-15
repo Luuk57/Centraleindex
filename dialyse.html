@@ -198,7 +198,52 @@
             padding: 10px;
         }
 
-        .action-btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; margin-top: 8px; }
+        /* STIJL VOOR DAG / NACHT DRUKKNOPPEN */
+        .btn-toggle-group {
+            display: flex;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        .btn-toggle {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #bce0fd;
+            background: #ffffff;
+            color: var(--win-blue);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-toggle.active {
+            background: var(--win-blue);
+            color: #ffffff;
+            border-color: var(--win-blue);
+        }
+
+        /* STIJL VOOR START / STOP KNOPPEN */
+        .time-btn-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .time-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            white-space: nowrap;
+        }
+        .time-btn-start { background: var(--green-ok); }
+        .time-btn-start:hover { background: #0e6b39; }
+        .time-btn-stop { background: var(--red-alert); }
+        .time-btn-stop:hover { background: #a80000; }
+
+        .action-btn { background: var(--win-blue); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; text-align: center; margin-top: 10px; }
         .action-btn:hover { background: #106ebe; }
 
         table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 11px; background: #fff; }
@@ -306,7 +351,7 @@
                 <div class="section-title">🩺 Sessie Invoer & Gegevens</div>
                 
                 <div class="input-grid-2col">
-                    <!-- LINKERKANT: Gewichten & UF waarden -->
+                    <!-- LINKERKANT: Pre, Post, Ingesteld & Werkelijke UF -->
                     <div class="sub-section-box">
                         <div class="form-group">
                             <label>Actieve Patiënt</label>
@@ -314,11 +359,11 @@
                         </div>
                         <div class="form-group">
                             <label>Pre Gewicht (kg)</label>
-                            <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF()">
+                            <input type="number" step="0.1" id="valPreGewicht" placeholder="Bijv. 112.5" oninput="berekenUF(); berekenWerkelijkeUF();">
                         </div>
                         <div class="form-group">
                             <label>Post Gewicht (kg)</label>
-                            <input type="number" step="0.1" id="valPostGewicht" placeholder="Na dialyse">
+                            <input type="number" step="0.1" id="valPostGewicht" placeholder="Bijv. 109.2" oninput="berekenWerkelijkeUF();">
                         </div>
                         <div class="row-inputs">
                             <div class="form-group">
@@ -326,24 +371,24 @@
                                 <input type="number" step="0.1" id="valUfIngesteld" placeholder="Bijv. 3.0">
                             </div>
                             <div class="form-group">
-                                <label>Werkelijke UF (l)</label>
-                                <input type="number" step="0.1" id="valWerkelijkUf" placeholder="Werkelijk">
+                                <label>Werkelijke UF (Pre - Post) (kg)</label>
+                                <input type="text" id="valWerkelijkUf" readonly style="background: #f1f1f1; font-weight: bold;" placeholder="Berekend...">
                             </div>
                         </div>
                     </div>
 
-                    <!-- RECHTERKANT: Soort dialyse, Drooggewicht & Uitgerekende UF -->
+                    <!-- RECHTERKANT: Soort dialyse (knoppen), Aanpasbaar Drooggewicht & Uitgerekende UF -->
                     <div class="sub-section-box">
                         <div class="form-group">
                             <label>Soort Dialyse</label>
-                            <select id="valSoortDialyse" onchange="berekenUF()">
-                                <option value="nacht">Nacht (Factor 0,3)</option>
-                                <option value="dag">Dag (Factor 0,6)</option>
-                            </select>
+                            <div class="btn-toggle-group">
+                                <button type="button" class="btn-toggle" id="btnDialyseDag" onclick="setSoortDialyse('dag')">☀️ Dag (0,6)</button>
+                                <button type="button" class="btn-toggle active" id="btnDialyseNacht" onclick="setSoortDialyse('nacht')">🌙 Nacht (0,3)</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Droog Gewicht Aanpasbaar (kg)</label>
-                            <input type="number" step="0.1" id="valDroogGewicht" value="109" oninput="berekenUF()">
+                            <input type="number" step="0.1" id="valDroogGewicht" value="109" oninput="berekenUF(); opslaanNieuwDroogGewichtBin();">
                         </div>
                         <div class="form-group">
                             <label>UF Advies (kg)</label>
@@ -356,19 +401,33 @@
                     </div>
                 </div>
 
-                <div class="row-inputs" style="margin-top: 10px;">
-                    <div class="form-group">
-                        <label>Bloeddruk (Systool/Diastool)</label>
-                        <input type="text" id="valBloeddruk" placeholder="Bijv. 130/80">
+                <!-- DUUR & START/STOP TIJDEN (VERVANGT BLOEDDRUK/HARTSLAG) -->
+                <div class="sub-section-box" style="margin-top: 10px;">
+                    <div class="row-inputs">
+                        <div class="form-group" style="max-width: 130px;">
+                            <label>Duur (Uur)</label>
+                            <input type="number" step="0.5" id="valDuurUur" value="4.0" oninput="berekenAutomatischeEindtijd();">
+                        </div>
+                        <div class="form-group">
+                            <label>Start Datum & Tijd</label>
+                            <div class="time-btn-row">
+                                <input type="datetime-local" id="valStartTijd">
+                                <button type="button" class="time-btn time-btn-start" onclick="startSessieTijd()">▶ START</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Stop Datum & Tijd (Start + Duur)</label>
+                            <div class="time-btn-row">
+                                <input type="datetime-local" id="valStopTijd">
+                                <button type="button" class="time-btn time-btn-stop" onclick="stopSessieTijd()">⏹ STOP</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Hartslag (bpm)</label>
-                        <input type="number" id="valHartslag" placeholder="Bijv. 72">
-                    </div>
-                    <div class="form-group">
-                        <label>Notitie</label>
-                        <input type="text" id="valNotitie" placeholder="Bijzonderheden">
-                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 8px;">
+                    <label>Notitie / Bijzonderheden</label>
+                    <input type="text" id="valNotitie" placeholder="Bijv. nachtdialyse, bijzonderheden">
                 </div>
 
                 <button type="button" class="action-btn" onclick="slaDialyseOp()">💾 SESSIE OPSLAAN IN CLOUD</button>
@@ -386,9 +445,9 @@
                         <tr>
                             <th>Datum & Tijd</th>
                             <th>Persoon</th>
-                            <th>Pre / Droog</th>
-                            <th>UF Advies</th>
-                            <th>Bloeddruk / HR</th>
+                            <th>Pre / Post / Droog</th>
+                            <th>UF Advies / Ingesteld / Werkelijk</th>
+                            <th>Start / Stop / Duur</th>
                             <th>Notitie</th>
                             <th style="width: 45px; text-align: center;">Actie</th>
                         </tr>
@@ -408,7 +467,9 @@
 
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
         let gebruikerRol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
+        let actieveSoortDialyse = 'nacht'; // Standaard Nacht (0.3)
         let sessies = [];
+        let gebruikerProfielen = {};
 
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('rollodex_fullscreen') === 'true') {
@@ -422,6 +483,80 @@
             startKlok();
             laadData();
         });
+
+        function setSoortDialyse(soort) {
+            actieveSoortDialyse = soort;
+            if (soort === 'dag') {
+                document.getElementById('btnDialyseDag').classList.add('active');
+                document.getElementById('btnDialyseNacht').classList.remove('active');
+            } else {
+                document.getElementById('btnDialyseNacht').classList.add('active');
+                document.getElementById('btnDialyseDag').classList.remove('active');
+            }
+            berekenUF();
+        }
+
+        function berekenWerkelijkeUF() {
+            let pre = parseFloat(document.getElementById('valPreGewicht').value);
+            let post = parseFloat(document.getElementById('valPostGewicht').value);
+            let werkelijkInput = document.getElementById('valWerkelijkUf');
+
+            if (!isNaN(pre) && !isNaN(post)) {
+                let diff = pre - post;
+                werkelijkInput.value = diff.toFixed(2) + " kg";
+            } else {
+                werkelijkInput.value = "";
+            }
+        }
+
+        // Tijd functies
+        function formatDatetimeLocal(d) {
+            let yyyy = d.getFullYear();
+            let mm = String(d.getMonth() + 1).padStart(2, '0');
+            let dd = String(d.getDate()).padStart(2, '0');
+            let hh = String(d.getHours()).padStart(2, '0');
+            let min = String(d.getMinutes()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+        }
+
+        function startSessieTijd() {
+            let nu = new Date();
+            document.getElementById('valStartTijd').value = formatDatetimeLocal(nu);
+            berekenAutomatischeEindtijd();
+        }
+
+        function stopSessieTijd() {
+            let nu = new Date();
+            document.getElementById('valStopTijd').value = formatDatetimeLocal(nu);
+        }
+
+        function berekenAutomatischeEindtijd() {
+            let startVal = document.getElementById('valStartTijd').value;
+            let duurUur = parseFloat(document.getElementById('valDuurUur').value);
+
+            if (startVal && !isNaN(duurUur)) {
+                let startDatum = new Date(startVal);
+                let eindDatum = new Date(startDatum.getTime() + (duurUur * 60 * 60 * 1000));
+                document.getElementById('valStopTijd').value = formatDatetimeLocal(eindDatum);
+            }
+        }
+
+        // Drooggewicht direct synchroniseren met Cloud Bin
+        let binSaveTimeout = null;
+        function opslaanNieuwDroogGewichtBin() {
+            clearTimeout(binSaveTimeout);
+            binSaveTimeout = setTimeout(() => {
+                let nieuwDroog = parseFloat(document.getElementById('valDroogGewicht').value);
+                if (isNaN(nieuwDroog)) return;
+
+                if (!gebruikerProfielen[actieveGebruiker]) {
+                    gebruikerProfielen[actieveGebruiker] = {};
+                }
+                gebruikerProfielen[actieveGebruiker].droogGewicht = nieuwDroog;
+
+                slaNaarBin();
+            }, 800);
+        }
 
         function genereerUurStrepen() {
             let clock = document.getElementById('analogueClock');
@@ -474,9 +609,7 @@
         function berekenUF() {
             let pre = parseFloat(document.getElementById('valPreGewicht').value);
             let droog = parseFloat(document.getElementById('valDroogGewicht').value);
-            let soort = document.getElementById('valSoortDialyse').value;
-            
-            let factor = (soort === 'dag') ? 0.6 : 0.3;
+            let factor = (actieveSoortDialyse === 'dag') ? 0.6 : 0.3;
 
             if (!isNaN(pre) && !isNaN(droog)) {
                 let ufAdviesKg = (pre - droog) + factor;
@@ -485,9 +618,11 @@
                 document.getElementById('valUfAdvies').value = ufAdviesKg.toFixed(2) + " kg";
                 document.getElementById('valUitgerekendeUf').value = doelMl + " ml";
                 
-                // Direct doorzetten naar de bovenste console knop (UF DOEL)
+                // Direct doorzetten naar de bovenste console knoppen
                 document.getElementById('dispUfGoal').innerText = doelMl;
-                document.getElementById('dispUfPerUur').innerText = Math.round(doelMl / 4) + " ml";
+                
+                let duur = parseFloat(document.getElementById('valDuurUur').value) || 4.0;
+                document.getElementById('dispUfPerUur').innerText = Math.round(doelMl / duur) + " ml";
             } else {
                 document.getElementById('valUfAdvies').value = "";
                 document.getElementById('valUitgerekendeUf').value = "";
@@ -533,13 +668,23 @@
             .then(res => res.json())
             .then(data => {
                 sessies = (data.record && data.record.sessies) ? data.record.sessies : [];
+                gebruikerProfielen = (data.record && data.record.profielen) ? data.record.profielen : {};
+
+                // Indien er een opgeslagen drooggewicht is voor deze gebruiker, laad deze
+                if (gebruikerProfielen[actieveGebruiker] && gebruikerProfielen[actieveGebruiker].droogGewicht) {
+                    document.getElementById('valDroogGewicht').value = gebruikerProfielen[actieveGebruiker].droogGewicht;
+                }
+
                 vulHistorieTabel();
             })
             .catch(err => console.error("Fout bij laden:", err));
         }
 
         function slaNaarBin() {
-            let payload = { sessies: sessies };
+            let payload = { 
+                sessies: sessies,
+                profielen: gebruikerProfielen
+            };
             fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
                 method: 'PUT',
                 headers: {
@@ -553,8 +698,7 @@
         function slaDialyseOp() {
             let pre = parseFloat(document.getElementById('valPreGewicht').value);
             let droog = parseFloat(document.getElementById('valDroogGewicht').value);
-            let soort = document.getElementById('valSoortDialyse').value;
-            let factor = (soort === 'dag') ? 0.6 : 0.3;
+            let factor = (actieveSoortDialyse === 'dag') ? 0.6 : 0.3;
 
             if (isNaN(pre)) {
                 alert('Vul alstublieft een geldig pre-gewicht in.');
@@ -572,12 +716,13 @@
                 preGewicht: pre,
                 postGewicht: document.getElementById('valPostGewicht').value || '-',
                 droogGewicht: droog,
-                soortDialyse: soort,
+                soortDialyse: actieveSoortDialyse,
                 ufIngesteld: document.getElementById('valUfIngesteld').value || '-',
                 werkelijkUf: document.getElementById('valWerkelijkUf').value || '-',
                 ufAdvies: ufVal,
-                bloeddruk: document.getElementById('valBloeddruk').value.trim() || '-',
-                hartslag: document.getElementById('valHartslag').value.trim() || '-',
+                duurUur: document.getElementById('valDuurUur').value || '-',
+                startTijd: document.getElementById('valStartTijd').value || '-',
+                stopTijd: document.getElementById('valStopTijd').value || '-',
                 notitie: document.getElementById('valNotitie').value.trim() || '-'
             };
 
@@ -612,10 +757,10 @@
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${s.datum} ${s.tijd}</td>
-                    <td><b>${s.persoon}</b></td>
-                    <td>Pre: ${s.preGewicht}kg / Droog: ${s.droogGewicht}kg</td>
-                    <td><b>${getUfKleurBadge(s.ufAdvies)}</b></td>
-                    <td>${s.bloeddruk} mmHg<br><span style="font-size:10px; color:#666;">HR: ${s.hartslag} bpm</span></td>
+                    <td><b>${s.persoon}</b> (${s.soortDialyse})</td>
+                    <td>Pre: ${s.preGewicht}kg<br>Post: ${s.postGewicht}kg<br>Droog: ${s.droogGewicht}kg</td>
+                    <td>Advies: <b>${getUfKleurBadge(s.ufAdvies)}</b><br>Ingesteld: ${s.ufIngesteld}L<br>Werkelijk: ${s.werkelijkUf}</td>
+                    <td>Start: ${s.startTijd ? s.startTijd.replace('T', ' ') : '-'}<br>Stop: ${s.stopTijd ? s.stopTijd.replace('T', ' ') : '-'}<br>Duur: ${s.duurUur}u</td>
                     <td>${s.notitie}</td>
                     <td style="text-align: center;"><button type="button" class="btn-small-del" onclick="verwijderSessie(${s.id})">Wis</button></td>
                 `;
