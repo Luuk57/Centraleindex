@@ -148,7 +148,6 @@
             transition: all 0.3s ease;
         }
 
-        /* EXTRA PROMINENTE KLOK IN HOOFDSCHERM-STAND */
         .dialysis-console.ponti-mode .center-clock-panel {
             min-height: 400px;
         }
@@ -196,7 +195,6 @@
             letter-spacing: -0.5px;
         }
 
-        /* START / STOP IN KLOKPANEEL */
         .clock-action-row {
             display: flex;
             gap: 10px;
@@ -300,7 +298,24 @@
         .form-group label { font-size: 11px; font-weight: 700; color: #5f5f5f; }
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 13px; background: #fff; }
 
-        .row-inputs { display: flex; gap: 8px; }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--win-blue);
+            cursor: pointer;
+        }
+
+        .row-inputs { display: flex; gap: 8px; align-items: center; }
         .row-inputs .form-group { flex: 1; }
 
         .sub-section-box { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; display: none; }
@@ -312,6 +327,38 @@
             background: #ffffff; color: var(--win-blue); border-radius: 4px; cursor: pointer;
         }
         .btn-toggle.active { background: var(--win-blue); color: #ffffff; border-color: var(--win-blue); }
+
+        /* NURSE MULTI-SELECT & TAGS */
+        .nurse-tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+            min-height: 32px;
+            padding: 6px;
+            background: #f1f1f1;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .nurse-tag {
+            background: var(--win-blue);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nurse-tag span { cursor: pointer; font-weight: bold; opacity: 0.8; }
+        .nurse-tag span:hover { opacity: 1; }
+
+        .nurse-actions-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
 
         /* NUMERIEK TOUCHPAD */
         .numeric-pad-container {
@@ -452,13 +499,21 @@
                         <div class="label">KNOP 3</div>
                         <div class="value">⚖️ GEWICHT</div>
                     </div>
-                    <div class="med-box"><div class="label">KNOP 4</div><div class="value">---</div></div>
-                    <div class="med-box"><div class="label">KNOP 5</div><div class="value">---</div></div>
+                    <!-- Knop 4 = Verpleging -->
+                    <div class="med-box interactive" onclick="springNaarVerplegingVeld()">
+                        <div class="label">KNOP 4</div>
+                        <div class="value">👩‍⚕️ VERPLEGING</div>
+                    </div>
+                    <!-- Knop 5 = Toedieningen -->
+                    <div class="med-box interactive" onclick="springNaarToedieningenVeld()">
+                        <div class="label">KNOP 5</div>
+                        <div class="value">💊 TOEDIENING</div>
+                    </div>
                 </div>
 
             </div>
 
-            <!-- INVOER & BEREKENINGEN (WANNEER GESELECTEERD VERDWIJNT DE KLOK) -->
+            <!-- INVOER & BEREKENINGEN SCHERMEN -->
             <div class="controls-card" id="controlsCard">
                 <div class="menu-top-bar">
                     <div class="section-title" id="controlsTitle">Invoer</div>
@@ -526,6 +581,65 @@
                     </div>
                 </div>
 
+                <!-- 4. VERPLEGING BOX -->
+                <div class="sub-section-box" id="verplegingBox">
+                    <div class="form-group">
+                        <label>Selecteer Verpleegkundigen</label>
+                        <div class="row-inputs">
+                            <select id="selectVerplegingDropdown" style="flex:1;">
+                                <option value="">-- Kies verpleegkundige --</option>
+                            </select>
+                            <button type="button" class="win-btn" style="background:var(--win-blue); height:36px;" onclick="voegVerplegingToe()">Toevoegen</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 6px;">
+                        <label>Geselecteerde Verpleging:</label>
+                        <div class="nurse-tags-container" id="nurseTagsContainer">
+                            <span style="font-size:11px; color:#888;">Nog geen verpleging geselecteerd</span>
+                        </div>
+                    </div>
+
+                    <div class="nurse-actions-row">
+                        <input type="text" id="newNurseNameInput" placeholder="Nieuwe naam toevoegen..." style="flex:1; padding:6px; font-size:12px;">
+                        <button type="button" class="win-btn" style="background:var(--green-ok);" onclick="registreerNieuweVerpleging()">+ Naam Opslaan</button>
+                        <button type="button" class="win-btn" style="background:var(--red-alert);" onclick="verwijderGeselecteerdeNaamUitLijst()">- Naam Wissen</button>
+                    </div>
+                </div>
+
+                <!-- 5. TOEDIENINGEN BOX -->
+                <div class="sub-section-box" id="toedieningenBox">
+                    <div class="row-inputs" style="margin-bottom: 8px;">
+                        <div class="form-group">
+                            <label>Fragmin 2500 (max 1 digit)</label>
+                            <input type="text" inputmode="none" maxlength="1" id="valFragmin2500" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1)">
+                        </div>
+                        <div class="form-group">
+                            <label>Fragmin 5000 (max 1 digit)</label>
+                            <input type="text" inputmode="none" maxlength="1" id="valFragmin5000" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1)">
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px;">
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="checkEpo"> Epo toegediend
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="checkIjzer"> IJzer toegediend
+                        </label>
+                    </div>
+
+                    <div style="border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px;">
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="checkShuntflow"> Shuntflow meting uitgevoerd
+                        </label>
+                        <div class="form-group" style="margin-top: 4px;">
+                            <label>Shuntflow waarde (max 4 digits)</label>
+                            <input type="text" inputmode="none" maxlength="4" id="valShuntflow" placeholder="Bijv. 1200" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 4)">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- INGEBOUWD NUMERIEK TOUCHPAD -->
                 <div class="numeric-pad-container" id="numericPad">
                     <div class="numeric-pad-header">
@@ -566,15 +680,16 @@
                         <tr>
                             <th>Datum & Tijd</th>
                             <th>Persoon</th>
+                            <th>Verpleging</th>
                             <th>Pre / Post / Droog</th>
-                            <th>UF Advies / Ingesteld / Werkelijk</th>
+                            <th>UF Advies / Ingesteld</th>
+                            <th>Toedieningen</th>
                             <th>Start / Stop / Duur</th>
-                            <th>Notitie</th>
                             <th style="width: 45px; text-align: center;">Actie</th>
                         </tr>
                     </thead>
                     <tbody id="historieTabelBody">
-                        <tr><td colspan="7" style="color: #888; text-align: center;">Gegevens laden...</td></tr>
+                        <tr><td colspan="8" style="color: #888; text-align: center;">Gegevens laden...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -592,12 +707,15 @@
         let sessies = [];
         let gebruikerProfielen = {};
 
+        // Verpleging state
+        let beschikbareVerpleging = ["Jan Jansen", "Marie de Vries", "Ahmed el Amrani", "Lisa Bakker"];
+        let geselecteerdeVerpleging = [];
+
         // Timer variabelen
         let isTimerRunning = false;
         let timerTargetTime = null;
         let isDoorgaanGekozen = false;
 
-        // Actief input element voor numeriek touchpad
         let huidigInputVeld = null;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -612,7 +730,6 @@
             laadData();
         });
 
-        // Terug naar het hoofdscherm met extra grote Klok
         function schakelHoofdscherm() {
             sluitTouchpad();
             document.getElementById('controlsCard').style.display = 'none';
@@ -622,7 +739,6 @@
             genereerUurStrepen();
         }
 
-        // Toon gekozen menu en verberg de klok volledig
         function toonExclusiefMenu(boxId, titelTekst) {
             document.getElementById('consolePanel').style.display = 'none';
             document.getElementById('controlsCard').style.display = 'block';
@@ -647,6 +763,91 @@
             activeerTouchpad(document.getElementById('valPreGewicht'));
         }
 
+        function springNaarVerplegingVeld() {
+            toonExclusiefMenu('verplegingBox', '👩‍⚕️ VERPLEGING SELECTEREN');
+            sluitTouchpad();
+            vulVerplegingDropdown();
+        }
+
+        function springNaarToedieningenVeld() {
+            toonExclusiefMenu('toedieningenBox', '💊 TOEDIENINGEN & SHUNTFLOW');
+            activeerTouchpad(document.getElementById('valFragmin2500'));
+        }
+
+        // Verpleging logica
+        function vulVerplegingDropdown() {
+            let select = document.getElementById('selectVerplegingDropdown');
+            select.innerHTML = '<option value="">-- Kies verpleegkundige --</option>';
+            beschikbareVerpleging.forEach(naam => {
+                let opt = document.createElement('option');
+                opt.value = naam;
+                opt.textContent = naam;
+                select.appendChild(opt);
+            });
+            updateVerplegingTags();
+        }
+
+        function voegVerplegingToe() {
+            let select = document.getElementById('selectVerplegingDropdown');
+            let naam = select.value;
+            if (naam && !geselecteerdeVerpleging.includes(naam)) {
+                geselecteerdeVerpleging.push(naam);
+                updateVerplegingTags();
+            }
+        }
+
+        function verwijderVerplegingTag(naam) {
+            geselecteerdeVerpleging = geselecteerdeVerpleging.filter(n => n !== naam);
+            updateVerplegingTags();
+        }
+
+        function updateVerplegingTags() {
+            let container = document.getElementById('nurseTagsContainer');
+            container.innerHTML = '';
+            if (geselecteerdeVerpleging.length === 0) {
+                container.innerHTML = '<span style="font-size:11px; color:#888;">Nog geen verpleging geselecteerd</span>';
+                return;
+            }
+            geselecteerdeVerpleging.forEach(naam => {
+                let tag = document.createElement('div');
+                tag.className = 'nurse-tag';
+                tag.innerHTML = `${naam} <span onclick="verwijderVerplegingTag('${naam}')">✕</span>`;
+                container.appendChild(tag);
+            });
+        }
+
+        function registreerNieuweVerpleging() {
+            let input = document.getElementById('newNurseNameInput');
+            let naam = input.value.trim();
+            if (naam && !beschikbareVerpleging.includes(naam)) {
+                beschikbareVerpleging.push(naam);
+                input.value = '';
+                vulVerplegingDropdown();
+                alert(`Verpleegkundige '${naam}' succesvol toegevoegd.`);
+            }
+        }
+
+        function verwijderGeselecteerdeNaamUitLijst() {
+            let select = document.getElementById('selectVerplegingDropdown');
+            let naam = select.value;
+            if (!naam) {
+                alert('Selecteer eerst een naam in het dropdownmenu om te wissen.');
+                return;
+            }
+            if (confirm(`Weet je zeker dat je '${naam}' wilt verwijderen uit de lijst?`)) {
+                beschikbareVerpleging = beschikbareVerpleging.filter(n => n !== naam);
+                geselecteerdeVerpleging = geselecteerdeVerpleging.filter(n => n !== naam);
+                vulVerplegingDropdown();
+            }
+        }
+
+        // Cijfer limiet helper
+        function beperkCijfers(el, maxLen) {
+            if (el.value.length > maxLen) {
+                el.value = el.value.slice(0, maxLen);
+            }
+        }
+
         // Numeriek Touchpad logica
         function activeerTouchpad(inputEl) {
             huidigInputVeld = inputEl;
@@ -668,6 +869,9 @@
 
         function voegNummerToe(teken) {
             if (!huidigInputVeld) return;
+            let maxLen = huidigInputVeld.getAttribute('maxlength');
+            if (maxLen && huidigInputVeld.value.length >= parseInt(maxLen)) return;
+
             huidigInputVeld.value += teken;
             triggerInputEvent(huidigInputVeld);
         }
@@ -918,6 +1122,10 @@
                 sessies = (data.record && data.record.sessies) ? data.record.sessies : [];
                 gebruikerProfielen = (data.record && data.record.profielen) ? data.record.profielen : {};
 
+                if (data.record && data.record.verplegingLijst) {
+                    beschikbareVerpleging = data.record.verplegingLijst;
+                }
+
                 if (gebruikerProfielen[actieveGebruiker] && gebruikerProfielen[actieveGebruiker].droogGewicht) {
                     document.getElementById('valDroogGewicht').value = gebruikerProfielen[actieveGebruiker].droogGewicht;
                 }
@@ -930,7 +1138,8 @@
         function slaNaarBin() {
             let payload = { 
                 sessies: sessies,
-                profielen: gebruikerProfielen
+                profielen: gebruikerProfielen,
+                verplegingLijst: beschikbareVerpleging
             };
             fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
                 method: 'PUT',
@@ -959,6 +1168,7 @@
             let nieuweSessie = {
                 id: Date.now(),
                 persoon: actieveGebruiker,
+                verpleging: geselecteerdeVerpleging.join(', ') || '-',
                 datum: nu.toISOString().split('T')[0],
                 tijd: nu.toTimeString().slice(0, 5),
                 preGewicht: pre,
@@ -968,6 +1178,12 @@
                 ufIngesteld: document.getElementById('valUfIngesteld').value || '-',
                 werkelijkUf: document.getElementById('valWerkelijkUf').value || '-',
                 ufAdvies: ufVal,
+                fragmin2500: document.getElementById('valFragmin2500').value || '0',
+                fragmin5000: document.getElementById('valFragmin5000').value || '0',
+                epo: document.getElementById('checkEpo').checked ? 'Ja' : 'Nee',
+                ijzer: document.getElementById('checkIjzer').checked ? 'Ja' : 'Nee',
+                shuntflowCheck: document.getElementById('checkShuntflow').checked ? 'Ja' : 'Nee',
+                shuntflowWaarde: document.getElementById('valShuntflow').value || '-',
                 duurUur: document.getElementById('valDuurUur').value || '-',
                 startTijd: document.getElementById('valStartTijd').value || '-',
                 stopTijd: document.getElementById('valStopTijd').value || '-',
@@ -997,19 +1213,21 @@
             let gefilterd = (gebruikerRol === 'admin') ? sessies : sessies.filter(s => s.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
 
             if (gefilterd.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="color: #888; text-align: center;">Geen dialyse historie gevonden.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="color: #888; text-align: center;">Geen dialyse historie gevonden.</td></tr>';
                 return;
             }
 
             gefilterd.forEach(s => {
+                let toedieningTekst = `Frag25: ${s.fragmin2500}, Frag50: ${s.fragmin5000}<br>Epo: ${s.epo}, IJzer: ${s.ijzer}<br>Shunt: ${s.shuntflowCheck} (${s.shuntflowWaarde})`;
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${s.datum} ${s.tijd}</td>
                     <td><b>${s.persoon}</b> (${s.soortDialyse})</td>
+                    <td>${s.verpleging}</td>
                     <td>Pre: ${s.preGewicht}kg<br>Post: ${s.postGewicht}kg<br>Droog: ${s.droogGewicht}kg</td>
-                    <td>Advies: <b>${getUfKleurBadge(s.ufAdvies)}</b><br>Ingesteld: ${s.ufIngesteld}L<br>Werkelijk: ${s.werkelijkUf}</td>
+                    <td>Advies: <b>${getUfKleurBadge(s.ufAdvies)}</b><br>Ingesteld: ${s.ufIngesteld}L</td>
+                    <td><small>${toedieningTekst}</small></td>
                     <td>Start: ${s.startTijd ? s.startTijd.replace('T', ' ') : '-'}<br>Stop: ${s.stopTijd ? s.stopTijd.replace('T', ' ') : '-'}<br>Duur: ${s.duurUur}u</td>
-                    <td>${s.notitie}</td>
                     <td style="text-align: center;"><button type="button" class="btn-small-del" onclick="verwijderSessie(${s.id})">Wis</button></td>
                 `;
                 tbody.appendChild(tr);
