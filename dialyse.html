@@ -106,8 +106,9 @@
             width: 100%;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
-        .med-box.interactive { cursor: pointer; transition: background 0.15s; }
-        .med-box.interactive:hover { background: #2a7cbd; }
+        .med-box.interactive { cursor: pointer; transition: background 0.15s, transform 0.1s; }
+        .med-box.interactive:hover { background: #2a7cbd; transform: translateY(-1px); }
+        .med-box.interactive:active { transform: translateY(1px); }
 
         .med-box .label { font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
         .med-box .value { font-size: 15px; font-weight: 700; color: var(--dialysis-yellow); margin-top: 2px; }
@@ -250,7 +251,8 @@
         .row-inputs .form-group { flex: 1; }
 
         .input-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .sub-section-box { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; }
+        .sub-section-box { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; transition: all 0.2s; }
+        .sub-section-box.highlight { border-color: var(--win-blue); box-shadow: 0 0 0 2px rgba(0,120,212,0.2); }
 
         .btn-toggle-group { display: flex; gap: 6px; margin-top: 2px; }
         .btn-toggle {
@@ -422,7 +424,11 @@
                         <div class="label">KNOP 2</div>
                         <div class="value">💧 UF</div>
                     </div>
-                    <div class="med-box"><div class="label">KNOP 3</div><div class="value">---</div></div>
+                    <!-- Knop 3 = Gewicht -->
+                    <div class="med-box interactive" onclick="springNaarGewichtVeld()">
+                        <div class="label">KNOP 3</div>
+                        <div class="value">⚖️ GEWICHT</div>
+                    </div>
                     <div class="med-box"><div class="label">KNOP 4</div><div class="value">---</div></div>
                     <div class="med-box"><div class="label">KNOP 5</div><div class="value">---</div></div>
                 </div>
@@ -434,8 +440,8 @@
                 <div class="section-title">🩺 Sessie Invoer & Gegevens</div>
                 
                 <div class="input-grid-2col">
-                    <!-- LINKERKANT -->
-                    <div class="sub-section-box">
+                    <!-- LINKERKANT: GEWICHT & UF BEREKENING -->
+                    <div class="sub-section-box" id="gewichtBoxAnker">
                         <div class="form-group">
                             <label>Actieve Patiënt</label>
                             <input type="text" id="valPersoon" readonly style="background: #f1f1f1; font-weight: bold;">
@@ -460,8 +466,8 @@
                         </div>
                     </div>
 
-                    <!-- RECHTERKANT -->
-                    <div class="sub-section-box">
+                    <!-- RECHTERKANT: INSTELLINGEN & BEREKENING -->
+                    <div class="sub-section-box" id="ufBoxAnker">
                         <div class="form-group">
                             <label>Soort Dialyse</label>
                             <div class="btn-toggle-group">
@@ -477,7 +483,7 @@
                             <label>UF Advies (kg)</label>
                             <input type="text" id="valUfAdvies" readonly style="background: #fff; font-weight: bold;" placeholder="Berekend...">
                         </div>
-                        <div class="form-group" id="ufVeldAnker">
+                        <div class="form-group">
                             <label>Uitgerekende UF (ml) → Naar UF Doel</label>
                             <input type="text" id="valUitgerekendeUf" readonly style="background: #eef6fc; font-weight: bold; color: var(--win-blue);" placeholder="0 ml">
                         </div>
@@ -485,7 +491,7 @@
                 </div>
 
                 <!-- DUUR & START/STOP TIJDEN -->
-                <div class="sub-section-box" style="margin-top: 10px;" id="tijdVeldAnker">
+                <div class="sub-section-box" style="margin-top: 10px;" id="tijdBoxAnker">
                     <div class="row-inputs">
                         <div class="form-group" style="max-width: 130px;">
                             <label>Duur (Uur)</label>
@@ -508,7 +514,7 @@
                     </div>
                 </div>
 
-                <!-- INGEBOUWD NUMERIEK TOUCHPAD (ZONDER TABLET TOETSBORD) -->
+                <!-- INGEBOUWD NUMERIEK TOUCHPAD -->
                 <div class="numeric-pad-container" id="numericPad">
                     <div class="numeric-pad-header">
                         <span id="activeInputLabel">Numeriek Toetsenbord</span>
@@ -597,17 +603,30 @@
             laadData();
         });
 
-        // Knoppen onder de klok logica
+        // Knoppen onder de klok navigatie
+        function markeerSectie(elementId) {
+            document.querySelectorAll('.sub-section-box').forEach(box => box.classList.remove('highlight'));
+            let el = document.getElementById(elementId);
+            if (el) {
+                el.classList.add('highlight');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         function springNaarTijdVeld() {
-            let el = document.getElementById('tijdVeldAnker');
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            markeerSectie('tijdBoxAnker');
             let input = document.getElementById('valDuurUur');
             activeerTouchpad(input);
         }
 
         function springNaarUfVeld() {
-            let el = document.getElementById('ufVeldAnker');
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            markeerSectie('ufBoxAnker');
+            let input = document.getElementById('valPreGewicht');
+            activeerTouchpad(input);
+        }
+
+        function springNaarGewichtVeld() {
+            markeerSectie('gewichtBoxAnker');
             let input = document.getElementById('valPreGewicht');
             activeerTouchpad(input);
         }
