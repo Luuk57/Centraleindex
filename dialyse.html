@@ -147,7 +147,6 @@
             display: flex; align-items: center; justify-content: center;
             transition: all 0.3s ease;
             margin-top: 4px;
-            overflow: hidden;
         }
 
         .dialysis-console.ponti-mode .center-clock-panel {
@@ -162,17 +161,17 @@
             padding: 8px 18px;
         }
 
-        /* TRANSARANTE BINNENSTE VOORTGANGSCIRKEL */
-        .clock-progress-circle {
+        /* SVG VOORTGANGSRING BINNEN IN DE KLOK */
+        .clock-progress-svg {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 0%;
-            background: rgba(248, 231, 28, 0.35); /* Start geel doorzichtig */
-            transition: height 0.5s linear, background-color 0.5s linear;
-            z-index: 1;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            transform: rotate(-90deg);
             pointer-events: none;
+            border-radius: 50%;
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
         }
 
         .analogue-clock.alarm-state {
@@ -493,10 +492,12 @@
                     <div class="value" id="dispArt">---/---</div>
                 </div>
 
-                <!-- Midden: De grote ronde klok met countdown EN binnenste voortgangscirkel -->
+                <!-- Midden: De grote ronde klok met countdown EN SVG voortgangscirkel -->
                 <div class="center-clock-panel" id="clockPanel">
                     <div class="analogue-clock" id="analogueClock">
-                        <div class="clock-progress-circle" id="clockProgressCircle"></div>
+                        <svg class="clock-progress-svg" viewBox="0 0 100 100">
+                            <circle class="progress-ring-circle" id="progressRing" cx="50" cy="50" r="42" fill="none" stroke="rgba(248, 231, 28, 0.45)" stroke-width="12" stroke-dasharray="263.89" stroke-dashoffset="263.89"></circle>
+                        </svg>
                         <div class="clock-center-digital" id="countdownDisplay">00:00:00</div>
                     </div>
                     <div class="clock-action-row">
@@ -1007,7 +1008,8 @@
             isTimerRunning = false;
             timerStartTimestamp = null;
             timerTargetTime = null;
-            document.getElementById('clockProgressCircle').style.height = '0%';
+            let ring = document.getElementById('progressRing');
+            if(ring) ring.style.strokeDashoffset = '263.89';
             updateBloeddrukLijstEnScherm();
         }
 
@@ -1234,7 +1236,8 @@
             document.getElementById('liveClock').innerText = `${dagen[nu.getDay()]} ${dd}/${mm}/${yyyy} ${uuu}:${mmm}:${sss}`;
 
             let countdownEl = document.getElementById('countdownDisplay');
-            let progressCircle = document.getElementById('clockProgressCircle');
+            let progressRing = document.getElementById('progressRing');
+            let circum = 263.89; // Omtrek van cirkel met straal 42
 
             if (isTimerRunning && timerTargetTime && timerStartTimestamp) {
                 let overms = timerTargetTime - nu.getTime();
@@ -1247,15 +1250,18 @@
                 let voortgangFractie = verlopenMs / totaleDuurMs;
                 if (voortgangFractie > 1) voortgangFractie = 1;
 
-                // Binnenste cirkel vullen en kleur geleidelijk laten verschuiven van geel naar groen
-                let hoogtePct = Math.round(voortgangFractie * 100);
-                progressCircle.style.height = hoogtePct + '%';
+                // Bereken SVG ring vulling (van 263.89 naar 0)
+                let dashOffset = circum - (voortgangFractie * circum);
+                if(progressRing) {
+                    progressRing.style.strokeDashoffset = dashOffset;
 
-                // Kleurinterpolaatje (geel naar groen naarmate de voortgang vordert)
-                let rood = Math.round(248 - (248 - 16) * voortgangFractie);
-                let groen = Math.round(231 + (124 - 231) * (voortgangFractie * 0.2)); // subtiele kleurovergang
-                let blauw = Math.round(28 + (65 - 28) * voortgangFractie);
-                progressCircle.style.backgroundColor = `rgba(${rood}, ${groen}, ${blauw}, 0.38)`;
+                    // Vloeiende kleurverandering van geel naar groen naarmate de voortgang vordert
+                    // Begin: rgba(248, 231, 28, 0.65) [Geel] -> Einde: rgba(16, 124, 65, 0.75) [Groen]
+                    let r = Math.round(248 - (248 - 16) * voortgangFractie);
+                    let g = Math.round(231 - (231 - 124) * voortgangFractie);
+                    let b = Math.round(28 + (65 - 28) * voortgangFractie);
+                    progressRing.style.stroke = `rgba(${r}, ${g}, ${b}, 0.75)`;
+                }
 
                 huidigUfGeweestMl = Math.round(totaalUfDoelMl * voortgangFractie);
                 let overgeblevenUfDoel = totaalUfDoelMl - huidigUfGeweestMl;
@@ -1266,7 +1272,7 @@
 
                 if (overms <= 0) {
                     countdownEl.innerText = "00:00:00";
-                    progressCircle.style.height = '100%';
+                    if(progressRing) progressRing.style.strokeDashoffset = '0';
                     if (!isDoorgaanGekozen) {
                         document.getElementById('analogueClock').classList.add('alarm-state');
                         document.getElementById('alarmModal').style.display = 'flex';
@@ -1285,7 +1291,10 @@
                 }
             } else {
                 countdownEl.innerText = `${uuu}:${mmm}:${sss}`;
-                progressCircle.style.height = '0%';
+                if(progressRing) {
+                    progressRing.style.strokeDashoffset = circum;
+                    progressRing.style.stroke = 'rgba(248, 231, 28, 0.45)';
+                }
             }
         }
 
@@ -1319,11 +1328,10 @@
         function genereerUurStrepen() {
             let clock = document.getElementById('analogueClock');
             let countdownEl = document.getElementById('countdownDisplay');
-            let progressCircle = document.getElementById('clockProgressCircle');
+            let svgEl = clock.querySelector('.clock-progress-svg');
             
-            clock.innerHTML = '';
-            clock.appendChild(progressCircle);
-            clock.appendChild(countdownEl);
+            // Behoud de SVG en digitale tijd, ververs de uurmarkeringen
+            clock.querySelectorAll('.hour-mark').forEach(m => m.remove());
 
             for (let i = 0; i < 12; i++) {
                 let mark = document.createElement('div');
