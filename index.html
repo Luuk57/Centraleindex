@@ -12,6 +12,7 @@
             --android-card-bg: #ffffff;
             --android-text: #202124;
             --android-subtext: #5f6368;
+            --red-alert: #d93025;
             --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
@@ -84,7 +85,7 @@
             max-width: 600px;
         }
 
-        /* WELCOME CARD / PATIENT BAR */
+        /* GEBRUIKER SELECTIE KART */
         .patient-card {
             background: var(--android-card-bg);
             border-radius: 12px;
@@ -94,6 +95,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 10px;
         }
 
         .patient-info h2 {
@@ -108,6 +110,12 @@
             margin-top: 2px;
         }
 
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .patient-select {
             padding: 8px 12px;
             border-radius: 8px;
@@ -119,6 +127,18 @@
             outline: none;
             cursor: pointer;
         }
+
+        .btn-text {
+            background: #e8f0fe;
+            color: var(--android-primary);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-text:hover { background: #d2e3fc; }
 
         /* APPS GRID */
         .grid-apps {
@@ -153,7 +173,6 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: #e8f0fe;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -172,6 +191,103 @@
             font-size: 11px;
             color: var(--android-subtext);
             line-height: 1.3;
+        }
+
+        /* MODAL / POPUPS */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 16px;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--android-text);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--android-subtext);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .form-group input:focus { border-color: var(--android-primary); }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .btn-primary {
+            background: var(--android-primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-primary:hover { background: var(--android-primary-dark); }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: var(--android-text);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-secondary:hover { background: #e8eaed; }
+
+        .user-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 13px;
+        }
+        .user-list-item button {
+            background: #fce8e6;
+            color: var(--red-alert);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -192,16 +308,17 @@
     <div class="workspace">
         <div class="dashboard-container">
             
-            <!-- PATIËNT SELECTIE KART -->
+            <!-- GEBRUIKER SELECTIE KART -->
             <div class="patient-card">
                 <div class="patient-info">
-                    <h2>Actieve Patiënt</h2>
-                    <p id="patientSubText">Selecteer je actieve profiel</p>
+                    <h2>Actieve Gebruiker</h2>
+                    <p id="activeUserDisplay">Geladen...</p>
                 </div>
-                <div>
-                    <select id="selectGebruiker" class="patient-select" onchange="wisselGebruiker(this.value)">
+                <div class="controls-row">
+                    <select id="selectGebruiker" class="patient-select" onchange="vraagPincodeEnWissel(this.value)">
                         <option value="Gast">Gast</option>
                     </select>
+                    <button type="button" class="btn-text" onclick="openBeheerModal()">⚙️ Beheer</button>
                 </div>
             </div>
 
@@ -227,36 +344,186 @@
         </div>
     </div>
 
+    <!-- BEHEER MODAL -->
+    <div class="modal-overlay" id="beheerModal">
+        <div class="modal-card">
+            <div class="modal-title">⚙️ Gebruikersbeheer</div>
+            
+            <div style="margin-bottom: 16px;">
+                <label style="font-size:12px; font-weight:500; color:var(--android-subtext); margin-bottom:6px; display:block;">Bestaande Gebruikers:</label>
+                <div id="gebruikersLijstContainer" style="max-height: 120px; overflow-y: auto;"></div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #e8eaed; margin: 12px 0;">
+
+            <div class="modal-title" style="font-size: 14px;">➕ Nieuwe Gebruiker Toevoegen</div>
+            <div class="form-group">
+                <label>Naam Gebruiker</label>
+                <input type="text" id="nieuwNaamInput" placeholder="Bijv. Jan">
+            </div>
+            <div class="form-group">
+                <label>4-Cijferige Pincode (Optioneel)</label>
+                <input type="password" id="nieuwPinInput" maxlength="4" placeholder="Bijv. 1234">
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-secondary" onclick="sluitBeheerModal()">Sluiten</button>
+                <button type="button" class="btn-primary" onclick="voegGebruikerToe()">Toevoegen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PINCODE MODAL -->
+    <div class="modal-overlay" id="pinModal">
+        <div class="modal-card" style="max-width: 320px; text-align: center;">
+            <div class="modal-title" id="pinModalTitle">🔒 Voer Pincode in</div>
+            <div class="form-group">
+                <input type="password" id="pinInvoerInput" maxlength="4" style="text-align: center; font-size: 20px; letter-spacing: 4px;" placeholder="••••">
+            </div>
+            <div class="modal-buttons" style="justify-content: center;">
+                <button type="button" class="btn-secondary" onclick="annuleerPincode()">Annuleren</button>
+                <button type="button" class="btn-primary" onclick="verifieerPincode()">Ontgrendelen</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Opslagstructuur: [{naam: 'Gast', pin: ''}, {naam: 'Jan', pin: '1234'}]
+        let gebruikersData = JSON.parse(localStorage.getItem('rollodex_gebruikers')) || [
+            { naam: 'Gast', pin: '' }
+        ];
+
+        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
+        let doelGebruiker = '';
+
         window.addEventListener('DOMContentLoaded', () => {
-            let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
-            vulGebruikersDropdown(actieveGebruiker);
+            if (!gebruikersData.some(g => g.naam.toLowerCase() === actieveGebruiker.toLowerCase())) {
+                actieveGebruiker = 'Gast';
+                localStorage.setItem('actieve_gebruiker', 'Gast');
+            }
+            updateUI();
             startKlok();
         });
 
         function startKlok() {
             setInterval(() => {
                 let nu = new Date();
-                let tijdStr = nu.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                document.getElementById('liveClock').innerText = tijdStr;
+                document.getElementById('liveClock').innerText = nu.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             }, 1000);
         }
 
-        function vulGebruikersDropdown(actieve) {
+        function updateUI() {
+            document.getElementById('activeUserDisplay').innerText = `Actief profiel: ${actieveGebruiker}`;
+            
             let select = document.getElementById('selectGebruiker');
-            let gebruikers = ['Gast', 'Patiënt 1'];
             select.innerHTML = '';
-            gebruikers.forEach(g => {
+            gebruikersData.forEach(g => {
                 let opt = document.createElement('option');
-                opt.value = g;
-                opt.textContent = g;
-                if (g.toLowerCase() === actieve.toLowerCase()) opt.selected = true;
+                opt.value = g.naam;
+                opt.textContent = g.pin ? `🔒 ${g.naam}` : g.naam;
+                if (g.naam.toLowerCase() === actieveGebruiker.toLowerCase()) opt.selected = true;
                 select.appendChild(opt);
             });
         }
 
-        function wisselGebruiker(naam) {
+        function vraagPincodeEnWissel(nieuweNaam) {
+            if (nieuweNaam === actieveGebruiker) return;
+
+            let target = gebruikersData.find(g => g.naam.toLowerCase() === nieuweNaam.toLowerCase());
+            if (target && target.pin && target.pin.trim() !== '') {
+                doelGebruiker = target.naam;
+                document.getElementById('pinModalTitle').innerText = `🔒 Pincode voor ${target.naam}`;
+                document.getElementById('pinInvoerInput').value = '';
+                document.getElementById('pinModal').style.display = 'flex';
+                document.getElementById('pinInvoerInput').focus();
+            } else {
+                wisselActieveGebruiker(nieuweNaam);
+            }
+        }
+
+        function verifieerPincode() {
+            let ingevoerdePin = document.getElementById('pinInvoerInput').value;
+            let target = gebruikersData.find(g => g.naam.toLowerCase() === doelGebruiker.toLowerCase());
+
+            if (target && target.pin === ingevoerdePin) {
+                document.getElementById('pinModal').style.display = 'none';
+                wisselActieveGebruiker(doelGebruiker);
+            } else {
+                alert('Onjuiste pincode!');
+                document.getElementById('pinInvoerInput').value = '';
+            }
+        }
+
+        function annuleerPincode() {
+            document.getElementById('pinModal').style.display = 'none';
+            updateUI(); // Zet dropdown terug op huidige actieve gebruiker
+        }
+
+        function wisselActieveGebruiker(naam) {
+            actieveGebruiker = naam;
             localStorage.setItem('actieve_gebruiker', naam);
+            updateUI();
+        }
+
+        // BEHEER MODAL FUNCTIES
+        function openBeheerModal() {
+            laadBeheerLijst();
+            document.getElementById('beheerModal').style.display = 'flex';
+        }
+        function sluitBeheerModal() {
+            document.getElementById('beheerModal').style.display = 'none';
+            document.getElementById('nieuwNaamInput').value = '';
+            document.getElementById('nieuwPinInput').value = '';
+            updateUI();
+        }
+
+        function laadBeheerLijst() {
+            let container = document.getElementById('gebruikersLijstContainer');
+            container.innerHTML = '';
+            gebruikersData.forEach((g, index) => {
+                let div = document.createElement('div');
+                div.className = 'user-list-item';
+                div.innerHTML = `
+                    <span><b>${g.naam}</b> ${g.pin ? '(Met pincode)' : '(Geen pin)'}</span>
+                    ${g.naam !== 'Gast' ? `<button onclick="verwijderGebruiker(${index})">Verwijderen</button>` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function voegGebruikerToe() {
+            let naam = document.getElementById('nieuwNaamInput').value.trim();
+            let pin = document.getElementById('nieuwPinInput').value.trim();
+
+            if (!naam) {
+                alert('Vul a.u.b. een naam in.');
+                return;
+            }
+
+            if (gebruikersData.some(g => g.naam.toLowerCase() === naam.toLowerCase())) {
+                alert('Deze gebruiker bestaat al.');
+                return;
+            }
+
+            gebruikersData.push({ naam: naam, pin: pin });
+            localStorage.setItem('rollodex_gebruikers', JSON.stringify(gebruikersData));
+
+            document.getElementById('nieuwNaamInput').value = '';
+            document.getElementById('nieuwPinInput').value = '';
+            laadBeheerLijst();
+        }
+
+        function verwijderGebruiker(index) {
+            if (confirm(`Weet je zeker dat je deze gebruiker wilt verwijderen?`)) {
+                let verwijderdeNaam = gebruikersData[index].naam;
+                gebruikersData.splice(index, 1);
+                localStorage.setItem('rollodex_gebruikers', JSON.stringify(gebruikersData));
+
+                if (actieveGebruiker.toLowerCase() === verwijderdeNaam.toLowerCase()) {
+                    wisselActieveGebruiker('Gast');
+                }
+                laadBeheerLijst();
+            }
         }
 
         function toggleFullscreen() {
