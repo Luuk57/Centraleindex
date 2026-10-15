@@ -3,52 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Medische Suite • Enterprise Portaal</title>
+    <title>Medische Suite • Windows Hub</title>
     <style>
         :root {
-            --win-blue: #0067c0;
-            --win-blue-hover: #005499;
+            --win-blue: #0078d4;
+            --win-blue-hover: #106ebe;
             --win-bg: #f3f3f3;
+            --win-header-bg: #202020;
             --card-bg: #ffffff;
-            --text-main: #1f1f1f;
-            --text-secondary: #5e5e5e;
-            --border-color: #e0e0e0;
-            --font-ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-            --red-alert: #a80000;
-            --red-bg: #fde7e7;
+            --text-main: #1b1b1b;
+            --text-secondary: #5f5f5f;
+            --border-color: #d1d1d1;
+            --font-ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            --red-alert: #d13438;
+            --red-bg: #fde7e9;
             --green-ok: #107c41;
             --green-bg: #dff6dd;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
-        body, html { width: 100%; height: 100%; background: var(--win-bg); color: var(--text-main); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        body, html { width: 100%; height: 100%; background: var(--win-bg); color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
 
-        .portal-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 24px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            max-height: 92vh;
+        /* WINDOWS TITLEBAR / HEADER */
+        .win-titlebar {
+            background: var(--win-header-bg);
+            color: #ffffff;
+            height: 42px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .win-title-left { display: flex; align-items: center; gap: 8px; }
+        .win-title-actions { display: flex; gap: 4px; }
+
+        .win-btn {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s ease;
+        }
+        .win-btn:hover { background: rgba(255,255,255,0.25); }
+        .win-btn:active { background: rgba(255,255,255,0.08); }
+
+        /* MAIN CONTAINER (RESPONSIVE) */
+        .app-body {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
             overflow-y: auto;
         }
 
-        .brand-header {
-            text-align: center;
-            margin-bottom: 20px;
+        .win-window {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transition: all 0.2s ease;
         }
-        .brand-icon { font-size: 36px; margin-bottom: 6px; }
-        .brand-title { font-size: 18px; font-weight: 600; color: var(--text-main); letter-spacing: -0.3px; }
+
+        /* MEDIA QUERIES VOOR TABLETS & TELEFOONS */
+        @media (max-width: 600px) {
+            .app-body { padding: 10px; align-items: flex-start; }
+            .win-window { max-width: 100%; padding: 18px; border-radius: 6px; }
+            .win-titlebar { height: 48px; padding: 0 10px; }
+        }
+
+        .brand-section {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+        .brand-icon { font-size: 40px; margin-bottom: 4px; }
+        .brand-title { font-size: 20px; font-weight: 700; color: var(--win-blue); letter-spacing: -0.3px; }
         .brand-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
-        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+        /* FORM ELEMENTS */
+        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
         .form-group label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-group input { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; background: #fafafa; transition: all 0.2s; }
-        .form-group input:focus { outline: none; border-color: var(--win-blue); background: #ffffff; box-shadow: 0 0 0 2px rgba(0,103,192,0.15); }
+        .form-group input { 
+            width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; 
+            font-size: 13px; background: #fafafa; transition: all 0.2s; 
+        }
+        .form-group input:focus { 
+            outline: none; border-color: var(--win-blue); background: #ffffff; 
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2); 
+        }
 
-        .btn { background: var(--win-blue); color: white; border: none; padding: 10px 16px; width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.2s; margin-top: 6px; text-align: center; }
+        /* BUTTONS */
+        .btn { 
+            background: var(--win-blue); color: white; border: none; padding: 11px 16px; 
+            width: 100%; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; 
+            transition: background 0.15s; margin-top: 6px; text-align: center; 
+        }
         .btn:hover { background: var(--win-blue-hover); }
         .btn-green { background: var(--green-ok); }
         .btn-green:hover { background: #0e6b39; }
@@ -59,108 +125,137 @@
         .alert-error { background: var(--red-bg); color: var(--red-alert); border: 1px solid #f8d7da; }
         .alert-success { background: var(--green-bg); color: var(--green-ok); border: 1px solid #c3e6cb; }
 
-        /* Dashboard layout */
+        /* DASHBOARD SECTION */
         #dashboardSectie { display: none; }
         
         .user-banner {
             display: flex; justify-content: space-between; align-items: center;
-            background: #fafafa; border: 1px solid var(--border-color); border-radius: 6px;
-            padding: 10px 14px; margin-bottom: 16px;
+            background: #f8f9fa; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 12px 14px; margin-bottom: 18px;
         }
-        .user-info .name { font-weight: 600; font-size: 13px; }
-        .badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; }
+        .user-info .name { font-weight: 700; font-size: 14px; color: var(--text-main); }
+        .user-info .sub { font-size: 11px; color: var(--text-secondary); }
+        
+        .badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 12px; text-transform: uppercase; }
         .badge-admin { background: #eef6fc; color: var(--win-blue); border: 1px solid #bce0fd; }
-        .badge-user { background: #f1f1f1; color: var(--text-secondary); border: 1px solid #d1d1d1; }
+        .badge-user { background: #e9e9e9; color: var(--text-secondary); border: 1px solid #d1d1d1; }
 
-        .section-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
-
-        .apps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
-        .app-tile {
-            background: #fafafa; border: 1px solid var(--border-color); border-radius: 6px;
-            padding: 14px 10px; text-align: center; text-decoration: none; color: var(--text-main);
-            display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;
+        .section-label { 
+            font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; 
+            letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 2px solid var(--win-blue); 
+            padding-bottom: 4px; 
         }
-        .app-tile:hover { background: #eef6fc; border-color: var(--win-blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-        .app-tile-icon { font-size: 24px; }
-        .app-tile-name { font-size: 12px; font-weight: 600; }
 
-        .admin-panel { background: #f8f9fa; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; margin-top: 12px; }
-        .admin-panel-title { font-size: 11px; font-weight: 600; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; }
+        .apps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 18px; }
+        .app-tile {
+            background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 16px 12px; text-align: center; text-decoration: none; color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .app-tile:hover { 
+            background: #eef6fc; border-color: var(--win-blue); 
+            transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,120,212,0.12); 
+        }
+        .app-tile-icon { font-size: 28px; }
+        .app-tile-name { font-size: 12px; font-weight: 700; }
+
+        .admin-panel { background: #f8f9fa; border: 1px solid var(--border-color); border-radius: 6px; padding: 14px; margin-top: 14px; }
+        .admin-panel-title { font-size: 11px; font-weight: 700; color: var(--win-blue); text-transform: uppercase; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="portal-card">
-        
-        <!-- ================= INLOGSECTIE ================= -->
-        <div id="loginSectie">
-            <div class="brand-header">
-                <div class="brand-icon">🛡️</div>
-                <div class="brand-title">Medische Suite</div>
-                <div class="brand-subtitle">Beveiligd Patiënten- & Gegevensportaal</div>
-            </div>
-
-            <div class="form-group">
-                <label>Gebruikersnaam</label>
-                <input type="text" id="gebruikerNaam" placeholder="Bijv. jan of admin" autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label>Wachtwoord</label>
-                <input type="password" id="gebruikerWachtwoord" placeholder="••••••••" autocomplete="current-password" onkeypress="handleEnter(event)">
-            </div>
-            
-            <button type="button" class="btn" onclick="controleerLogin()">Inloggen</button>
-            <div id="loginError" class="alert-box alert-error">Onjuiste gebruikersnaam of wachtwoord.</div>
+    <!-- WINDOWS HEADER / TOOLBAR -->
+    <div class="win-titlebar">
+        <div class="win-title-left">
+            <span>🎛️ Medische Suite</span>
+            <span id="titleSyncStatus" style="font-size: 10px; opacity: 0.7; font-weight: normal;">• Cloud Actief</span>
         </div>
+        <div class="win-title-actions">
+            <button type="button" class="win-btn" onclick="verversPagina()" title="Systeem Herladen / Synchroniseren">
+                🔄 Refresh
+            </button>
+            <button type="button" class="win-btn" onclick="toggleFullscreen()" title="Volledig Scherm In/Uitschakelen">
+                ⛶ Scherm
+            </button>
+        </div>
+    </div>
 
-        <!-- ================= DASHBOARD SECTIE ================= -->
-        <div id="dashboardSectie">
-            <div class="user-banner">
-                <div class="user-info">
-                    <div class="name" id="welkomNaam">Gebruiker</div>
-                    <div style="font-size: 11px; color: var(--text-secondary);" id="syncStatus">Cloud gesynchroniseerd</div>
+    <!-- INHOUD (CENTERED CARD) -->
+    <div class="app-body">
+        <div class="win-window">
+            
+            <!-- ================= INLOGSECTIE ================= -->
+            <div id="loginSectie">
+                <div class="brand-section">
+                    <div class="brand-icon">🏥</div>
+                    <div class="brand-title">Medische Suite</div>
+                    <div class="brand-subtitle">Centraal Windows Zorgportaal</div>
                 </div>
-                <div id="rolBadge" class="badge badge-user">Gebruiker</div>
-            </div>
 
-            <div class="section-label">Gekoppelde Applicaties</div>
-            <div class="apps-grid">
-                <a href="bloedsuiker.html" class="app-tile">
-                    <div class="app-tile-icon">🩸</div>
-                    <div class="app-tile-name">Bloedsuiker</div>
-                </a>
-                <a href="medicatie.html" class="app-tile">
-                    <div class="app-tile-icon">💊</div>
-                    <div class="app-tile-name">Medicatie</div>
-                </a>
-                <a href="dialyse.html" class="app-tile">
-                    <div class="app-tile-icon">🩺</div>
-                    <div class="app-tile-name">Dialyse</div>
-                </a>
-                <a href="taxi.html" class="app-tile">
-                    <div class="app-tile-icon">🚕</div>
-                    <div class="app-tile-name">Taxi / Vervoer</div>
-                </a>
-            </div>
-
-            <!-- ADMIN CONFIGURATIE PANEEL -->
-            <div id="adminPaneel" class="admin-panel" style="display: none;">
-                <div class="admin-panel-title">⚙️ Admin: Nieuwe Gebruiker Registreren</div>
                 <div class="form-group">
-                    <label>Nieuwe Naam</label>
-                    <input type="text" id="nieuwGebruikerNaam" placeholder="Naam van gebruiker">
+                    <label>Gebruikersnaam</label>
+                    <input type="text" id="gebruikerNaam" placeholder="Bijv. jan of admin" autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label>Wachtwoord</label>
-                    <input type="text" id="nieuwGebruikerWachtwoord" placeholder="Tijdelijk wachtwoord">
+                    <input type="password" id="gebruikerWachtwoord" placeholder="••••••••" autocomplete="current-password" onkeypress="handleEnter(event)">
                 </div>
-                <button type="button" class="btn btn-green" onclick="voegNieuweGebruikerToe()">Gebruiker Toevoegen</button>
-                <div id="adminFeedback" class="alert-box alert-success"></div>
+                
+                <button type="button" class="btn" onclick="controleerLogin()">Inloggen</button>
+                <div id="loginError" class="alert-box alert-error">Onjuiste gebruikersnaam of wachtwoord.</div>
             </div>
 
-            <button type="button" class="btn btn-danger" onclick="uitloggen()">Uitloggen</button>
-        </div>
+            <!-- ================= DASHBOARD SECTIE ================= -->
+            <div id="dashboardSectie">
+                <div class="user-banner">
+                    <div class="user-info">
+                        <div class="name" id="welkomNaam">Gebruiker</div>
+                        <div class="sub" id="syncSub">Online gesynchroniseerd</div>
+                    </div>
+                    <div id="rolBadge" class="badge badge-user">Gebruiker</div>
+                </div>
 
+                <div class="section-label">Gekoppelde Applicaties</div>
+                <div class="apps-grid">
+                    <a href="bloedsuiker.html" class="app-tile">
+                        <div class="app-tile-icon">🩸</div>
+                        <div class="app-tile-name">Bloedsuiker</div>
+                    </a>
+                    <a href="medicatie.html" class="app-tile">
+                        <div class="app-tile-icon">💊</div>
+                        <div class="app-tile-name">Medicatie</div>
+                    </a>
+                    <a href="dialyse.html" class="app-tile">
+                        <div class="app-tile-icon">🩺</div>
+                        <div class="app-tile-name">Dialyse</div>
+                    </a>
+                    <a href="taxi.html" class="app-tile">
+                        <div class="app-tile-icon">🚕</div>
+                        <div class="app-tile-name">Taxi / Vervoer</div>
+                    </a>
+                </div>
+
+                <!-- ADMIN CONFIGURATIE PANEEL -->
+                <div id="adminPaneel" class="admin-panel" style="display: none;">
+                    <div class="admin-panel-title">⚙️ Admin: Nieuwe Gebruiker Registreren</div>
+                    <div class="form-group">
+                        <label>Nieuwe Naam</label>
+                        <input type="text" id="nieuwGebruikerNaam" placeholder="Naam van gebruiker">
+                    </div>
+                    <div class="form-group">
+                        <label>Wachtwoord</label>
+                        <input type="text" id="nieuwGebruikerWachtwoord" placeholder="Tijdelijk wachtwoord">
+                    </div>
+                    <button type="button" class="btn btn-green" onclick="voegNieuweGebruikerToe()">Gebruiker Toevoegen</button>
+                    <div id="adminFeedback" class="alert-box alert-success"></div>
+                </div>
+
+                <button type="button" class="btn btn-danger" onclick="uitloggen()">Uitloggen</button>
+            </div>
+
+        </div>
     </div>
 
     <script>
@@ -185,6 +280,23 @@
             if (e.key === 'Enter') controleerLogin();
         }
 
+        function verversPagina() {
+            laadGebruikersVanBin();
+            location.reload();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Fout bij activeren schermvullende weergave: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
         function laadGebruikersVanBin() {
             fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
                 headers: { 'X-Master-Key': API_KEY }
@@ -193,12 +305,12 @@
             .then(data => {
                 if (data && data.record && data.record.gebruikers) {
                     gebruikersDatabase = data.record.gebruikers;
-                    document.getElementById('syncStatus').innerText = "Cloud verbonden ✓";
+                    document.getElementById('titleSyncStatus').innerText = "• Cloud Gesynchroniseerd";
                 }
             })
             .catch(err => {
                 console.error("Fout bij ophalen gebruikers:", err);
-                document.getElementById('syncStatus').innerText = "Offline modus";
+                document.getElementById('titleSyncStatus').innerText = "• Offline Modus";
             });
         }
 
