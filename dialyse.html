@@ -722,7 +722,7 @@
                 laadData(false);
             }, 3000);
 
-            // 2. Direct hervatten/herberekenen zodra scherm weer geopend of actief wordt!
+            // 2. Direct hervatten/herberekenen zodra scherm weer geopend of actief wordt
             document.addEventListener("visibilitychange", () => {
                 if (!document.hidden) {
                     laadData(false);
@@ -857,6 +857,7 @@
             huidigUfGeweestMl = 0;
             isTimerRunning = false;
             actieveTimerCloud = null;
+            document.getElementById('analogueClock').style.backgroundColor = '#282c34';
             updateBloeddrukLijstEnScherm();
         }
 
@@ -942,9 +943,11 @@
                 timerTargetTime = new Date(stopVal).getTime();
                 timerStartTimestamp = nu.getTime();
                 isTimerRunning = true; isDoorgaanGekozen = false;
-                document.getElementById('analogueClock').classList.remove('alarm-state');
+                
+                let clockEl = document.getElementById('analogueClock');
+                clockEl.classList.remove('alarm-state');
                 document.getElementById('alarmModal').style.display = 'none';
-                document.getElementById('analogueClock').style.backgroundColor = '#fbbc04';
+                clockEl.style.backgroundColor = '#fbbc04';
                 
                 actieveTimerCloud = {
                     gebruiker: actieveGebruiker,
@@ -968,7 +971,9 @@
             document.getElementById('valStopTijd').value = formatDatetimeLocal(new Date());
             isTimerRunning = false;
             actieveTimerCloud = null;
-            document.getElementById('analogueClock').classList.remove('alarm-state');
+            let clockEl = document.getElementById('analogueClock');
+            clockEl.classList.remove('alarm-state');
+            clockEl.style.backgroundColor = '#282c34';
             document.getElementById('alarmModal').style.display = 'none';
             slaLokaalOp();
             slaNaarBin();
@@ -1005,13 +1010,17 @@
 
                 if (overms <= 0) {
                     countdownEl.innerText = "00:00:00";
-                    if (!isDoorgaanGekozen) { clockEl.classList.add('alarm-state'); document.getElementById('alarmModal').style.display = 'flex'; }
+                    if (!isDoorgaanGekozen) { 
+                        clockEl.classList.add('alarm-state'); 
+                        document.getElementById('alarmModal').style.display = 'flex'; 
+                    }
                 } else {
+                    clockEl.style.backgroundColor = '#fbbc04'; // Zorg dat klok geel blijft tijdens actieve sessie
                     let sec = Math.floor(overms / 1000);
                     countdownEl.innerText = `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
                 }
             } else {
-                // Als er GEEN actieve countdown is, pas dan de gewone klok op de ronde meter tonen
+                clockEl.style.backgroundColor = '#282c34';
                 countdownEl.innerText = nu.toTimeString().slice(0, 8);
             }
         }
@@ -1073,7 +1082,7 @@
                 gebruikerProfielen = rec.profielen || {};
                 if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
                 
-                // Synchroniseer lopende timer via cloud
+                // Synchroniseer lopende timer én klokkleur via cloud
                 if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
                     let tc = rec.actieveTimerCloud;
                     if (tc.isTimerRunning) {
@@ -1089,6 +1098,7 @@
                     }
                 } else if (!rec.actieveTimerCloud) {
                     isTimerRunning = false;
+                    document.getElementById('analogueClock').style.backgroundColor = '#282c34';
                 }
 
                 herstelLokaalOp(); vulHistorieTabel(); updateKlok();
@@ -1151,6 +1161,7 @@
             } else { sessies.unshift(sessie); }
             
             actieveTimerCloud = null;
+            document.getElementById('analogueClock').style.backgroundColor = '#282c34';
             slaNaarBin(); wisLokaalConcept(); vulHistorieTabel(); alert('Sessie succesvol opgeslagen!'); toonTab('historie');
         }
 
