@@ -132,7 +132,7 @@
             <div class="module-desc">UF berekeningen, timer & bloeddruk</div>
         </a>
 
-        <!-- Vocht Monitor -->
+        <!-- Vocht Monitor (Verwijst nu correct naar vocht.html) -->
         <a href="vocht.html" class="module-card">
             <div class="module-icon">🥤</div>
             <div class="module-title">Vocht Monitor</div>
@@ -147,7 +147,7 @@
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'luuk';
         let profielenData = {};
         let pendingGebruiker = '';
-        let pinDoelType = 'login'; // 'login' of 'beheer'
+        let pinDoelType = 'login'; 
 
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('rollodex_fullscreen') === 'true') {
@@ -203,7 +203,7 @@
 
         function sluitPinModal() {
             document.getElementById('pinModal').style.display = 'none';
-            vulGebruikerDropdown(); // Reset select naar actieve gebruiker
+            vulGebruikerDropdown(); 
         }
 
         function vulGebruikerDropdown() {
@@ -221,7 +221,7 @@
 
             if (pinDoelType === 'login') {
                 let profiel = profielenData[pendingGebruiker];
-                let juistePin = profiel && profiel.pin ? profiel.pin : "1234"; // Standaard pin indien niet ingesteld
+                let juistePin = profiel && profiel.pin ? profiel.pin : "1234";
 
                 if (ingevoerdePin === juistePin) {
                     actieveGebruiker = pendingGebruiker;
@@ -235,7 +235,6 @@
                     document.getElementById('pinInputVeld').value = '';
                 }
             } else if (pinDoelType === 'beheer') {
-                // Check of de ingevoerde pin klopt bij de actieve admin of de algemene beheerpin (bijv. "1234" of admin profiel)
                 let actueelProfiel = profielenData[actieveGebruiker];
                 let adminPin = (actueelProfiel && actueelProfiel.pin) ? actueelProfiel.pin : "1234";
 
