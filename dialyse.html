@@ -417,7 +417,7 @@
 
                 <!-- Rechts onder: UF VOLUME ML -->
                 <div class="med-box">
-                    <div class="label">UF volume ml</div>
+                    <div class="label">UF VOLUME ML</div>
                     <div class="value" id="dispUfVol">0</div>
                 </div>
 
@@ -752,8 +752,9 @@
 
             genereerUurStrepen();
             startKlokLus();
-            laadData(true);
+            laadData(false);
 
+            // LIVE LUS: Haalt elke 3 seconden de actieve stand uit de cloud
             setInterval(() => {
                 laadData(false);
             }, 3000);
@@ -985,7 +986,6 @@
             slaNaarBin();
         }
 
-        // GECORRIGEERDE START FUNCTIE DIE ALTIJD WERKT
         function startSessieTijd() {
             let nu = new Date();
             let startInput = document.getElementById('valStartTijd');
@@ -1018,8 +1018,6 @@
                 clockEl.style.backgroundColor = '#fbbc04';
                 
                 updateActieveTimerInCloud();
-            } else {
-                alert("Kon de start- of eindtijd niet instellen.");
             }
         }
 
