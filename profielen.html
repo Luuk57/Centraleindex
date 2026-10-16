@@ -64,10 +64,14 @@
         <div class="card">
             <a href="index.html" class="back-link">← Terug naar Hoofdmenu</a>
             
-            <div class="section-title">Nieuw Profiel Aanmaken</div>
+            <div class="section-title">Nieuw Profiel & Pincode Aanmaken</div>
             <div class="form-group">
                 <label>Naam van de gebruiker</label>
                 <input type="text" id="nieuweGebruikerNaam" placeholder="Bijv. Jan of Maria...">
+            </div>
+            <div class="form-group">
+                <label>Pincode (4 cijfers)</label>
+                <input type="password" id="nieuweGebruikerPin" maxlength="6" placeholder="Bijv. 1234">
             </div>
             <div class="form-group">
                 <label>Rol</label>
@@ -100,7 +104,7 @@
             .then(res => res.json())
             .then(data => {
                 let rec = data.record || {};
-                profielenData = rec.profielen || { "luuk": { rol: "admin" } };
+                profielenData = rec.profielen || { "luuk": { rol: "admin", pin: "1234" } };
                 renderProfielenLijst();
             }).catch(err => console.error(err));
         }
@@ -127,14 +131,18 @@
 
         function voegProfielToe() {
             let input = document.getElementById('nieuweGebruikerNaam');
+            let pinInput = document.getElementById('nieuweGebruikerPin');
             let rolSelect = document.getElementById('nieuweGebruikerRol');
             let naam = input.value.trim().toLowerCase();
+            let pin = pinInput.value.trim();
             
             if (!naam) { alert('Vul een geldige naam in.'); return; }
+            if (!pin) { alert('Vul een pincode in.'); return; }
             if (profielenData[naam]) { alert('Dit profiel bestaat al.'); return; }
 
-            profielenData[naam] = { rol: rolSelect.value };
+            profielenData[naam] = { rol: rolSelect.value, pin: pin };
             input.value = '';
+            pinInput.value = '';
 
             slaNaarBin();
         }
@@ -160,7 +168,7 @@
                 });
             })
             .then(() => {
-                alert('Profielen bijgewerkt!');
+                alert('Profielen en pincodes bijgewerkt!');
                 laadProfielen();
             })
             .catch(err => console.error(err));
