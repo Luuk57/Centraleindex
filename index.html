@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rollodex • Hoofdmenu</title>
+    <title>Rollodex • Home</title>
     <style>
         :root {
             --android-bg: #f8f9fa;
@@ -12,7 +12,6 @@
             --android-card-bg: #ffffff;
             --android-text: #202124;
             --android-subtext: #5f6368;
-            --red-alert: #d93025;
             --green-ok: #188038;
             --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
             --dialysis-yellow: #fbbc04;
@@ -21,7 +20,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
         body, html { width: 100%; height: 100%; background: var(--android-bg); color: var(--android-text); display: flex; flex-direction: column; overflow: hidden; }
 
-        /* ANDROID APPBAR */
+        /* APPBAR */
         .android-appbar {
             background: var(--android-primary);
             color: #ffffff;
@@ -40,90 +39,117 @@
         .icon-btn { background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .icon-btn:hover { background: rgba(255,255,255,0.1); }
 
-        /* WORKSPACE */
-        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; padding: 16px; background: var(--android-bg); overflow-y: auto; }
-        
-        .menu-container {
-            width: 100%; max-width: 420px; background: var(--android-card-bg); border-radius: 16px; padding: 24px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #e8eaed; display: flex; flex-direction: column; gap: 14px; text-align: center;
+        /* USER BANNER */
+        .user-banner {
+            max-width: 900px; width: 95%; margin: 16px auto 0 auto; background: var(--android-card-bg);
+            border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #dadce0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
+        .user-info .label { font-size: 11px; color: var(--android-subtext); font-weight: 500; text-transform: uppercase; }
+        .user-info .name { font-size: 14px; font-weight: 700; color: var(--android-text); }
+        .user-actions { display: flex; gap: 8px; align-items: center; }
+        .user-select { padding: 6px 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 12px; font-weight: 600; outline: none; background: #fff; cursor: pointer; }
 
-        .menu-logo { font-size: 36px; margin-bottom: 2px; }
-        .menu-header-title { font-size: 18px; font-weight: 700; color: var(--android-primary); }
-        .menu-subtitle { font-size: 12px; color: var(--android-subtext); margin-bottom: 8px; }
-
-        .menu-btn {
-            background: #f8f9fa; border: 1px solid #dadce0; border-radius: 12px; padding: 16px;
-            font-size: 14px; font-weight: 700; color: var(--android-text); cursor: pointer; text-decoration: none;
-            display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        /* GRID MODULES */
+        .modules-grid {
+            max-width: 900px; width: 95%; margin: 16px auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;
         }
-        .menu-btn:hover { background: #e8f0fe; border-color: var(--android-primary); color: var(--android-primary); transform: translateY(-1px); }
-        .menu-btn span.icon { font-size: 20px; }
-
-        .menu-btn.primary { background: var(--android-primary); color: #fff; border-color: var(--android-primary-dark); }
-        .menu-btn.primary:hover { background: var(--android-primary-dark); color: #fff; }
-
-        .menu-btn.vocht { background: #e6f4ea; border-color: #ceead6; color: var(--green-ok); }
-        .menu-btn.vocht:hover { background: #ceead6; color: #137333; }
+        .module-card {
+            background: var(--android-card-bg); border-radius: 16px; padding: 20px; border: 1px solid #dadce0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05); cursor: pointer; text-decoration: none; color: inherit;
+            display: flex; flex-direction: column; gap: 8px; transition: all 0.2s;
+        }
+        .module-card:hover { transform: translateY(-2px); border-color: var(--android-primary); box-shadow: 0 4px 12px rgba(26,115,232,0.15); }
+        .module-icon { font-size: 28px; margin-bottom: 4px; }
+        .module-title { font-size: 16px; font-weight: 700; color: var(--android-primary); }
+        .module-desc { font-size: 12px; color: var(--android-subtext); line-height: 1.4; }
     </style>
 </head>
 <body>
 
-    <!-- ANDROID APPBAR -->
     <div class="android-appbar">
         <div class="appbar-title">
-            <span>🩺 Rollodex • Hoofdmenu</span>
-            <span id="gebruikerBadge" style="font-size: 11px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; color: var(--dialysis-yellow);">...</span>
+            <span>Rollodex Home</span>
         </div>
         <div class="appbar-actions">
-            <div id="liveClock" class="android-clock">--:--</div>
+            <div id="liveClock" class="android-clock">--:--:--</div>
+            <button type="button" class="icon-btn" onclick="laadProfielen()" title="Verversen">🔄</button>
             <button type="button" class="icon-btn" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
         </div>
     </div>
 
-    <!-- WORKSPACE -->
-    <div class="workspace">
-        <div class="menu-container">
-            <div class="menu-logo">🏥</div>
-            <div class="menu-header-title">Rollodex Medisch Systeem</div>
-            <div class="menu-subtitle" id="welkomTekst">Kies een module om te starten</div>
-
-            <a href="dialyse.html" class="menu-btn primary">
-                <span>🩺 Dialyse Monitor & Invoer</span>
-                <span class="icon">➔</span>
-            </a>
-
-            <a href="vocht.html" class="menu-btn vocht">
-                <span>🥤 Vocht Monitor (POS Invoer)</span>
-                <span class="icon">➔</span>
-            </a>
-
-            <a href="profielen.html" class="menu-btn" style="display:none;" id="adminBtn">
-                <span>⚙️ Gebruikersbeheer (Admin)</span>
-                <span class="icon">➔</span>
-            </a>
+    <div class="user-banner">
+        <div class="user-info">
+            <div class="label">Actieve Gebruiker</div>
+            <div class="name" id="actieveGebruikerLabel">Actief profiel: ...</div>
+        </div>
+        <div class="user-actions">
+            <select id="gebruikerDropdown" class="user-select" onchange="wijzigGebruiker(this.value)">
+                <option value="luuk">Luuk</option>
+            </select>
+            <a href="profielen.html" class="user-select" style="text-decoration: none; background: #f1f3f4; color: var(--android-primary); display: inline-flex; align-items: center; gap: 4px;">⚙️ Beheer</a>
         </div>
     </div>
 
+    <div class="modules-grid">
+        <!-- Dialyse Monitor -->
+        <a href="dialyse.html" class="module-card">
+            <div class="module-icon">🩺</div>
+            <div class="module-title">Dialyse Monitor</div>
+            <div class="module-desc">UF berekeningen, timer & bloeddruk</div>
+        </a>
+
+        <!-- Vocht Monitor (Aangepast van Consumptie Monitor) -->
+        <a href="vocht.html" class="module-card">
+            <div class="module-icon">🥤</div>
+            <div class="module-title">Vocht Monitor</div>
+            <div class="module-desc">Drinken, sneltoetsen & dagelijkse vochtbalans</div>
+        </a>
+    </div>
+
     <script>
+        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+
+        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'luuk';
+
         window.addEventListener('DOMContentLoaded', () => {
-            let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
-            let rol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
-            let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
-            
-            document.getElementById('gebruikerBadge').innerText = pNaam;
-            document.getElementById('welkomTekst').innerText = `Ingelogd als: ${pNaam}`;
-
-            if (rol === 'admin') {
-                document.getElementById('adminBtn').style.display = 'flex';
+            if (localStorage.getItem('rollodex_fullscreen') === 'true') {
+                document.documentElement.requestFullscreen().catch(err => {});
             }
-
+            laadProfielen();
             setInterval(() => {
                 let nu = new Date();
-                document.getElementById('liveClock').innerText = `${nu.toLocaleDateString()} ${nu.toLocaleTimeString()}`;
+                document.getElementById('liveClock').innerText = nu.toTimeString().slice(0, 8);
             }, 1000);
         });
+
+        function laadProfielen() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                let profielen = rec.profielen || { "luuk": { rol: "admin" } };
+                
+                let dropdown = document.getElementById('gebruikerDropdown');
+                dropdown.innerHTML = '';
+                Object.keys(profielen).forEach(p => {
+                    let opt = document.createElement('option');
+                    opt.value = p;
+                    opt.textContent = p.charAt(0).toUpperCase() + p.slice(1);
+                    if (p.toLowerCase() === actieveGebruiker.toLowerCase()) opt.selected = true;
+                    dropdown.appendChild(opt);
+                });
+
+                document.getElementById('actieveGebruikerLabel').innerText = `Actief profiel: ${actieveGebruiker}`;
+            }).catch(err => console.error(err));
+        }
+
+        function wijzigGebruiker(naam) {
+            actieveGebruiker = naam;
+            localStorage.setItem('actieve_gebruiker', naam);
+            document.getElementById('actieveGebruikerLabel').innerText = `Actief profiel: ${naam}`;
+        }
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
