@@ -53,7 +53,27 @@
         .controls-card { background: var(--android-card-bg); border-radius: 16px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e8eaed; margin-bottom: 10px; }
         .section-title { font-size: 12px; font-weight: 700; color: var(--green-ok); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         
-        .back-link { display: inline-block; margin-bottom: 6px; font-size: 10px; font-weight: 500; color: #ffffff; text-decoration: none; background: rgba(0,0,0,0.4); padding: 3px 6px; border-radius: 6px; }
+        /* OPVALLENDE EN SPREKENDE TERUG-KNOP */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            background: linear-gradient(135deg, var(--android-primary), var(--android-primary-dark));
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(26,115,232,0.3);
+            transition: all 0.2s ease;
+        }
+        .back-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(26,115,232,0.4);
+            background: var(--android-primary-dark);
+        }
 
         /* INLOG BAR */
         .user-switch-bar { background: #fff; border: 1px solid #dadce0; border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -155,7 +175,8 @@
         
         <!-- TAB 1: POS INVOER -->
         <div class="tab-pane active" id="posPane">
-            <a href="index.html" class="back-link">← Terug naar Hoofdmenu</a>
+            <!-- Duidelijke en opvallende terug-knop -->
+            <a href="index.html" class="back-link">🏠 Terug naar Hoofdmenu</a>
 
             <div class="user-switch-bar">
                 <div style="font-size: 11px; font-weight: 700; color: var(--android-subtext);">🔒 Actieve Gebruiker:</div>
@@ -209,7 +230,7 @@
 
         <!-- TAB 2: HISTORIE -->
         <div id="historiePane" class="tab-pane">
-            <a href="index.html" class="back-link">← Terug naar Hoofdmenu</a>
+            <a href="index.html" class="back-link">🏠 Terug naar Hoofdmenu</a>
 
             <div class="controls-card" style="display: block;">
                 
@@ -281,8 +302,8 @@
 
         let actieveCategorie = "Ontbijt"; 
         let actievePortie = "Normale portie";
-        let gekozenGerechten = []; // Dingen die nu aangevinkt staan (bijv: ['Brood', 'Boter', 'Kaas'])
-        let huidigeBon = []; // De verzameling regels op de bon
+        let gekozenGerechten = []; 
+        let huidigeBon = []; 
 
         let sneltoetsenLijsten = {
             ontbijtMiddag: ["Brood", "Boter", "Kaas", "Ham", "Beschuit", "Yoghurt", "Kwark", "Fruit", "Eitje"],
@@ -345,7 +366,7 @@
             document.getElementById('catBtnMiddag').classList.toggle('active', cat === 'Middageten');
             document.getElementById('catBtnAvond').classList.toggle('active', cat === 'Avondeten');
             document.getElementById('catBtnSnack').classList.toggle('active', cat === 'Tussendoortje');
-            gekozenGerechten = []; // Reset selectie bij categorie wisselen
+            gekozenGerechten = []; 
             renderPosGrids();
         }
 
@@ -405,7 +426,7 @@
                 gerecht: gecombineerdTekst
             });
 
-            gekozenGerechten = []; // Reset de selectie op het scherm
+            gekozenGerechten = []; 
             renderPosGrids();
             renderBonLijst();
         }
