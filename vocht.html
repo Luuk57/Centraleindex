@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rollodex • Vocht Monitor (POS)</title>
+    <style>
+        :root {
+            --android-bg: #f8f9fa;
+            --android-primary: #1a73e8;
+            --android-primary-dark: #1557b0;
+            --android-card-bg: #ffffff;
+            --android-text: #202124;
+            --android-subtext: #5f6368;
+            --red-alert: #d93025;
+            --green-ok: #188038;
+            --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            --dialysis-yellow: #fbbc04;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
+        body, html { width: 100%; height: 100%; background: var(--android-bg); color: var(--android-text); display: flex; flex-direction: column; overflow: hidden; }
+
+        /* ANDROID APPBAR */
+        .android-appbar {
+            background: var(--android-primary);
+            color: #ffffff;
+            height: 56px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .appbar-title { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .appbar-actions { display: flex; align-items: center; gap: 6px; }
+        .android-clock { font-size: 11px; background: rgba(255,255,255,0.15); padding: 4px 8px; border-radius: 16px; font-weight: 500; }
+        .icon-btn { background: transparent; border: none; color: white; font-size: 15px; cursor: pointer; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
+
+        /* TAB BAR */
+        .tab-bar { display: flex; background: #e8eaed; border-bottom: 1px solid #dadce0; flex-shrink: 0; padding: 4px; gap: 4px; }
+        .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 500; background: transparent; border: none; cursor: pointer; text-align: center; color: var(--android-subtext); border-radius: 8px; }
+        .tab-btn.active { background: #ffffff; color: var(--android-primary); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* WORKSPACE */
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 10px; background: var(--android-bg); overflow-y: auto; position: relative; }
+        .tab-pane { display: none; width: 100%; max-width: 820px; }
+        .tab-pane.active { display: block; }
+
+        .controls-card { background: var(--android-card-bg); border-radius: 16px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e8eaed; margin-bottom: 10px; }
+        .section-title { font-size: 13px; font-weight: 700; color: var(--android-primary); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .back-link { display: inline-block; margin-bottom: 6px; font-size: 10px; font-weight: 500; color: #ffffff; text-decoration: none; background: rgba(0,0,0,0.4); padding: 3px 6px; border-radius: 6px; }
+
+        /* POS GRID LAYOUT */
+        .pos-section-label { font-size: 11px; font-weight: 700; color: var(--android-subtext); margin: 8px 0 4px 0; text-transform: uppercase; }
+        .pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px; margin-bottom: 10px; }
+        
+        .pos-btn {
+            background: #f1f3f4; border: 1px solid #dadce0; border-radius: 10px; padding: 10px 6px;
+            font-size: 12px; font-weight: 600; color: var(--android-text); cursor: pointer; text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: all 0.15s;
+            position: relative;
+        }
+        .pos-btn:hover { background: #e8f0fe; border-color: var(--android-primary); color: var(--android-primary); }
+        .pos-btn.selected { background: var(--android-primary); color: #fff; border-color: var(--android-primary-dark); }
+        
+        .pos-btn-del {
+            position: absolute; top: 2px; right: 4px; font-size: 10px; color: var(--red-alert); background: rgba(255,255,255,0.8);
+            border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .pos-btn-del:hover { background: var(--red-alert); color: #fff; }
+
+        .pos-add-row { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
+        .pos-add-row input { flex: 1; padding: 8px; border: 1px solid #dadce0; border-radius: 8px; font-size: 12px; outline: none; }
+        .btn-pos-add { background: var(--green-ok); color: #white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; color:#fff; }
+        .btn-pos-add:hover { background: #137333; }
+
+        .total-display-box { background: #e8f0fe; border-radius: 12px; padding: 12px; text-align: center; margin: 10px 0; border: 1px solid #b3d1fc; }
+        .total-display-box .label { font-size: 10px; font-weight: 700; color: var(--android-primary); text-transform: uppercase; }
+        .total-display-box .value { font-size: 22px; font-weight: 900; color: var(--android-primary-dark); margin-top: 2px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+        .form-group label { font-size: 10px; font-weight: 500; color: var(--android-subtext); }
+        .form-group input { width: 100%; padding: 9px; border: 1px solid #dadce0; border-radius: 8px; font-size: 12px; background: #fff; outline: none; }
+
+        table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 10px; background: #fff; }
+        table.dialyse-table th, table.dialyse-table td { border: 1px solid #dadce0; padding: 6px; text-align: left; }
+        table.dialyse-table th { background: #202124; color: white; font-weight: 500; }
+        .btn-small-del { padding: 3px 6px; font-size: 9px; border: none; border-radius: 4px; cursor: pointer; color: white; background: var(--red-alert); }
+    </style>
+</head>
+<body>
+
+    <!-- ANDROID APPBAR -->
+    <div class="android-appbar">
+        <div class="appbar-title">
+            <span>🥤 Rollodex • Vocht Monitor</span>
+            <span id="gebruikerTitleBadge" style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; color: var(--dialysis-yellow);">...</span>
+        </div>
+        <div class="appbar-actions">
+            <div id="liveClock" class="android-clock">--:--</div>
+            <button type="button" class="icon-btn" onclick="laadData(true)" title="Verversen">🔄</button>
+        </div>
+    </div>
+
+    <!-- TABBALK -->
+    <div class="tab-bar">
+        <button type="button" class="tab-btn active" id="btnPos" onclick="toonTab('pos')">🧮 POS Invoer</button>
+        <button type="button" class="tab-btn" id="btnHistorie" onclick="toonTab('historie')">📊 Vocht Historie</button>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div class="workspace">
+        
+        <!-- TAB 1: POS INVOER -->
+        <div id="posPane" class="tab-pane active">
+            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Hoofdmenu</a>
+
+            <div class="controls-card">
+                <div class="section-title">1. Selecteer Drank (Zonder hoeveelheid)</div>
+                <div class="pos-grid" id="drankGrid"></div>
+                <div class="pos-add-row">
+                    <input type="text" id="nieuweDrankInput" placeholder="Nieuwe drank toevoegen (bijv. Thee)...">
+                    <button type="button" class="btn-pos-add" onclick="voegDrankToe()">+ Drank</button>
+                </div>
+
+                <div class="section-title" style="margin-top:14px;">2. Selecteer Hoeveelheid (ml)</div>
+                <div class="pos-grid" id="hoeveelheidGrid"></div>
+                <div class="pos-add-row">
+                    <input type="number" id="nieuweHoeveelheidInput" placeholder="Nieuwe ml (bijv. 300)...">
+                    <button type="button" class="btn-pos-add" onclick="voegHoeveelheidToe()">+ Hoeveelheid</button>
+                </div>
+
+                <div class="total-display-box">
+                    <div class="label">Geselecteerde Inname</div>
+                    <div class="value" id="huidigeSelectieTekst">Kies drank & hoeveelheid</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Aangepaste / Handmatige invoer (ml)</label>
+                    <input type="number" id="handmatigMl" placeholder="Bijv. 175" oninput="updateHandmatigeSelectie(this.value)">
+                </div>
+
+                <button type="button" class="btn-pos-add" style="width:100%; padding:12px; font-size:13px; background:var(--android-primary); margin-top:6px;" onclick="registreerInname()">💾 Vocht Inname Opslaan</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: HISTORIE -->
+        <div id="historiePane" class="tab-pane">
+            <a href="index.html" class="back-link" onclick="gaNaarHoofdm(event)">← Terug naar Hoofdmenu</a>
+
+            <div class="controls-card">
+                <div class="section-title">📊 Vocht Inname Overzicht</div>
+                <table class="dialyse-table">
+                    <thead>
+                        <tr>
+                            <th>Datum & Tijd</th>
+                            <th>Gebruiker</th>
+                            <th>Drank / Omschrijving</th>
+                            <th>Hoeveelheid</th>
+                            <th style="width: 50px; text-align: center;">Actie</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historieTabelBody">
+                        <tr><td colspan="5" style="text-align: center;">Laden...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+
+        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
+        let vochtSessies = [];
+        
+        // Standaard sneltoetsen die je kunt uitbreiden of deleten
+        let drankenLijst = ["Water", "Koffie", "Thee", "Melk", "Soep", "Frisdrank"];
+        let hoeveelhedenLijst = [100, 150, 200, 250, 330, 500];
+
+        let geselecteerdeDrank = "";
+        let geselecteerdeMl = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
+            document.getElementById('gebruikerTitleBadge').innerText = pNaam;
+            startKlokLus();
+            laadData(false);
+        });
+
+        function gaNaarHoofdm(e) {
+            e.preventDefault();
+            let path = window.location.pathname;
+            let dir = path.substring(0, path.lastIndexOf('/') + 1);
+            window.location.href = dir + 'index.html';
+        }
+
+        function startKlokLus() {
+            setInterval(() => {
+                let nu = new Date();
+                document.getElementById('liveClock').innerText = `${nu.toLocaleDateString()} ${nu.toLocaleTimeString()}`;
+            }, 1000);
+        }
+
+        function toonTab(tab) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab === 'pos' ? 'posPane' : 'historiePane').classList.add('active');
+            document.getElementById(tab === 'pos' ? 'btnPos' : 'btnHistorie').classList.add('active');
+        }
+
+        // --- POS INTERACTIE & UI RENDEREN ---
+        function renderPosGrids() {
+            // Dranken renderen
+            let dGrid = document.getElementById('drankGrid');
+            dGrid.innerHTML = '';
+            drankenLijst.forEach((d, idx) => {
+                let btn = document.createElement('div');
+                btn.className = `pos-btn ${geselecteerdeDrank === d ? 'selected' : ''}`;
+                btn.innerHTML = `<span>🥤 ${d}</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderDrank(${idx})">✕</div>`;
+                btn.onclick = () => { geselecteerdeDrank = d; renderPosGrids(); updateSelectieTekst(); };
+                dGrid.appendChild(btn);
+            });
+
+            // Hoeveelheden renderen
+            let hGrid = document.getElementById('hoeveelheidGrid');
+            hGrid.innerHTML = '';
+            hoeveelhedenLijst.forEach((ml, idx) => {
+                let btn = document.createElement('div');
+                btn.className = `pos-btn ${geselecteerdeMl === ml ? 'selected' : ''}`;
+                btn.innerHTML = `<span>💧 ${ml} ml</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderHoeveelheid(${idx})">✕</div>`;
+                btn.onclick = () => { 
+                    geselecteerdeMl = ml; 
+                    document.getElementById('handmatigMl').value = ''; 
+                    renderPosGrids(); 
+                    updateSelectieTekst(); 
+                };
+                hGrid.appendChild(btn);
+            });
+        }
+
+        function updateHandmatigeSelectie(val) {
+            geselecteerdeMl = parseInt(val) || 0;
+            renderPosGrids();
+            updateSelectieTekst();
+        }
+
+        function updateSelectieTekst() {
+            let tekst = `${geselecteerdeDrank || 'Geen drank'} — ${geselecteerdeMl > 0 ? geselecteerdeMl + ' ml' : 'Geen hoeveelheid'}`;
+            document.getElementById('huidigeSelectieTekst').innerText = tekst;
+        }
+
+        // --- TOEVOEGEN & DELETEN VAN SNELTOETSEN ---
+        function voegDrankToe() {
+            let input = document.getElementById('nieuweDrankInput');
+            let val = input.value.trim();
+            if (val && !drankenLijst.includes(val)) {
+                drankenLijst.push(val);
+                input.value = '';
+                renderPosGrids();
+                slaNaarBin();
+            }
+        }
+
+        function verwijderDrank(index) {
+            if (confirm(`Verwijder drank sneltoets '${drankenLijst[index]}'?`)) {
+                drankenLijst.splice(index, 1);
+                renderPosGrids();
+                slaNaarBin();
+            }
+        }
+
+        function voegHoeveelheidToe() {
+            let input = document.getElementById('nieuweHoeveelheidInput');
+            let val = parseInt(input.value);
+            if (!isNaN(val) && val > 0 && !hoeveelhedenLijst.includes(val)) {
+                hoeveelhedenLijst.push(val);
+                hoeveelhedenLijst.sort((a,b) => a - b);
+                input.value = '';
+                renderPosGrids();
+                slaNaarBin();
+            }
+        }
+
+        function verwijderHoeveelheid(index) {
+            if (confirm(`Verwijder hoeveelheid sneltoets '${hoeveelhedenLijst[index]} ml'?`)) {
+                hoeveelhedenLijst.splice(index, 1);
+                renderPosGrids();
+                slaNaarBin();
+            }
+        }
+
+        // --- OPSLAAN INNAME ---
+        function registreerInname() {
+            if (!geselecteerdeDrank) { alert('Selecteer alstublieft een drankje.'); return; }
+            if (geselecteerdeMl <= 0) { alert('Selecteer of vul een geldige hoeveelheid in ml in.'); return; }
+
+            let item = {
+                id: Date.now(),
+                persoon: actieveGebruiker,
+                datum: new Date().toISOString().split('T')[0],
+                tijd: new Date().toTimeString().slice(0, 5),
+                drank: geselecteerdeDrank,
+                hoeveelheid: geselecteerdeMl
+            };
+
+            vochtSessies.unshift(item);
+            slaNaarBin();
+            alert(`Opgeslagen: ${geselecteerdeDrank} (${geselecteerdeMl} ml)`);
+            
+            // Reset selectie
+            geselecteerdeDrank = "";
+            geselecteerdeMl = 0;
+            document.getElementById('handmatigMl').value = '';
+            renderPosGrids();
+            updateSelectieTekst();
+            vulHistorieTabel();
+        }
+
+        // --- CLOUD SYNCHRONISATIE (JSONBIN) ---
+        function laadData(showAlert) {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                vochtSessies = rec.vochtSessies || [];
+                if (rec.vochtDranken) drankenLijst = rec.vochtDranken;
+                if (rec.vochtHoeveelheden) hoeveelhedenLijst = rec.vochtHoeveelheden;
+
+                renderPosGrids();
+                vulHistorieTabel();
+                if (showAlert) alert('Gegevens bijgewerkt!');
+            }).catch(err => console.error(err));
+        }
+
+        function slaNaarBin() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                rec.vochtSessies = vochtSessies;
+                rec.vochtDranken = drankenLijst;
+                rec.vochtHoeveelheden = hoeveelhedenLijst;
+
+                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(rec)
+                });
+            }).catch(err => console.error(err));
+        }
+
+        function vulHistorieTabel() {
+            let tbody = document.getElementById('historieTabelBody'); 
+            tbody.innerHTML = '';
+            if (vochtSessies.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color:#888;">Nog geen vochtinname geregistreerd.</td></tr>';
+                return;
+            }
+            vochtSessies.forEach(s => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td>${s.drank}</td><td><b>${s.hoeveelheid} ml</b></td><td style="text-align: center;"><button class="btn-small-del" onclick="verwijderSessie(${s.id})">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function verwijderSessie(id) {
+            if (confirm('Deze inname verwijderen?')) {
+                vochtSessies = vochtSessies.filter(s => s.id !== id);
+                slaNaarBin();
+                vulHistorieTabel();
+            }
+        }
+    </script>
+</body>
+</html>
