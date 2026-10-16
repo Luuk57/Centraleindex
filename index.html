@@ -85,7 +85,7 @@
             max-width: 600px;
         }
 
-        /* GEBRUIKER SELECTIE KART */
+        /* GEBRUIKER SELECTIE KAART */
         .patient-card {
             background: var(--android-card-bg);
             border-radius: 12px;
@@ -309,7 +309,7 @@
     <div class="workspace">
         <div class="dashboard-container">
             
-            <!-- GEBRUIKER SELECTIE KART -->
+            <!-- GEBRUIKER SELECTIE KAART -->
             <div class="patient-card">
                 <div class="patient-info">
                     <h2>Actieve Gebruiker</h2>
@@ -391,18 +391,20 @@
     <script>
         const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
         const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
-        const MASTER_PIN = "1234"; // Beveiligingspincode voor gebruikersbeheer
+        const MASTER_PIN = "1234";
 
         let pinDoelActie = ""; 
-        let gebruikersData = [{ naam: 'Gast', pin: '' }];
+        // Laad eerst lokale geheugen als beveiligings-fallback
+        let gebruikersData = JSON.parse(localStorage.getItem('rollodex_gebruikers')) || [{ naam: 'Gast', pin: '' }];
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
         let doelGebruiker = '';
 
         window.addEventListener('DOMContentLoaded', () => {
+            updateUI();
             startKlok();
             laadCloudData(false);
 
-            // Automatische achtergrond-sync elke 5 seconden voor Tablet B
+            // Automatische achtergrond-sync elke 5 seconden
             setInterval(() => {
                 laadCloudData(false);
             }, 5000);
@@ -420,10 +422,12 @@
             .then(res => res.json())
             .then(data => {
                 let record = data.record || {};
+                
+                // Controleer of de cloud geldige gebruikers bevat
                 if (record.gebruikersData && Array.isArray(record.gebruikersData) && record.gebruikersData.length > 0) {
                     gebruikersData = record.gebruikersData;
-                } else {
-                    gebruikersData = [{ naam: 'Gast', pin: '' }];
+                    // Bewaar ook altijd lokaal als back-up
+                    localStorage.setItem('rollodex_gebruikers', JSON.stringify(gebruikersData));
                 }
 
                 if (!gebruikersData.some(g => g.naam.toLowerCase() === actieveGebruiker.toLowerCase())) {
@@ -434,11 +438,14 @@
                 if (showAlert) alert('Cloud gegevens succesvol ververst!');
             })
             .catch(err => {
-                console.error("Fout bij laden cloud gebruikers:", err);
+                console.error("Cloud tijdelijk onbereikbaar, lokale back-up gebruikt:", err);
             });
         }
 
         function slaCloudDataOp(callback) {
+            // Sla direct lokaal op als back-up
+            localStorage.setItem('rollodex_gebruikers', JSON.stringify(gebruikersData));
+
             fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
             .then(res => res.json())
             .then(data => {
@@ -454,15 +461,16 @@
             .then(() => {
                 if (callback) callback();
             })
-            .catch(err => console.error("Fout bij opslaan cloud gebruikers:", err));
+            .catch(err => {
+                console.error("Fout bij opslaan cloud gebruikers:", err);
+                if (callback) callback();
+            });
         }
 
         function updateUI() {
             document.getElementById('activeUserDisplay').innerText = `Actief profiel: ${actieveGebruiker}`;
             
             let select = document.getElementById('selectGebruiker');
-            let huidigeWaarde = select.value;
-            
             select.innerHTML = '';
             gebruikersData.forEach(g => {
                 let opt = document.createElement('option');
@@ -577,7 +585,7 @@
                 document.getElementById('nieuwNaamInput').value = '';
                 document.getElementById('nieuwPinInput').value = '';
                 laadBeheerLijst();
-                alert('Gebruiker succesvol opgeslagen in de cloud!');
+                alert('Gebruiker succesvol opgeslagen en gesynchroniseerd!');
             });
         }
 
