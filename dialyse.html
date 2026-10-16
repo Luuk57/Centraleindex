@@ -1076,7 +1076,7 @@
 
         function getUfKleurBadge(v) {
             let val = parseFloat(v);
-            return isNaN(val) ? `<span>${v}</span>` : val >= 4.5 ? `<span class="badge-red">${v} (≥4.5)</span>` : val >= 4.0 ? `<span class="badge-orange">${v} (≥4.0)</span>` : `<span class="badge-green ${v} (<4.0)</span>`; // veilige fallback
+            return isNaN(val) ? `<span>${v}</span>` : val >= 4.5 ? `<span class="badge-red">${v} (≥4.5)</span>` : val >= 4.0 ? `<span class="badge-orange">${v} (≥4.0)</span>` : `<span class="badge-green">${v} (<4.0)</span>`;
         }
 
         function verversPagina() { laadData(true); }
@@ -1090,10 +1090,10 @@
                 gebruikerProfielen = rec.profielen || {};
                 if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
                 
-                // Als de timer lokaal al loopt, overschrijf hem dan NIET met een lege cloud-stand
+                // Synchroniseer lopende timer via cloud voor de actieve gebruiker
                 if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
                     let tc = rec.actieveTimerCloud;
-                    if (tc.isTimerRunning && !isTimerRunning) {
+                    if (tc.isTimerRunning) {
                         isTimerRunning = true;
                         timerStartTimestamp = tc.timerStartTimestamp;
                         timerTargetTime = tc.timerTargetTime;
@@ -1103,8 +1103,9 @@
                         if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
                         if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
                         if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
-                        slaLokaalOp();
                     }
+                } else if (!rec.actieveTimerCloud) {
+                    isTimerRunning = false;
                 }
 
                 vulHistorieTabel(); updateKlok();
