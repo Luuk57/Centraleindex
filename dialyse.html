@@ -477,7 +477,7 @@
                     <div class="row-inputs">
                         <div class="form-group">
                             <label>UF Ingesteld (l)</label>
-                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="this.dataset.autoFilled='false'; bepaalTotaalDoelVanIngesteld(); slaLokaalOp(); updateActieveTimerInCloud();">
+                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="bepaalTotaalDoelVanIngesteld(); slaLokaalOp(); updateActieveTimerInCloud();">
                         </div>
                         <div class="form-group">
                             <label>Werkelijke UF (kg)</label>
@@ -718,7 +718,6 @@
             startKlokLus();
             laadData(false);
 
-            // Elke 3 seconden achtergrond-sync voor feilloze gelijktijdigheid op alle tablets
             setInterval(() => {
                 laadData(false);
             }, 3000);
@@ -1075,8 +1074,11 @@
                 let adv = (pre - droog) + factor;
                 document.getElementById('valUfAdvies').value = adv.toFixed(2) + " kg";
                 document.getElementById('valUitgerekendeUf').value = Math.round(adv * 1000) + " ml";
-                let ingesteld = document.getElementById('valUfIngesteld');
-                if (!ingesteld.value) ingesteld.value = adv.toFixed(2);
+                
+                // Automatisch doorzetten naar UF Ingesteld
+                let ingesteldField = document.getElementById('valUfIngesteld');
+                ingesteldField.value = adv.toFixed(2);
+                
                 bepaalTotaalDoelVanIngesteld();
             }
         }
@@ -1103,7 +1105,6 @@
                 gebruikerProfielen = rec.profielen || {};
                 if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
                 
-                // Volledige live synchronisatie van timer, doel en verstreken UF-volume over A, B en C
                 if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
                     let tc = rec.actieveTimerCloud;
                     if (tc.isTimerRunning) {
