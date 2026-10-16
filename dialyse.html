@@ -714,17 +714,20 @@
             }
 
             genereerUurStrepen();
+            herstelLokaalOp(); // Direct lokale status inladen bij opstarten!
             startKlokLus();
             laadData(false);
 
-            // 1. Automatische achtergrond-sync elke 3 seconden
+            // Automatische achtergrond-sync elke 3 seconden
             setInterval(() => {
                 laadData(false);
             }, 3000);
 
-            // 2. Direct hervatten/herberekenen zodra scherm weer geopend of actief wordt
+            // Direct herberekenen bij heropenen van het scherm
             document.addEventListener("visibilitychange", () => {
                 if (!document.hidden) {
+                    herstelLokaalOp();
+                    updateKlok();
                     laadData(false);
                 }
             });
@@ -824,6 +827,7 @@
                 bloeddrukMetingen: bloeddrukMetingen,
                 soortDialyse: actieveSoortDialyse,
                 huidigUfGeweestMl: huidigUfGeweestMl,
+                totaalUfDoelMl: totaalUfDoelMl,
                 isTimerRunning: isTimerRunning,
                 timerStartTimestamp: timerStartTimestamp,
                 timerTargetTime: timerTargetTime,
@@ -845,8 +849,12 @@
                 if (d.post) document.getElementById('valPostGewicht').value = d.post;
                 if (d.droog) document.getElementById('valDroogGewicht').value = d.droog;
                 if (d.ufIngesteld) { document.getElementById('valUfIngesteld').value = d.ufIngesteld; }
-                if (d.bloeddrukken) { bloeddrukMetingen = d.bloeddrukken; updateBloeddrukLijstEnScherm(); }
+                if (d.bloeddrukMetingen) { bloeddrukMetingen = d.bloeddrukMetingen; updateBloeddrukLijstEnScherm(); }
                 if (d.soortDialyse) setSoortDialyse(d.soortDialyse);
+                if (d.isTimerRunning !== undefined) isTimerRunning = d.isTimerRunning;
+                if (d.timerStartTimestamp) timerStartTimestamp = d.timerStartTimestamp;
+                if (d.timerTargetTime) timerTargetTime = d.timerTargetTime;
+                if (d.totaalUfDoelMl) totaalUfDoelMl = d.totaalUfDoelMl;
                 berekenUF(); berekenWerkelijkeUF();
             } catch (e) {}
         }
@@ -1015,7 +1023,7 @@
                         document.getElementById('alarmModal').style.display = 'flex'; 
                     }
                 } else {
-                    clockEl.style.backgroundColor = '#fbbc04'; // Zorg dat klok geel blijft tijdens actieve sessie
+                    clockEl.style.backgroundColor = '#fbbc04'; 
                     let sec = Math.floor(overms / 1000);
                     countdownEl.innerText = `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
                 }
@@ -1095,13 +1103,16 @@
                         if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
                         if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
                         if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
+                        slaLokaalOp();
                     }
-                } else if (!rec.actieveTimerCloud) {
+                } else if (!rec.actieveTimerCloud && isTimerRunning) {
+                    // Als de timer op een ander apparaat stopgezet werd
                     isTimerRunning = false;
                     document.getElementById('analogueClock').style.backgroundColor = '#282c34';
+                    slaLokaalOp();
                 }
 
-                herstelLokaalOp(); vulHistorieTabel(); updateKlok();
+                vulHistorieTabel(); updateKlok();
                 if (showAlert) alert('Gevuld vanuit cloud!');
             }).catch(err => console.error(err));
         }
