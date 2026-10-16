@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rollodex • Gebruikersbeheer</title>
+    <style>
+        :root {
+            --android-bg: #f8f9fa;
+            --android-primary: #1a73e8;
+            --android-primary-dark: #1557b0;
+            --android-card-bg: #ffffff;
+            --android-text: #202124;
+            --android-subtext: #5f6368;
+            --red-alert: #d93025;
+            --green-ok: #188038;
+            --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
+        body, html { width: 100%; height: 100%; background: var(--android-bg); color: var(--android-text); display: flex; flex-direction: column; overflow: hidden; }
+
+        .android-appbar {
+            background: var(--android-primary);
+            color: #ffffff;
+            height: 56px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .appbar-title { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 16px; overflow-y: auto; }
+        .card { background: var(--android-card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #dadce0; }
+        .section-title { font-size: 14px; font-weight: 700; color: var(--android-primary); text-transform: uppercase; margin-bottom: 12px; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .form-group label { font-size: 11px; font-weight: 600; color: var(--android-subtext); }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #dadce0; border-radius: 8px; font-size: 13px; outline: none; }
+        
+        .btn-primary { background: var(--android-primary); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-primary:hover { background: var(--android-primary-dark); }
+        
+        .back-link { display: inline-block; margin-bottom: 12px; font-size: 11px; font-weight: 600; color: var(--android-primary); text-decoration: none; }
+        
+        .profile-list { margin-top: 16px; border-top: 1px solid #dadce0; padding-top: 12px; }
+        .profile-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; margin-bottom: 6px; font-size: 12px; font-weight: 600; }
+        .btn-del { background: var(--red-alert); color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="android-appbar">
+        <div class="appbar-title">
+            <span>⚙️ Rollodex • Gebruikersbeheer</span>
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div class="card">
+            <a href="index.html" class="back-link">← Terug naar Hoofdmenu</a>
+            
+            <div class="section-title">Nieuw Profiel Aanmaken</div>
+            <div class="form-group">
+                <label>Naam van de gebruiker</label>
+                <input type="text" id="nieuweGebruikerNaam" placeholder="Bijv. Jan of Maria...">
+            </div>
+            <div class="form-group">
+                <label>Rol</label>
+                <select id="nieuweGebruikerRol">
+                    <option value="gebruiker">Normale gebruiker</option>
+                    <option value="admin">Administrator (Beheer)</option>
+                </select>
+            </div>
+            <button type="button" class="btn-primary" onclick="voegProfielToe()">+ Profiel Opslaan</button>
+
+            <div class="profile-list">
+                <div class="section-title" style="margin-top: 10px;">Bestaande Profielen</div>
+                <div id="profielenContainer">Laden...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+
+        let profielenData = {};
+
+        window.addEventListener('DOMContentLoaded', () => {
+            laadProfielen();
+        });
+
+        function laadProfielen() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                profielenData = rec.profielen || { "luuk": { rol: "admin" } };
+                renderProfielenLijst();
+            }).catch(err => console.error(err));
+        }
+
+        function renderProfielenLijst() {
+            let container = document.getElementById('profielenContainer');
+            container.innerHTML = '';
+            Object.keys(profielenData).forEach(naam => {
+                let p = profielenData[naam];
+                let div = document.createElement('div');
+                div.className = 'profile-item';
+                div.innerHTML = `<span>👤 ${naam.charAt(0).toUpperCase() + naam.slice(1)} <small style="color:gray;">(${p.rol})</small></span>`;
+                
+                if (naam.toLowerCase() !== 'luuk') {
+                    let btn = document.createElement('button');
+                    btn.className = 'btn-del';
+                    btn.innerText = 'Verwijder';
+                    btn.onclick = () => verwijderProfiel(naam);
+                    div.appendChild(btn);
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function voegProfielToe() {
+            let input = document.getElementById('nieuweGebruikerNaam');
+            let rolSelect = document.getElementById('nieuweGebruikerRol');
+            let naam = input.value.trim().toLowerCase();
+            
+            if (!naam) { alert('Vul een geldige naam in.'); return; }
+            if (profielenData[naam]) { alert('Dit profiel bestaat al.'); return; }
+
+            profielenData[naam] = { rol: rolSelect.value };
+            input.value = '';
+
+            slaNaarBin();
+        }
+
+        function verwijderProfiel(naam) {
+            if (confirm(`Weet je zeker dat je profiel '${naam}' wilt verwijderen?`)) {
+                delete profielenData[naam];
+                slaNaarBin();
+            }
+        }
+
+        function slaNaarBin() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                rec.profielen = profielenData;
+
+                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(rec)
+                });
+            })
+            .then(() => {
+                alert('Profielen bijgewerkt!');
+                laadProfielen();
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>
