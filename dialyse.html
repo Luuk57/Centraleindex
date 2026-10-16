@@ -1,4 +1,4 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
@@ -280,7 +280,6 @@
         .back-link { display: inline-block; margin-bottom: 6px; font-size: 10px; font-weight: 500; color: #ffffff; text-decoration: none; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 6px; }
         .back-link:hover { background: rgba(0,0,0,0.5); }
 
-        /* TELEFOON SPECIALE MEDIA QUERY (SCHERMEN < 600px) */
         @media screen and (max-width: 600px) {
             .dialysis-console {
                 grid-template-columns: 1fr 1fr;
@@ -299,13 +298,12 @@
             .dialysis-console.ponti-mode .center-clock-panel { min-height: 290px; }
             .dialysis-console.ponti-mode .analogue-clock { width: 170px; height: 170px; }
 
-            /* Verplaats de med-boxen netjes rondom op mobiel */
-            .med-box:nth-of-type(1) { grid-column: 1; grid-row: 2; } /* Bloeddruk */
-            .med-box:nth-of-type(2) { grid-column: 2; grid-row: 2; } /* UF Doel */
-            .med-box:nth-of-type(3) { grid-column: 1; grid-row: 3; } /* Scherm */
-            .med-box:nth-of-type(4) { grid-column: 2; grid-row: 3; } /* UF per uur */
-            .med-box:nth-of-type(5) { grid-column: 1; grid-row: 4; } /* Opslaan */
-            .med-box:nth-of-type(6) { grid-column: 2; grid-row: 4; } /* UF volume */
+            .med-box:nth-of-type(1) { grid-column: 1; grid-row: 2; }
+            .med-box:nth-of-type(2) { grid-column: 2; grid-row: 2; }
+            .med-box:nth-of-type(3) { grid-column: 1; grid-row: 3; }
+            .med-box:nth-of-type(4) { grid-column: 2; grid-row: 3; }
+            .med-box:nth-of-type(5) { grid-column: 1; grid-row: 4; }
+            .med-box:nth-of-type(6) { grid-column: 2; grid-row: 4; }
 
             .bottom-buttons-row {
                 grid-column: 1 / span 2;
@@ -753,9 +751,10 @@
             }
 
             genereerUurStrepen();
-            herstelLokaalOp(); 
             startKlokLus();
-            laadData(false);
+            
+            // Direct bij opstarten ophalen uit de cloud, ongeacht welk apparaat gestart wordt
+            laadData(true);
 
             setInterval(() => {
                 laadData(false);
@@ -763,7 +762,6 @@
 
             document.addEventListener("visibilitychange", () => {
                 if (!document.hidden) {
-                    herstelLokaalOp();
                     updateKlok();
                     laadData(false);
                 }
@@ -866,13 +864,7 @@
                 notitie: document.getElementById('valNotitie').value,
                 geselecteerdeVerpleging: geselecteerdeVerpleging,
                 bloeddrukMetingen: bloeddrukMetingen,
-                soortDialyse: actieveSoortDialyse,
-                huidigUfGeweestMl: huidigUfGeweestMl,
-                totaalUfDoelMl: totaalUfDoelMl,
-                isTimerRunning: isTimerRunning,
-                timerStartTimestamp: timerStartTimestamp,
-                timerTargetTime: timerTargetTime,
-                huidigeBewerkingSessieId: huidigeBewerkingSessieId
+                soortDialyse: actieveSoortDialyse
             };
             localStorage.setItem('dialyse_form_concept', JSON.stringify(data));
         }
@@ -889,13 +881,9 @@
                 if (d.pre) document.getElementById('valPreGewicht').value = d.pre;
                 if (d.post) document.getElementById('valPostGewicht').value = d.post;
                 if (d.droog) document.getElementById('valDroogGewicht').value = d.droog;
-                if (d.ufIngesteld) { document.getElementById('valUfIngesteld').value = d.ufIngesteld; }
+                if (d.ufIngesteld) document.getElementById('valUfIngesteld').value = d.ufIngesteld;
                 if (d.bloeddrukMetingen) { bloeddrukMetingen = d.bloeddrukMetingen; updateBloeddrukLijstEnScherm(); }
                 if (d.soortDialyse) setSoortDialyse(d.soortDialyse);
-                if (d.isTimerRunning !== undefined) isTimerRunning = d.isTimerRunning;
-                if (d.timerStartTimestamp) timerStartTimestamp = d.timerStartTimestamp;
-                if (d.timerTargetTime) timerTargetTime = d.timerTargetTime;
-                if (d.totaalUfDoelMl) totaalUfDoelMl = d.totaalUfDoelMl;
                 berekenUF(); berekenWerkelijkeUF();
             } catch (e) {}
         }
@@ -984,11 +972,10 @@
         }
 
         function updateActieveTimerInCloud() {
-            if (!isTimerRunning) return;
             bepaalTotaalDoelVanIngesteld();
             actieveTimerCloud = {
                 gebruiker: actieveGebruiker,
-                isTimerRunning: true,
+                isTimerRunning: isTimerRunning,
                 timerStartTimestamp: timerStartTimestamp,
                 timerTargetTime: timerTargetTime,
                 totaalUfDoelMl: totaalUfDoelMl,
@@ -1021,7 +1008,6 @@
                 document.getElementById('alarmModal').style.display = 'none';
                 clockEl.style.backgroundColor = '#fbbc04';
                 
-                slaLokaalOp();
                 updateActieveTimerInCloud();
             }
         }
@@ -1034,7 +1020,6 @@
             clockEl.classList.remove('alarm-state');
             clockEl.style.backgroundColor = '#282c34';
             document.getElementById('alarmModal').style.display = 'none';
-            slaLokaalOp();
             slaNaarBin();
         }
 
@@ -1115,8 +1100,9 @@
                 document.getElementById('valUitgerekendeUf').value = Math.round(adv * 1000) + " ml";
                 
                 let ingesteldField = document.getElementById('valUfIngesteld');
-                ingesteldField.value = adv.toFixed(2);
-                
+                if (!ingesteldField.value || ingesteldField.value == "0") {
+                    ingesteldField.value = adv.toFixed(2);
+                }
                 bepaalTotaalDoelVanIngesteld();
             }
         }
@@ -1129,7 +1115,7 @@
 
         function getUfKleurBadge(v) {
             let val = parseFloat(v);
-            return isNaN(val) ? `<span>${v}</span>` : val >= 4.5 ? `<span class="badge-red">${v} (≥4.5)</span>` : val >= 4.0 ? `<span class="badge-orange">${v} (≥4.0)</span>` : `<span class="badge-green">${v} (<4.0)</span>`;
+            return isNaN(val) ? `<span>${v}</span>` : val >= 4.5 ? `<span class="badge-red">${v} (≥4.5)</span>` : val >= 4.0 ? `<span class="badge-orange>${v} (≥4.0)</span>` : `<span class="badge-green">${v} (<4.0)</span>`;
         }
 
         function verversPagina() { laadData(true); }
@@ -1143,33 +1129,34 @@
                 gebruikerProfielen = rec.profielen || {};
                 if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
                 
+                // Haalt altijd direct de actieve sessie op uit de cloud, ongeacht welk apparaat als eerste opstart
                 if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
                     let tc = rec.actieveTimerCloud;
-                    if (tc.isTimerRunning) {
-                        isTimerRunning = true;
-                        timerStartTimestamp = tc.timerStartTimestamp;
-                        timerTargetTime = tc.timerTargetTime;
-                        totaalUfDoelMl = tc.totaalUfDoelMl || 0;
-                        if (tc.duurUur) document.getElementById('valDuurUur').value = tc.duurUur;
-                        if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
-                        if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
-                        if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
-                        
-                        if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
-                        if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
-                        if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
-                        if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
-                        if (tc.ufIngesteld) document.getElementById('valUfIngesteld').value = tc.ufIngesteld;
-                        if (tc.verpleging) { geselecteerdeVerpleging = tc.verpleging; updateVerplegingTags(); }
-                        
-                        berekenUF(); berekenWerkelijkeUF();
-                    }
-                } else if (!rec.actieveTimerCloud) {
-                    isTimerRunning = false;
+                    isTimerRunning = tc.isTimerRunning;
+                    timerStartTimestamp = tc.timerStartTimestamp;
+                    timerTargetTime = tc.timerTargetTime;
+                    totaalUfDoelMl = tc.totaalUfDoelMl || 0;
+                    
+                    if (tc.duurUur) document.getElementById('valDuurUur').value = tc.duurUur;
+                    if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
+                    if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
+                    if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
+                    
+                    if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
+                    if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
+                    if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
+                    if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
+                    if (tc.ufIngesteld) document.getElementById('valUfIngesteld').value = tc.ufIngesteld;
+                    if (tc.verpleging) { geselecteerdeVerpleging = tc.verpleging; updateVerplegingTags(); }
+                    
+                    berekenUF(); berekenWerkelijkeUF();
+                } else {
+                    // Als er niets in de cloud staat, val dan terug op lokaal concept
+                    herstelLokaalOp();
                 }
 
                 vulHistorieTabel(); updateKlok();
-                if (showAlert) alert('Gevuld vanuit cloud!');
+                if (showAlert) alert('Gegevens succesvol geladen!');
             }).catch(err => console.error(err));
         }
 
