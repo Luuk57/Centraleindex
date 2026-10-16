@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rollodex • Dialyse Monitor</title>
+    <!-- Supabase JavaScript Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --android-bg: #f8f9fa;
@@ -716,8 +718,11 @@
     </div>
 
     <script>
-        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
-        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+        // SUPABASE CONFIGURATIE
+        const SUPABASE_URL = "https://cnsjgjpzxgyezqppnhzv.supabase.co";
+        const SUPABASE_ANON_KEY = "Sb_publishable_4iyh2BWub7qgc3QbJDeq0g_qjdXQlor";
+
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
         let gebruikerRol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
@@ -752,12 +757,16 @@
 
             genereerUurStrepen();
             startKlokLus();
-            laadData(false);
+            laadDataVanSupabase(true);
 
-            // LIVE LUS: Haalt elke 3 seconden de actieve stand uit de cloud
-            setInterval(() => {
-                laadData(false);
-            }, 3000);
+            // Realtime WebSocket luisteraar (Vervangt de slopende setInterval polling!)
+            _supabase
+                .channel('public:rollodex_store')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'rollodex_store' }, payload => {
+                    console.log('Realtime update binnengekomen!', payload);
+                    laadDataVanSupabase(false);
+                })
+                .subscribe();
         });
 
         function gaNaarHoofdm(e) {
@@ -923,15 +932,15 @@
 
         function registreerNieuweVerpleging() {
             let naam = document.getElementById('newNurseNameInput').value.trim();
-            if (naam && !beschikbareVerpleging.includes(naam)) { beschikbareVerpleging.push(naam); document.getElementById('newNurseNameInput').value=''; vulVerplegingDropdown(); slaNaarBin(); }
+            if (naam && !beschikbareVerpleging.includes(naam)) { beschikbareVerpleging.push(naam); document.getElementById('newNurseNameInput').value=''; vulVerplegingDropdown(); slaNaarSupabaseMaster(); }
         }
 
         function verwijderGeselecteerdeNaamUitLijst() {
             let naam = document.getElementById('selectVerplegingDropdown').value;
             if (naam && confirm(`Verwijder ${naam}?`)) {
-                beschikbareVerpleging = beschikbareVerpleging.filter(n => n !== naam);
+                beschikbareVerpleging = beschilkbareVerpleging.filter(n => n !== naam);
                 geselecteerdeVerpleging = geselecteerdeVerpleging.filter(n => n !== naam);
-                vulVerplegingDropdown(); slaNaarBin();
+                vulVerplegingDropdown(); slaNaarSupabaseMaster();
             }
         }
 
@@ -983,7 +992,7 @@
                 ufIngesteld: document.getElementById('valUfIngesteld').value,
                 verpleging: geselecteerdeVerpleging
             };
-            slaNaarBin();
+            slaNaarSupabaseMaster();
         }
 
         function startSessieTijd() {
@@ -1029,7 +1038,7 @@
             clockEl.classList.remove('alarm-state');
             clockEl.style.backgroundColor = '#282c34';
             document.getElementById('alarmModal').style.display = 'none';
-            slaNaarBin();
+            slaNaarSupabaseMaster();
         }
 
         function berekenAutomatischeEindtijd() {
@@ -1126,63 +1135,72 @@
             return isNaN(val) ? `<span>${v}</span>` : val >= 4.5 ? `<span class="badge-red">${v} (≥4.5)</span>` : val >= 4.0 ? `<span class="badge-orange">${v} (≥4.0)</span>` : `<span class="badge-green">${v} (<4.0)</span>`;
         }
 
-        function verversPagina() { laadData(true); }
+        function verversPagina() { laadDataVanSupabase(true); }
 
-        function laadData(showAlert) {
-            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
-            .then(res => res.json())
-            .then(data => {
-                let rec = data.record || {};
-                sessies = rec.sessies || [];
-                gebruikerProfielen = rec.profielen || {};
-                if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
-                
-                if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
-                    let tc = rec.actieveTimerCloud;
-                    isTimerRunning = tc.isTimerRunning;
-                    timerStartTimestamp = tc.timerStartTimestamp;
-                    timerTargetTime = tc.timerTargetTime;
-                    totaalUfDoelMl = tc.totaalUfDoelMl || 0;
-                    
-                    if (tc.duurUur) document.getElementById('valDuurUur').value = tc.duurUur;
-                    if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
-                    if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
-                    if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
-                    
-                    if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
-                    if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
-                    if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
-                    if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
-                    if (tc.ufIngesteld) document.getElementById('valUfIngesteld').value = tc.ufIngesteld;
-                    if (tc.verpleging) { geselecteerdeVerpleging = tc.verpleging; updateVerplegingTags(); }
-                    
-                    berekenUF(); berekenWerkelijkeUF();
-                } else {
-                    herstelLokaalOp();
-                }
+        // DATA INLADEN VANAF SUPABASE
+        function laadDataVanSupabase(showAlert) {
+            _supabase
+                .from('rollodex_store')
+                .select('*')
+                .eq('id', 'dialyse_master_data')
+                .then(({ data, error }) => {
+                    if (error) {
+                        console.error("Fout bij laden Supabase:", error);
+                        return;
+                    }
+                    if (data && data.length > 0) {
+                        let rec = data[0].payload || {};
+                        sessies = rec.sessies || [];
+                        gebruikerProfielen = rec.profielen || {};
+                        if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
+                        
+                        if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
+                            let tc = rec.actieveTimerCloud;
+                            isTimerRunning = tc.isTimerRunning;
+                            timerStartTimestamp = tc.timerStartTimestamp;
+                            timerTargetTime = tc.timerTargetTime;
+                            totaalUfDoelMl = tc.totaalUfDoelMl || 0;
+                            
+                            if (tc.duurUur) document.getElementById('valDuurUur').value = tc.duurUur;
+                            if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
+                            if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
+                            if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
+                            
+                            if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
+                            if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
+                            if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
+                            if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
+                            if (tc.ufIngesteld) document.getElementById('valUfIngesteld').value = tc.ufIngesteld;
+                            if (tc.verpleging) { geselecteerdeVerpleging = tc.verpleging; updateVerplegingTags(); }
+                            
+                            berekenUF(); berekenWerkelijkeUF();
+                        } else {
+                            herstelLokaalOp();
+                        }
+                    } else {
+                        herstelLokaalOp();
+                    }
 
-                vulHistorieTabel(); updateKlok();
-                if (showAlert) alert('Gegevens geladen!');
-            }).catch(err => console.error(err));
+                    vulHistorieTabel(); updateKlok();
+                    if (showAlert) alert('Supabase live data geladen!');
+                });
         }
 
-        function slaNaarBin() {
-            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
-            .then(res => res.json())
-            .then(data => {
-                let rec = data.record || {};
-                rec.sessies = sessies;
-                rec.profielen = gebruikerProfielen;
-                rec.verplegingLijst = beschikbareVerpleging;
-                rec.actieveTimerCloud = actieveTimerCloud;
+        // DATA OPSLAAN NAAR SUPABASE
+        function slaNaarSupabaseMaster() {
+            let payloadData = {
+                sessies: sessies,
+                profielen: gebruikerProfielen,
+                verplegingLijst: beschikbareVerpleging,
+                actieveTimerCloud: actieveTimerCloud
+            };
 
-                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                    body: JSON.stringify(rec)
+            _supabase
+                .from('rollodex_store')
+                .upsert({ id: 'dialyse_master_data', payload: payloadData, updated_at: new Date() })
+                .then(({ error }) => {
+                    if (error) console.error("Fout bij opslaan naar Supabase:", error);
                 });
-            })
-            .catch(err => console.error(err));
         }
 
         function slaDialyseOp() {
@@ -1222,7 +1240,7 @@
             
             actieveTimerCloud = null;
             document.getElementById('analogueClock').style.backgroundColor = '#282c34';
-            slaNaarBin(); wisLokaalConcept(); vulHistorieTabel(); alert('Sessie succesvol opgeslagen!'); toonTab('historie');
+            slaNaarSupabaseMaster(); wisLokaalConcept(); vulHistorieTabel(); alert('Sessie succesvol opgeslagen!'); toonTab('historie');
         }
 
         window.bewerkSessie = function(id) {
@@ -1251,7 +1269,7 @@
         };
 
         window.verwijderSessie = function(id) {
-            if (confirm('Sessie verwijderen?')) { sessies = sessies.filter(s => s.id !== id); slaNaarBin(); vulHistorieTabel(); }
+            if (confirm('Sessie verwijderen?')) { sessies = sessies.filter(s => s.id !== id); slaNaarSupabaseMaster(); vulHistorieTabel(); }
         };
 
         function resetteerDatumFilter() { document.getElementById('filterVanDatum').value = ''; document.getElementById('filterTotDatum').value = ''; vulHistorieTabel(); }
