@@ -136,7 +136,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-between: space-between;
             width: 100%;
             height: 100%;
             min-height: 310px;
@@ -757,14 +757,15 @@
 
             genereerUurStrepen();
             startKlokLus();
-            laadDataVanSupabase(true);
+            laadDataVanSupabase(false);
 
-            // Realtime WebSocket luisteraar (Vervangt de slopende setInterval polling!)
+            // REALTIME WEBSOCKET LUISTERARR
             _supabase
                 .channel('public:rollodex_store')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'rollodex_store' }, payload => {
-                    console.log('Realtime update binnengekomen!', payload);
-                    laadDataVanSupabase(false);
+                    if (payload.new && payload.new.id === 'dialyse_master_data') {
+                        verwerkSupabasePayload(payload.new.payload);
+                    }
                 })
                 .subscribe();
         });
@@ -938,7 +939,7 @@
         function verwijderGeselecteerdeNaamUitLijst() {
             let naam = document.getElementById('selectVerplegingDropdown').value;
             if (naam && confirm(`Verwijder ${naam}?`)) {
-                beschikbareVerpleging = beschilkbareVerpleging.filter(n => n !== naam);
+                beschikbareVerpleging = beschikbareVerpleging.filter(n => n !== naam);
                 geselecteerdeVerpleging = geselecteerdeVerpleging.filter(n => n !== naam);
                 vulVerplegingDropdown(); slaNaarSupabaseMaster();
             }
@@ -1137,6 +1138,41 @@
 
         function verversPagina() { laadDataVanSupabase(true); }
 
+        function verwerkSupabasePayload(rec) {
+            if (!rec) return;
+            sessies = rec.sessies || [];
+            gebruikerProfielen = rec.profielen || {};
+            if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
+            
+            if (rec.actieveTimerCloud) {
+                let tc = rec.actieveTimerCloud;
+                isTimerRunning = tc.isTimerRunning;
+                timerStartTimestamp = tc.timerStartTimestamp;
+                timerTargetTime = tc.timerTargetTime;
+                totaalUfDoelMl = tc.totaalUfDoelMl || 0;
+                
+                if (tc.duurUur) document.getElementById('valDuurUur').value = tc.duurUur;
+                if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
+                if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
+                if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
+                
+                if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
+                if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
+                if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
+                if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
+                if (tc.ufIngesteld) document.getElementById('valUfIngesteld').value = tc.ufIngesteld;
+                if (tc.verpleging) { geselecteerdeVerpleging = tc.verpleging; updateVerplegingTags(); }
+                
+                berekenUF(); berekenWerkelijkeUF();
+            } else {
+                isTimerRunning = false;
+                timerTargetTime = null;
+                document.getElementById('analogueClock').style.backgroundColor = '#282c34';
+            }
+
+            vulHistorieTabel(); updateKlok();
+        }
+
         // DATA INLADEN VANAF SUPABASE
         function laadDataVanSupabase(showAlert) {
             _supabase
@@ -1149,39 +1185,10 @@
                         return;
                     }
                     if (data && data.length > 0) {
-                        let rec = data[0].payload || {};
-                        sessies = rec.sessies || [];
-                        gebruikerProfielen = rec.profielen || {};
-                        if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
-                        
-                        if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
-                            let tc = rec.actieveTimerCloud;
-                            isTimerRunning = tc.isTimerRunning;
-                            timerStartTimestamp = tc.timerStartTimestamp;
-                            timerTargetTime = tc.timerTargetTime;
-                            totaalUfDoelMl = tc.totaalUfDoelMl || 0;
-                            
-                            if (tc.duurUur) document.getElementById('valDuurUur').value = tc.duurUur;
-                            if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
-                            if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
-                            if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
-                            
-                            if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
-                            if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
-                            if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
-                            if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
-                            if (tc.ufIngesteld) document.getElementById('valUfIngesteld').value = tc.ufIngesteld;
-                            if (tc.verpleging) { geselecteerdeVerpleging = tc.verpleging; updateVerplegingTags(); }
-                            
-                            berekenUF(); berekenWerkelijkeUF();
-                        } else {
-                            herstelLokaalOp();
-                        }
+                        verwerkSupabasePayload(data[0].payload);
                     } else {
                         herstelLokaalOp();
                     }
-
-                    vulHistorieTabel(); updateKlok();
                     if (showAlert) alert('Supabase live data geladen!');
                 });
         }
