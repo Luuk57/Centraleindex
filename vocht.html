@@ -118,4 +118,416 @@
             .workspace { padding: 0 !important; background: none !important; }
             #historiePane { display: block !important; width: 100% !important; max-width: 100% !important; }
             .controls-card { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
-            .print-only-header
+            .print-only-header { display: block !important; border-bottom: 3px solid var(--android-primary); padding-bottom: 8px; margin-bottom: 12px; }
+            .print-only-footer { display: block !important; margin-top: 24px; padding-top: 10px; border-top: 1px solid #aaa; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="android-appbar">
+        <div class="appbar-title">
+            <span>🥤 Rollodex • Vocht Monitor</span>
+            <span id="gebruikerTitleBadge" style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; color: var(--dialysis-yellow);">...</span>
+        </div>
+        <div class="appbar-actions">
+            <div id="liveClock" class="android-clock">--:--</div>
+            <button type="button" class="icon-btn" onclick="laadData(true)" title="Verversen">🔄</button>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button type="button" class="tab-btn active" id="btnPos" onclick="toonTab('pos')">🧮 POS Invoer</button>
+        <button type="button" class="tab-btn" id="btnHistorie" onclick="toonTab('historie')">📊 Vocht Historie</button>
+    </div>
+
+    <div class="workspace">
+        
+        <!-- TAB 1: POS INVOER -->
+        <div class="tab-pane active" id="posPane">
+            <a href="index.html" class="back-link">← Terug naar Hoofdmenu</a>
+
+            <div class="user-switch-bar">
+                <div style="font-size: 11px; font-weight: 700; color: var(--android-subtext);">🔒 Actieve Gebruiker:</div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <select id="gebruikerDropdown" onchange="wijzigActieveGebruiker(this.value)"></select>
+                    <a href="profielen.html" style="text-decoration: none; background: #f1f3f4; color: var(--android-primary); padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; border: 1px solid #dadce0;">⚙️ Beheer</a>
+                </div>
+            </div>
+
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span>Dagelijks Vocht: <b id="totaalVochtVandaag">0 ml</b> / <span id="doelMlTekst">1000 ml</span></span>
+                    <button type="button" class="icon-btn" style="background:#f1f3f4; color:#333; font-size:12px; padding:4px 8px; border-radius:6px;" onclick="toggleDoelBewerken()">⚙️ Doel</button>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+                <div class="goal-settings-row" id="goalSettingsRow">
+                    <input type="number" id="inputDoelMl" value="1000" placeholder="Nieuw doel in ml...">
+                    <button type="button" class="btn-pos-add" onclick="slaDoelOp()">Opslaan</button>
+                </div>
+            </div>
+
+            <div class="controls-card">
+                <div class="section-title">1. Selecteer Drank (Zonder hoeveelheid)</div>
+                <div class="pos-grid" id="drankGrid"></div>
+                <div class="pos-add-row">
+                    <input type="text" id="nieuweDrankInput" placeholder="Nieuwe drank toevoegen (bijv. Thee)...">
+                    <button type="button" class="btn-pos-add" onclick="voegDrankToe()">+ Drank</button>
+                </div>
+
+                <div class="section-title" style="margin-top:10px;">2. Selecteer Hoeveelheid (ml)</div>
+                <div class="pos-grid" id="hoeveelheidGrid"></div>
+                <div class="pos-add-row">
+                    <input type="number" id="nieuweHoeveelheidInput" placeholder="Nieuwe ml (bijv. 300)...">
+                    <button type="button" class="btn-pos-add" onclick="voegHoeveelheidToe()">+ Hoeveelheid</button>
+                </div>
+
+                <div class="total-display-box">
+                    <div class="label">Geselecteerde Inname</div>
+                    <div class="value" id="huidigeSelectieTekst">Kies drank & hoeveelheid</div>
+                </div>
+
+                <button type="button" class="btn-pos-add" style="width:100%; padding:12px; font-size:12px; background:var(--android-primary); margin-top:4px;" onclick="registreerInname()">💾 Vocht Inname Opslaan</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: HISTORIE -->
+        <div id="historiePane" class="tab-pane">
+            <a href="index.html" class="back-link">← Terug naar Hoofdmenu</a>
+
+            <div class="controls-card" style="display: block;">
+                
+                <div class="print-only-header">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <div style="font-size: 15px; font-weight: bold; color: #1a73e8;">🥤 CLINICAL VOCHT MONITOR OVERZICHT</div>
+                            <div style="font-size: 10px; color: #555;">Afdeling Nefrologie & Vochtbalans • Officiële Rapportage</div>
+                        </div>
+                        <div style="border: 1px solid #1a73e8; background: #f8f9fa; padding: 6px 10px; border-radius: 4px; text-align: right; font-size: 10px;">
+                            Gebruiker: <strong id="printPatientName">...</strong><br>
+                            Afdrukdatum: <span id="printGeneratedDate">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">📊 Vocht Inname Historie & Periode</div>
+                
+                <div class="filter-bar">
+                    <div class="form-group" style="flex:1;">
+                        <label>Van Datum:</label>
+                        <input type="date" id="filterVanDatum" onchange="vulHistorieTabel()">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Tot Datum:</label>
+                        <input type="date" id="filterTotDatum" onchange="vulHistorieTabel()">
+                    </div>
+                    <button type="button" class="btn-action-custom btn-reset" onclick="resetteerDatumFilter()">🔄 Reset</button>
+                    <button type="button" class="btn-action-custom btn-print" onclick="printHistoriePdf()">🖨️ Print PDF</button>
+                </div>
+
+                <table class="dialyse-table">
+                    <thead>
+                        <tr>
+                            <th>Datum & Tijd</th>
+                            <th>Gebruiker</th>
+                            <th>Drank / Omschrijving</th>
+                            <th>Hoeveelheid</th>
+                            <th style="width: 50px; text-align: center;">Actie</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historieTabelBody">
+                        <tr><td colspan="5" style="text-align: center;">Laden...</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="print-only-footer">
+                    <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                        <div style="width: 45%; border-top: 1px dashed #555; padding-top: 4px; font-size: 9px;">Handtekening Verpleegkundige</div>
+                        <div style="width: 45%; border-top: 1px dashed #555; padding-top: 4px; font-size: 9px;">Paraaf Patiënt / Nefroloog</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+
+        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'luuk';
+        let gebruikerRol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
+        let gebruikerProfielen = {};
+        let vochtSessies = [];
+        let dagelijksDoelMl = 1000;
+        
+        let drankenLijst = ["Water", "Koffie", "Thee", "Melk", "Soep", "Frisdrank"];
+        let hoeveelhedenLijst = [100, 150, 200, 250, 330, 500];
+
+        let geselecteerdeDrank = "";
+        let geselecteerdeMl = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
+            document.getElementById('gebruikerTitleBadge').innerText = pNaam;
+            document.getElementById('printPatientName').innerText = pNaam;
+            startKlokLus();
+            laadData(false);
+        });
+
+        function startKlokLus() {
+            setInterval(() => {
+                let nu = new Date();
+                document.getElementById('liveClock').innerText = `${nu.toLocaleDateString()} ${nu.toLocaleTimeString()}`;
+            }, 1000);
+        }
+
+        function toonTab(tab) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab === 'pos' ? 'posPane' : 'historiePane').classList.add('active');
+            document.getElementById(tab === 'pos' ? 'btnPos' : 'btnHistorie').classList.add('active');
+        }
+
+        function wijzigActieveGebruiker(naam) {
+            actieveGebruiker = naam;
+            localStorage.setItem('actieve_gebruiker', naam);
+            if (gebruikerProfielen[naam]) {
+                localStorage.setItem('gebruiker_rol', gebruikerProfielen[naam].rol || 'gebruiker');
+                gebruikerRol = gebruikerProfielen[naam].rol || 'gebruiker';
+            }
+            let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
+            document.getElementById('gebruikerTitleBadge').innerText = pNaam;
+            document.getElementById('printPatientName').innerText = pNaam;
+            updateProgressBalk();
+            vulHistorieTabel();
+        }
+
+        function vulGebruikerDropdown() {
+            let select = document.getElementById('gebruikerDropdown');
+            select.innerHTML = '';
+            let profielenLijst = Object.keys(gebruikerProfielen).length > 0 ? Object.keys(gebruikerProfielen) : [actieveGebruiker];
+            
+            profielenLijst.forEach(p => {
+                let opt = document.createElement('option');
+                opt.value = p;
+                opt.textContent = p.charAt(0).toUpperCase() + p.slice(1);
+                if (p.toLowerCase() === actieveGebruiker.toLowerCase()) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function toggleDoelBewerken() {
+            let row = document.getElementById('goalSettingsRow');
+            row.style.display = row.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function slaDoelOp() {
+            let val = parseInt(document.getElementById('inputDoelMl').value);
+            if (!isNaN(val) && val > 0) {
+                dagelijksDoelMl = val;
+                document.getElementById('goalSettingsRow').style.display = 'none';
+                updateProgressBalk();
+                slaNaarBin();
+            }
+        }
+
+        function updateProgressBalk() {
+            let vandaagStr = new Date().toISOString().split('T')[0];
+            let totaalVandaag = vochtSessies
+                .filter(s => s.datum === vandaagStr && s.persoon.toLowerCase() === actieveGebruiker.toLowerCase())
+                .reduce((som, item) => som + (parseInt(item.hoeveelheid) || 0), 0);
+
+            document.getElementById('totaalVochtVandaag').innerText = totaalVandaag + " ml";
+            document.getElementById('doelMlTekst').innerText = dagelijksDoelMl + " ml";
+            document.getElementById('inputDoelMl').value = dagelijksDoelMl;
+
+            let percentage = Math.min((totaalVandaag / dagelijksDoelMl) * 100, 100);
+            let fill = document.getElementById('progressBarFill');
+            fill.style.width = percentage + "%";
+
+            if (totaalVandaag >= dagelijksDoelMl) {
+                fill.style.backgroundColor = 'var(--red-alert)';
+            } else if (percentage >= 75) {
+                fill.style.backgroundColor = 'var(--dialysis-yellow)';
+            } else {
+                fill.style.backgroundColor = 'var(--green-ok)';
+            }
+        }
+
+        function renderPosGrids() {
+            let dGrid = document.getElementById('drankGrid');
+            dGrid.innerHTML = '';
+            drankenLijst.forEach((d, idx) => {
+                let btn = document.createElement('div');
+                btn.className = `pos-btn ${geselecteerdeDrank === d ? 'selected' : ''}`;
+                btn.innerHTML = `<span>🥤 ${d}</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderDrank(${idx})">✕</div>`;
+                btn.onclick = () => { geselecteerdeDrank = d; renderPosGrids(); updateSelectieTekst(); };
+                dGrid.appendChild(btn);
+            });
+
+            let hGrid = document.getElementById('hoeveelheidGrid');
+            hGrid.innerHTML = '';
+            hoeveelhedenLijst.forEach((ml, idx) => {
+                let btn = document.createElement('div');
+                btn.className = `pos-btn ${geselecteerdeMl === ml ? 'selected' : ''}`;
+                btn.innerHTML = `<span>💧 ${ml} ml</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderHoeveelheid(${idx})">✕</div>`;
+                btn.onclick = () => { geselecteerdeMl = ml; renderPosGrids(); updateSelectieTekst(); };
+                hGrid.appendChild(btn);
+            });
+        }
+
+        function updateSelectieTekst() {
+            let tekst = `${geselecteerdeDrank || 'Geen drank'} — ${geselecteerdeMl > 0 ? geselecteerdeMl + ' ml' : 'Geen hoeveelheid'}`;
+            document.getElementById('huidigeSelectieTekst').innerText = tekst;
+        }
+
+        function voegDrankToe() {
+            let input = document.getElementById('nieuweDrankInput');
+            let val = input.value.trim();
+            if (val && !drankenLijst.includes(val)) {
+                drankenLijst.push(val);
+                input.value = '';
+                renderPosGrids();
+                slaNaarBin();
+            }
+        }
+
+        function verwijderDrank(index) {
+            if (confirm(`Verwijder drank sneltoets '${drankenLijst[index]}'?`)) {
+                drankenLijst.splice(index, 1);
+                renderPosGrids();
+                slaNaarBin();
+            }
+        }
+
+        function voegHoeveelheidToe() {
+            let input = document.getElementById('nieuweHoeveelheidInput');
+            let val = parseInt(input.value);
+            if (!isNaN(val) && val > 0 && !hoeveelhedenLijst.includes(val)) {
+                hoeveelhedenLijst.push(val);
+                hoeveelhedenLijst.sort((a,b) => a - b);
+                input.value = '';
+                renderPosGrids();
+                slaNaarBin();
+            }
+        }
+
+        function verwijderHoeveelheid(index) {
+            if (confirm(`Verwijder hoeveelheid sneltoets '${hoeveelhedenLijst[index]} ml'?`)) {
+                hoeveelhedenLijst.splice(index, 1);
+                renderPosGrids();
+                slaNaarBin();
+            }
+        }
+
+        function registreerInname() {
+            if (!geselecteerdeDrank) { alert('Selecteer alstublieft een drankje.'); return; }
+            if (geselecteerdeMl <= 0) { alert('Selecteer een hoeveelheid in ml.'); return; }
+
+            let item = {
+                id: Date.now(),
+                persoon: actieveGebruiker,
+                datum: new Date().toISOString().split('T')[0],
+                tijd: new Date().toTimeString().slice(0, 5),
+                drank: geselecteerdeDrank,
+                hoeveelheid: geselecteerdeMl
+            };
+
+            vochtSessies.unshift(item);
+            slaNaarBin();
+            alert(`Opgeslagen: ${geselecteerdeDrank} (${geselecteerdeMl} ml)`);
+            
+            geselecteerdeDrank = "";
+            geselecteerdeMl = 0;
+            renderPosGrids();
+            updateSelectieTekst();
+            vulHistorieTabel();
+            updateProgressBalk();
+        }
+
+        function laadData(showAlert) {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                vochtSessies = rec.vochtSessies || [];
+                gebruikerProfielen = rec.profielen || { "luuk": { rol: "admin" } };
+                if (rec.vochtDranken) drankenLijst = rec.vochtDranken;
+                if (rec.vochtHoeveelheden) hoeveelhedenLijst = rec.vochtHoeveelheden;
+                if (rec.vochtDoelMl) dagelijksDoelMl = rec.vochtDoelMl;
+
+                vulGebruikerDropdown();
+                renderPosGrids();
+                vulHistorieTabel();
+                updateProgressBalk();
+                if (showAlert) alert('Gegevens bijgewerkt!');
+            }).catch(err => console.error(err));
+        }
+
+        function slaNaarBin() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                rec.vochtSessies = vochtSessies;
+                rec.profielen = gebruikerProfielen;
+                rec.vochtDranken = drankenLijst;
+                rec.vochtHoeveelheden = hoeveelhedenLijst;
+                rec.vochtDoelMl = dagelijksDoelMl;
+
+                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(rec)
+                });
+            }).catch(err => console.error(err));
+        }
+
+        function resetteerDatumFilter() {
+            document.getElementById('filterVanDatum').value = '';
+            document.getElementById('filterTotDatum').value = '';
+            vulHistorieTabel();
+        }
+
+        function printHistoriePdf() {
+            document.getElementById('printGeneratedDate').innerText = new Date().toLocaleString('nl-NL');
+            window.print();
+        }
+
+        function vulHistorieTabel() {
+            let tbody = document.getElementById('historieTabelBody'); 
+            tbody.innerHTML = '';
+            
+            let gefilterd = (gebruikerRol === 'admin') ? vochtSessies : vochtSessies.filter(s => s.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
+            
+            let van = document.getElementById('filterVanDatum').value;
+            let tot = document.getElementById('filterTotDatum').value;
+            if (van) gefilterd = gefilterd.filter(s => s.datum >= van);
+            if (tot) gefilterd = gefilterd.filter(s => s.datum <= tot);
+
+            if (gefilterd.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color:#888;">Nog geen vochtinname geregistreerd voor deze periode.</td></tr>';
+                return;
+            }
+            gefilterd.forEach(s => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td>${s.drank}</td><td><b>${s.hoeveelheid} ml</b></td><td style="text-align: center;"><button class="btn-small-del" onclick="verwijderSessie(${s.id})">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function verwijderSessie(id) {
+            if (confirm('Deze inname verwijderen?')) {
+                vochtSessies = vochtSessies.filter(s => s.id !== id);
+                slaNaarBin();
+                vulHistorieTabel();
+                updateProgressBalk();
+            }
+        }
+    </script>
+</body>
+</html>
