@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rollodex • Vervoer Monitor</title>
+    <style>
+        :root {
+            --android-bg: #f8f9fa;
+            --android-primary: #1a73e8;
+            --android-primary-dark: #1557b0;
+            --android-card-bg: #ffffff;
+            --android-text: #202124;
+            --android-subtext: #5f6368;
+            --red-alert: #d93025;
+            --green-ok: #188038;
+            --orange-warn: #e37400;
+            --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            --dialysis-yellow: #fbbc04;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
+        body, html { width: 100%; height: 100%; background: var(--android-bg); color: var(--android-text); display: flex; flex-direction: column; overflow: hidden; }
+
+        /* APPBAR */
+        .android-appbar {
+            background: var(--android-primary);
+            color: #ffffff;
+            height: 56px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .appbar-title { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .appbar-actions { display: flex; align-items: center; gap: 6px; }
+        .android-clock { font-size: 11px; background: rgba(255,255,255,0.15); padding: 4px 8px; border-radius: 16px; font-weight: 500; }
+        .icon-btn { background: transparent; border: none; color: white; font-size: 15px; cursor: pointer; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
+
+        /* TAB BAR */
+        .tab-bar { display: flex; background: #e8eaed; border-bottom: 1px solid #dadce0; flex-shrink: 0; padding: 4px; gap: 4px; }
+        .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 500; background: transparent; border: none; cursor: pointer; text-align: center; color: var(--android-subtext); border-radius: 8px; }
+        .tab-btn.active { background: #ffffff; color: var(--android-primary); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* WORKSPACE */
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 10px; background: var(--android-bg); overflow-y: auto; position: relative; }
+        .tab-pane { display: none; width: 100%; max-width: 820px; }
+        .tab-pane.active { display: block; }
+
+        .controls-card { background: var(--android-card-bg); border-radius: 16px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e8eaed; margin-bottom: 10px; }
+        .section-title { font-size: 12px; font-weight: 700; color: var(--android-primary); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* OPVALLENDE TERUG-KNOP */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            background: linear-gradient(135deg, var(--android-primary), var(--android-primary-dark));
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(26,115,232,0.3);
+            transition: all 0.2s ease;
+        }
+        .back-link:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(26,115,232,0.4); }
+
+        /* INLOG BAR */
+        .user-switch-bar { background: #fff; border: 1px solid #dadce0; border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .user-switch-bar select { padding: 6px 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 12px; font-weight: 600; outline: none; background: #fff; }
+
+        /* FORM IFIELDS GRID */
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 10px; }
+        .form-group { display: flex; flex-direction: column; gap: 3px; }
+        .form-group label { font-size: 10px; font-weight: 600; color: var(--android-subtext); text-transform: uppercase; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #dadce0; border-radius: 8px; font-size: 12px; outline: none; background: #fff; }
+        .form-group input:focus { border-color: var(--android-primary); }
+
+        /* INFO BOX */
+        .info-box { background: #e8f0fe; border: 1px solid #b3d1fc; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+        .info-box h4 { font-size: 12px; font-weight: 700; color: var(--android-primary); margin-bottom: 4px; }
+        .info-box p { font-size: 11px; color: var(--android-text); }
+
+        /* FILTER BALK */
+        .filter-bar { background: #f1f3f4; border: 1px solid #dadce0; border-radius: 8px; padding: 8px; margin-bottom: 10px; display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+        .btn-action-custom { padding: 7px 10px; font-size: 11px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; color: white; }
+        .btn-reset { background: #5c2d91; }
+        .btn-print { background: var(--green-ok); }
+
+        table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 10px; background: #fff; }
+        table.dialyse-table th, table.dialyse-table td { border: 1px solid #dadce0; padding: 6px; text-align: left; }
+        table.dialyse-table th { background: #202124; color: white; font-weight: 500; }
+        .btn-small-del { padding: 3px 6px; font-size: 9px; border: none; border-radius: 4px; cursor: pointer; color: white; background: var(--red-alert); }
+
+        /* PRINT STYLING */
+        .print-only-header, .print-only-footer { display: none; }
+        @media print {
+            @page { size: A4 landscape; margin: 12mm 10mm; }
+            body, html { background: #fff !important; color: #000 !important; overflow: visible !important; }
+            .android-appbar, .tab-bar, .back-link, .filter-bar, .btn-small-del, #invoerPane, .section-title { display: none !important; }
+            .workspace { padding: 0 !important; background: none !important; }
+            #historiePane { display: block !important; width: 100% !important; max-width: 100% !important; }
+            .controls-card { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+            .print-only-header { display: block !important; border-bottom: 3px solid var(--android-primary); padding-bottom: 8px; margin-bottom: 12px; }
+            .print-only-footer { display: block !important; margin-top: 24px; padding-top: 10px; border-top: 1px solid #aaa; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="android-appbar">
+        <div class="appbar-title">
+            <span>🚕 Rollodex • Vervoer Monitor</span>
+            <span id="gebruikerTitleBadge" style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; color: var(--dialysis-yellow);">...</span>
+        </div>
+        <div class="appbar-actions">
+            <div id="liveClock" class="android-clock">--:--</div>
+            <button type="button" class="icon-btn" onclick="laadData(true)" title="Verversen">🔄</button>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button type="button" class="tab-btn active" id="btnInvoer" onclick="toonTab('invoer')">🚕 Rit Inplannen</button>
+        <button type="button" class="tab-btn" id="btnHistorie" onclick="toonTab('historie')">📊 Rittenoverzicht</button>
+    </div>
+
+    <div class="workspace">
+        
+        <!-- TAB 1: RIT INPLANNEN -->
+        <div class="tab-pane active" id="invoerPane">
+            <a href="index.html" class="back-link">🏠 Terug naar Hoofdmenu</a>
+
+            <div class="user-switch-bar">
+                <div style="font-size: 11px; font-weight: 700; color: var(--android-subtext);">🔒 Actieve Gebruiker:</div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <select id="gebruikerDropdown" onchange="wijzigActieveGebruiker(this.value)"></select>
+                    <a href="profielen.html" style="text-decoration: none; background: #f1f3f4; color: var(--android-primary); padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; border: 1px solid #dadce0;">⚙️ Beheer</a>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>📞 Vaste Vervoersgegevens</h4>
+                <p>Zorgvervoer / Regiotaxi Centrale • Tel: <b>0800-0000</b> (Ritnummer / Pasnr bij de hand houden).</p>
+            </div>
+
+            <div class="controls-card">
+                <div class="section-title">🚕 Dialyserit Inplannen</div>
+
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label>Datum</label>
+                        <input type="date" id="inputDatum">
+                    </div>
+                    <div class="form-group">
+                        <label>Taxibedrijf / Vervoerder</label>
+                        <input type="text" id="inputBedrijf" placeholder="Bijv. Connexxion / Regiotaxi">
+                    </div>
+                </div>
+
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label>Ophaaltijd Heenreis</label>
+                        <input type="time" id="inputHeenTijd" value="17:00">
+                    </div>
+                    <div class="form-group">
+                        <label>Ophaaltijd Terugreis</label>
+                        <input type="time" id="inputTerugTijd" value="22:30">
+                    </div>
+                </div>
+
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label>Bestemming / Ziekenhuis</label>
+                        <input type="text" id="inputBestemming" placeholder="Bijv. Dialyse Centrum">
+                    </div>
+                    <div class="form-group">
+                        <label>Ritnummer / Bijzonderheden</label>
+                        <input type="text" id="inputBijzonderheden" placeholder="Bijv. Rolstoel / Liftbus">
+                    </div>
+                </div>
+
+                <button type="button" class="btn-action-custom" style="width:100%; padding:12px; font-size:12px; background:var(--android-primary); font-weight:bold; margin-top:6px;" onclick="opslaanVervoerSessie()">💾 Rit Opslaan in Overzicht</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: HISTORIE & OVERZICHT -->
+        <div id="historiePane" class="tab-pane">
+            <a href="index.html" class="back-link">🏠 Terug naar Hoofdmenu</a>
+
+            <div class="controls-card" style="display: block;">
+                
+                <div class="print-only-header">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <div style="font-size: 15px; font-weight: bold; color: #1a73e8;">🚕 RITTENOVERZICHT VERVOER DIALYSE</div>
+                            <div style="font-size: 10px; color: #555;">Planning & Vervoershistorie</div>
+                        </div>
+                        <div style="border: 1px solid #1a73e8; background: #f8f9fa; padding: 6px 10px; border-radius: 4px; text-align: right; font-size: 10px;">
+                            Gebruiker: <strong id="printPatientName">...</strong><br>
+                            Afdrukdatum: <span id="printGeneratedDate">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">📊 Geplande & Gereden Ritten</div>
+                
+                <div class="filter-bar">
+                    <div class="form-group" style="flex:1;">
+                        <label>Van Datum:</label>
+                        <input type="date" id="filterVanDatum" onchange="vulHistorieTabel()">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Tot Datum:</label>
+                        <input type="date" id="filterTotDatum" onchange="vulHistorieTabel()">
+                    </div>
+                    <button type="button" class="btn-action-custom btn-reset" onclick="resetteerDatumFilter()">🔄 Reset</button>
+                    <button type="button" class="btn-action-custom btn-print" onclick="printHistoriePdf()">🖨️ Print PDF</button>
+                </div>
+
+                <table class="dialyse-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Gebruiker</th>
+                            <th>Vervoerder</th>
+                            <th>Heenreis</th>
+                            <th>Terugreis</th>
+                            <th>Bestemming</th>
+                            <th>Bijzonderheden</th>
+                            <th style="width: 50px; text-align: center;">Actie</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historieTabelBody">
+                        <tr><td colspan="8" style="text-align: center;">Laden...</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="print-only-footer">
+                    <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                        <div style="width: 45%; border-top: 1px dashed #555; padding-top: 4px; font-size: 9px;">Handtekening / Paraaf</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
+        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
+
+        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'luuk';
+        let gebruikerRol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
+        let gebruikerProfielen = {};
+        let vervoerSessies = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
+            document.getElementById('gebruikerTitleBadge').innerText = pNaam;
+            document.getElementById('printPatientName').innerText = pNaam;
+            
+            let nu = new Date();
+            document.getElementById('inputDatum').value = nu.toISOString().split('T')[0];
+
+            startKlokLus();
+            laadData(false);
+        });
+
+        function startKlokLus() {
+            setInterval(() => {
+                let nu = new Date();
+                document.getElementById('liveClock').innerText = `${nu.toLocaleDateString()} ${nu.toLocaleTimeString()}`;
+            }, 1000);
+        }
+
+        function toonTab(tab) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab === 'invoer' ? 'invoerPane' : 'historiePane').classList.add('active');
+            document.getElementById(tab === 'invoer' ? 'btnInvoer' : 'btnHistorie').classList.add('active');
+        }
+
+        function wijzigActieveGebruiker(naam) {
+            actieveGebruiker = naam;
+            localStorage.setItem('actieve_gebruiker', naam);
+            if (gebruikerProfielen[naam]) {
+                localStorage.setItem('gebruiker_rol', gebruikerProfielen[naam].rol || 'gebruiker');
+                gebruikerRol = gebruikerProfielen[naam].rol || 'gebruiker';
+            }
+            let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
+            document.getElementById('gebruikerTitleBadge').innerText = pNaam;
+            document.getElementById('printPatientName').innerText = pNaam;
+            vulHistorieTabel();
+        }
+
+        function vulGebruikerDropdown() {
+            let select = document.getElementById('gebruikerDropdown');
+            select.innerHTML = '';
+            let profielenLijst = Object.keys(gebruikerProfielen).length > 0 ? Object.keys(gebruikerProfielen) : [actieveGebruiker];
+            
+            profielenLijst.forEach(p => {
+                let opt = document.createElement('option');
+                opt.value = p;
+                opt.textContent = p.charAt(0).toUpperCase() + p.slice(1);
+                if (p.toLowerCase() === actieveGebruiker.toLowerCase()) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function opslaanVervoerSessie() {
+            let datum = document.getElementById('inputDatum').value;
+            let heen = document.getElementById('inputHeenTijd').value;
+            
+            if (!datum || !heen) { alert('Vul tenminste de datum en heenreis tijd in.'); return; }
+
+            let sessie = {
+                id: Date.now(),
+                persoon: actieveGebruiker,
+                datum: datum,
+                bedrijf: document.getElementById('inputBedrijf').value || 'Regiotaxi',
+                heenTijd: heen,
+                terugTijd: document.getElementById('inputTerugTijd').value || '-',
+                bestemming: document.getElementById('inputBestemming').value || 'Ziekenhuis',
+                bijzonderheden: document.getElementById('inputBijzonderheden').value || '-'
+            };
+
+            vervoerSessies.unshift(sessie);
+            slaNaarBin();
+            alert('Dialyserit succesvol opgeslagen!');
+            vulHistorieTabel();
+            toonTab('historie');
+        }
+
+        function laadData(showAlert) {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                vervoerSessies = rec.vervoerSessies || [];
+                gebruikerProfielen = rec.profielen || { "luuk": { rol: "admin" } };
+
+                vulGebruikerDropdown();
+                vulHistorieTabel();
+                if (showAlert) alert('Gegevens bijgewerkt!');
+            }).catch(err => console.error(err));
+        }
+
+        function slaNaarBin() {
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                rec.vervoerSessies = vervoerSessies;
+                rec.profielen = gebruikerProfielen;
+
+                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(rec)
+                });
+            }).catch(err => console.error(err));
+        }
+
+        function resetteerDatumFilter() {
+            document.getElementById('filterVanDatum').value = '';
+            document.getElementById('filterTotDatum').value = '';
+            vulHistorieTabel();
+        }
+
+        function printHistoriePdf() {
+            document.getElementById('printGeneratedDate').innerText = new Date().toLocaleString('nl-NL');
+            window.print();
+        }
+
+        function vulHistorieTabel() {
+            let tbody = document.getElementById('historieTabelBody'); 
+            tbody.innerHTML = '';
+            
+            let gefilterd = (gebruikerRol === 'admin') ? vervoerSessies : vervoerSessies.filter(s => s.persoon.toLowerCase() === actieveGebruiker.toLowerCase());
+            
+            let van = document.getElementById('filterVanDatum').value;
+            let tot = document.getElementById('filterTotDatum').value;
+            if (van) gefilterd = gefilterd.filter(s => s.datum >= van);
+            if (tot) gefilterd = gefilterd.filter(s => s.datum <= tot);
+
+            if (gefilterd.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color:#888;">Geen ritten gevonden.</td></tr>';
+                return;
+            }
+
+            gefilterd.forEach(s => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${s.datum}</td>
+                    <td><b>${s.persoon}</b></td>
+                    <td>${s.bedrijf}</td>
+                    <td><span style="background:#e6f4ea; color:#137333; padding:2px 6px; border-radius:4px; font-weight:bold;">heen: ${s.heenTijd}</span></td>
+                    <td><span style="background:#fce8e6; color:#c5221f; padding:2px 6px; border-radius:4px; font-weight:bold;">terug: ${s.terugTijd}</span></td>
+                    <td>${s.bestemming}</td>
+                    <td>${s.bijzonderheden}</td>
+                    <td style="text-align: center;"><button class="btn-small-del" onclick="verwijderSessie('${s.id}')">🗑️</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function verwijderSessie(id) {
+            if (confirm('Deze rit uit het overzicht verwijderen?')) {
+                vervoerSessies = vervoerSessies.filter(s => String(s.id) !== String(id));
+                slaNaarBin();
+                vulHistorieTabel();
+            }
+        }
+    </script>
+</body>
+</html>
