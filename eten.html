@@ -59,7 +59,7 @@
         .user-switch-bar { background: #fff; border: 1px solid #dadce0; border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .user-switch-bar select { padding: 6px 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 12px; font-weight: 600; outline: none; background: #fff; }
 
-        /* MAALTIJD CATEGORIEEN & PORTIES */
+        /* CATEGORIEEN & PORTIES */
         .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
         .cat-btn {
             background: #f1f3f4; border: 1px solid #dadce0; border-radius: 10px; padding: 8px 4px;
@@ -76,7 +76,7 @@
         }
         .portie-btn.active { background: var(--green-ok); color: #ffffff; border-color: #137333; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
 
-        /* POS GRID LAYOUT */
+        /* POS GRID LAYOUT FOR MULTI-SELECT */
         .pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 6px; margin-bottom: 8px; }
         .pos-btn {
             background: #f1f3f4; border: 1px solid #dadce0; border-radius: 10px; padding: 12px 6px;
@@ -84,8 +84,8 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: all 0.15s;
             position: relative;
         }
-        .pos-btn:hover { background: #e6f4ea; border-color: var(--green-ok); color: var(--green-ok); }
-        .pos-btn:active { transform: scale(0.96); }
+        .pos-btn:hover { background: #e6f4ea; border-color: var(--green-ok); }
+        .pos-btn.selected { background: #c8e6c9; border-color: var(--green-ok); color: #1b5e20; font-weight: 800; box-shadow: inset 0 0 0 2px var(--green-ok); }
         
         .pos-btn-del {
             position: absolute; top: 2px; right: 4px; font-size: 9px; color: var(--red-alert); background: rgba(255,255,255,0.9);
@@ -182,21 +182,24 @@
                     <button type="button" class="portie-btn" id="portieBtnGroot" onclick="selecteerPortie('Grote portie')">🔺 Grote portie</button>
                 </div>
 
-                <div class="section-title">3. Tik Items aan voor op de Bon</div>
+                <div class="section-title">3. Tik Items aan (Meerdere keuzes mogelijk)</div>
                 <div class="pos-grid" id="etenGrid"></div>
                 <div class="pos-add-row">
                     <input type="text" id="nieuwEtenInput" placeholder="Nieuwe snelkeuze toevoegen...">
                     <button type="button" class="btn-pos-add" onclick="voegEtenToe()">+ Toevoegen</button>
                 </div>
 
+                <!-- KNOP OM GESELECTEERDE COMBINATIE NAAR BON TE ZETTEN -->
+                <button type="button" class="btn-pos-add" style="width:100%; padding:10px; font-size:12px; background:var(--android-primary); margin-bottom:10px;" onclick="voegSelectieToeAanBon()">➕ Voeg Geselecteerde Items toe aan Bon</button>
+
                 <!-- DE BON OVERZICHT -->
                 <div class="bon-card">
                     <div class="bon-header">
                         <span>🧾 HUIDIGE BON / SELECTIE</span>
-                        <span id="bonAantalItems">0 items</span>
+                        <span id="bonAantalItems">0 regels</span>
                     </div>
                     <ul class="bon-list" id="bonLijstContainer">
-                        <li style="color:#999; text-align:center; padding:8px 0;">Nog geen items op de bon. Tik hierboven op snelkeuzes.</li>
+                        <li style="color:#999; text-align:center; padding:8px 0;">Nog niks op de bon. Tik items aan en druk op "Voeg toe aan Bon".</li>
                     </ul>
                 </div>
 
@@ -245,7 +248,7 @@
                             <th>Gebruiker</th>
                             <th>Bon / Groep</th>
                             <th>Type Maaltijd</th>
-                            <th>Gerecht / Item</th>
+                            <th>Gerecht / Combinatie</th>
                             <th>Portie</th>
                             <th style="width: 50px; text-align: center;">Actie</th>
                         </tr>
@@ -278,10 +281,11 @@
 
         let actieveCategorie = "Ontbijt"; 
         let actievePortie = "Normale portie";
-        let huidigeBon = []; 
+        let gekozenGerechten = []; // Dingen die nu aangevinkt staan (bijv: ['Brood', 'Boter', 'Kaas'])
+        let huidigeBon = []; // De verzameling regels op de bon
 
         let sneltoetsenLijsten = {
-            ontbijtMiddag: ["Brood", "Beschuit", "Yoghurt", "Kwark", "Fruit", "Eitje", "Kaas", "Ham"],
+            ontbijtMiddag: ["Brood", "Boter", "Kaas", "Ham", "Beschuit", "Yoghurt", "Kwark", "Fruit", "Eitje"],
             avondeten: ["Warm Eten", "Soep", "Salade", "Aardappelen", "Rijst", "Pasta", "Vlees/Vis"],
             tussendoortje: ["Fruit", "Koek", "Nootjes", "Snoep", "Snack", "Cracker"]
         };
@@ -341,6 +345,7 @@
             document.getElementById('catBtnMiddag').classList.toggle('active', cat === 'Middageten');
             document.getElementById('catBtnAvond').classList.toggle('active', cat === 'Avondeten');
             document.getElementById('catBtnSnack').classList.toggle('active', cat === 'Tussendoortje');
+            gekozenGerechten = []; // Reset selectie bij categorie wisselen
             renderPosGrids();
         }
 
@@ -368,20 +373,40 @@
             let eGrid = document.getElementById('etenGrid');
             eGrid.innerHTML = '';
             actueleLijst.forEach((item, idx) => {
+                let isGekozen = gekozenGerechten.includes(item);
                 let btn = document.createElement('div');
-                btn.className = 'pos-btn';
+                btn.className = `pos-btn ${isGekozen ? 'selected' : ''}`;
                 btn.innerHTML = `<span>🍽️ ${item}</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderEten(${idx})">✕</div>`;
-                btn.onclick = () => voegItemToeAanBon(item);
+                btn.onclick = () => toggleGerechtSelectie(item);
                 eGrid.appendChild(btn);
             });
         }
 
-        function voegItemToeAanBon(gerechtNaam) {
+        function toggleGerechtSelectie(item) {
+            if (gekozenGerechten.includes(item)) {
+                gekozenGerechten = gekozenGerechten.filter(g => g !== item);
+            } else {
+                gekozenGerechten.push(item);
+            }
+            renderPosGrids();
+        }
+
+        function voegSelectieToeAanBon() {
+            if (gekozenGerechten.length === 0) {
+                alert('Tik eerst één of meerdere items aan (bijv. Brood, Boter, Kaas).');
+                return;
+            }
+
+            let gecombineerdTekst = gekozenGerechten.join(' + ');
+
             huidigeBon.push({
                 categorie: actieveCategorie,
                 portie: actievePortie,
-                gerecht: gerechtNaam
+                gerecht: gecombineerdTekst
             });
+
+            gekozenGerechten = []; // Reset de selectie op het scherm
+            renderPosGrids();
             renderBonLijst();
         }
 
@@ -393,10 +418,10 @@
         function renderBonLijst() {
             let container = document.getElementById('bonLijstContainer');
             container.innerHTML = '';
-            document.getElementById('bonAantalItems').innerText = `${huidigeBon.length} item(s)`;
+            document.getElementById('bonAantalItems').innerText = `${huidigeBon.length} regel(s)`;
 
             if (huidigeBon.length === 0) {
-                container.innerHTML = '<li style="color:#999; text-align:center; padding:8px 0;">Nog geen items op de bon. Tik hierboven op snelkeuzes.</li>';
+                container.innerHTML = '<li style="color:#999; text-align:center; padding:8px 0;">Nog niks op de bon. Tik items aan en druk op "Voeg toe aan Bon".</li>';
                 return;
             }
 
@@ -435,13 +460,13 @@
 
         function verstuurBonNaarOpslag() {
             if (huidigeBon.length === 0) {
-                alert('Je bon is leeg! Klik eerst op de snelkeuze knoppen om items toe te voegen.');
+                alert('Je bon is nog leeg!');
                 return;
             }
 
             let nuDatum = new Date().toISOString().split('T')[0];
             let nuTijd = new Date().toTimeString().slice(0, 5);
-            let uniekeBonId = 'BON-' + Date.now().toString().slice(-6); // Genereer een herkenbaar bon-nummer
+            let uniekeBonId = 'BON-' + Date.now().toString().slice(-6);
 
             huidigeBon.forEach(item => {
                 etenSessies.unshift({
@@ -457,7 +482,7 @@
             });
 
             slaNaarBin();
-            alert(`Bon ${uniekeBonId} met ${huidigeBon.length} item(s) succesvol opgeslagen!`);
+            alert(`Bon ${uniekeBonId} succesvol verstuurd naar opslag!`);
             
             huidigeBon = []; 
             renderBonLijst();
