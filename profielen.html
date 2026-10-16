@@ -49,7 +49,8 @@
         
         .profile-list { margin-top: 16px; border-top: 1px solid #dadce0; padding-top: 12px; }
         .profile-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; margin-bottom: 6px; font-size: 12px; font-weight: 600; }
-        .btn-del { background: var(--red-alert); color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
+        .btn-del { background: var(--red-alert); color: #fff; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        .btn-del:hover { background: #b31412; }
     </style>
 </head>
 <body>
@@ -70,7 +71,7 @@
                 <input type="text" id="nieuweGebruikerNaam" placeholder="Bijv. Jan of Maria...">
             </div>
             <div class="form-group">
-                <label>Pincode (4 cijfers)</label>
+                <label>Pincode (4-6 cijfers)</label>
                 <input type="password" id="nieuweGebruikerPin" maxlength="6" placeholder="Bijv. 1234">
             </div>
             <div class="form-group">
@@ -83,7 +84,7 @@
             <button type="button" class="btn-primary" onclick="voegProfielToe()">+ Profiel Opslaan</button>
 
             <div class="profile-list">
-                <div class="section-title" style="margin-top: 10px;">Bestaande Profielen</div>
+                <div class="section-title" style="margin-top: 10px;">Bestaande Profielen Verwijderen / Beheren</div>
                 <div id="profielenContainer">Laden...</div>
             </div>
         </div>
@@ -94,6 +95,7 @@
         const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
 
         let profielenData = {};
+        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'luuk';
 
         window.addEventListener('DOMContentLoaded', () => {
             laadProfielen();
@@ -112,18 +114,32 @@
         function renderProfielenLijst() {
             let container = document.getElementById('profielenContainer');
             container.innerHTML = '';
-            Object.keys(profielenData).forEach(naam => {
+            
+            let namen = Object.keys(profielenData);
+            if (namen.length === 0) {
+                container.innerHTML = '<span style="font-size:11px; color:gray;">Geen profielen gevonden.</span>';
+                return;
+            }
+
+            namen.forEach(naam => {
                 let p = profielenData[naam];
                 let div = document.createElement('div');
                 div.className = 'profile-item';
                 div.innerHTML = `<span>👤 ${naam.charAt(0).toUpperCase() + naam.slice(1)} <small style="color:gray;">(${p.rol})</small></span>`;
                 
-                if (naam.toLowerCase() !== 'luuk') {
+                // Voorkom dat je de actieve hoofdgebruiker per ongeluk wist als er geen andere admin is
+                if (naam.toLowerCase() !== actieveGebruiker.toLowerCase() || namen.length > 1) {
                     let btn = document.createElement('button');
                     btn.className = 'btn-del';
-                    btn.innerText = 'Verwijder';
+                    btn.innerText = '🗑️ Verwijder';
                     btn.onclick = () => verwijderProfiel(naam);
                     div.appendChild(btn);
+                } else {
+                    let span = document.createElement('span');
+                    span.style.fontSize = '10px';
+                    span.style.color = 'gray';
+                    span.innerText = '(Actief)';
+                    div.appendChild(span);
                 }
                 container.appendChild(div);
             });
@@ -148,7 +164,7 @@
         }
 
         function verwijderProfiel(naam) {
-            if (confirm(`Weet je zeker dat je profiel '${naam}' wilt verwijderen?`)) {
+            if (confirm(`Weet je zeker dat je profiel '${naam}' volledig wilt verwijderen?`)) {
                 delete profielenData[naam];
                 slaNaarBin();
             }
@@ -168,7 +184,7 @@
                 });
             })
             .then(() => {
-                alert('Profielen en pincodes bijgewerkt!');
+                alert('Profielen succesvol bijgewerkt!');
                 laadProfielen();
             })
             .catch(err => console.error(err));
