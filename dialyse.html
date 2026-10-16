@@ -448,20 +448,20 @@
                     <div class="row-inputs">
                         <div class="form-group">
                             <label>Duur (Uur)</label>
-                            <input type="text" inputmode="none" maxlength="2" id="valDuurUur" value="4" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp();">
+                            <input type="text" inputmode="none" maxlength="2" id="valDuurUur" value="4" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp(); updateActieveTimerInCloud();">
                         </div>
                         <div class="form-group">
                             <label>Duur (Minuten)</label>
-                            <input type="text" inputmode="none" maxlength="2" id="valDuurMin" value="0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp();">
+                            <input type="text" inputmode="none" maxlength="2" id="valDuurMin" value="0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp(); updateActieveTimerInCloud();">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Start Datum & Tijd</label>
-                        <input type="datetime-local" id="valStartTijd" oninput="slaLokaalOp();">
+                        <input type="datetime-local" id="valStartTijd" oninput="slaLokaalOp(); updateActieveTimerInCloud();">
                     </div>
                     <div class="form-group">
                         <label>Stop Datum & Tijd (Start + Duur)</label>
-                        <input type="datetime-local" id="valStopTijd" oninput="slaLokaalOp();">
+                        <input type="datetime-local" id="valStopTijd" oninput="slaLokaalOp(); updateActieveTimerInCloud();">
                     </div>
                 </div>
 
@@ -718,7 +718,7 @@
             startKlokLus();
             laadData(false);
 
-            // Automatische achtergrond-sync elke 3 seconden (zodat B & C steeds de live status van A binnenkrijgen)
+            // Elke 3 seconden achtergrond-sync voor feilloze gelijktijdigheid op alle tablets
             setInterval(() => {
                 laadData(false);
             }, 3000);
@@ -778,7 +778,7 @@
             document.getElementById('valBpSys').value = ''; document.getElementById('valBpDia').value = ''; document.getElementById('valBpHart').value = '';
             updateBloeddrukLijstEnScherm(); 
             slaLokaalOp(); 
-            updateActieveTimerInCloud(); // Direct naar cloud, zodat verpleegkundige op B/C het meteen ziet!
+            updateActieveTimerInCloud();
         }
 
         function verwijderBloeddrukMeting(index) {
@@ -947,6 +947,7 @@
 
         function updateActieveTimerInCloud() {
             if (!isTimerRunning) return;
+            bepaalTotaalDoelVanIngesteld();
             actieveTimerCloud = {
                 gebruiker: actieveGebruiker,
                 isTimerRunning: true,
@@ -1102,7 +1103,7 @@
                 gebruikerProfielen = rec.profielen || {};
                 if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
                 
-                // Live Synchronisatie van TIMER + BLOEDDRUK + INSTELLINGEN via Cloud
+                // Volledige live synchronisatie van timer, doel en verstreken UF-volume over A, B en C
                 if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
                     let tc = rec.actieveTimerCloud;
                     if (tc.isTimerRunning) {
@@ -1115,7 +1116,6 @@
                         if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
                         if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
                         
-                        // Overnemen live waarden ingevoerd op ander apparaat
                         if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
                         if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
                         if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
