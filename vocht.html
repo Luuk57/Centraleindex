@@ -54,6 +54,15 @@
         
         .back-link { display: inline-block; margin-bottom: 6px; font-size: 10px; font-weight: 500; color: #ffffff; text-decoration: none; background: rgba(0,0,0,0.4); padding: 3px 6px; border-radius: 6px; }
 
+        /* PROGRESS BAR STYLING */
+        .progress-card { background: var(--android-card-bg); border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e8eaed; margin-bottom: 10px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; color: var(--android-subtext); margin-bottom: 6px; }
+        .progress-header span b { color: var(--android-primary); }
+        .progress-bar-container { width: 100%; background: #e8eaed; border-radius: 10px; height: 14px; overflow: hidden; position: relative; }
+        .progress-bar-fill { height: 100%; background: var(--green-ok); width: 0%; transition: width 0.4s ease, background-color 0.4s ease; border-radius: 10px; }
+        .goal-settings-row { display: flex; gap: 6px; margin-top: 8px; align-items: center; display: none; }
+        .goal-settings-row input { flex: 1; padding: 6px; border: 1px solid #dadce0; border-radius: 6px; font-size: 11px; }
+
         /* POS GRID LAYOUT */
         .pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 6px; margin-bottom: 8px; }
         .pos-btn {
@@ -106,10 +115,25 @@
 
     <div class="workspace">
         
-        <!-- TAB 1: POS INVOER -->
-        <div id="posPane" class="tab-pane active">
+        <div class="tab-pane active" id="posPane">
             <a href="index.html" class="back-link">← Terug naar Hoofdmenu</a>
 
+            <!-- PROGRESS BAR CARD -->
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span>Dagelijks Vocht: <b id="totaalVochtVandaag">0 ml</b> / <span id="doelMlTekst">1000 ml</span></span>
+                    <button type="button" class="icon-btn" style="background:#f1f3f4; color:#333; font-size:12px; padding:4px 8px; border-radius:6px;" onclick="toggleDoelBewerken()">⚙️ Doel</button>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+                <div class="goal-settings-row" id="goalSettingsRow">
+                    <input type="number" id="inputDoelMl" value="1000" placeholder="Nieuw doel in ml...">
+                    <button type="button" class="btn-pos-add" onclick="slaDoelOp()">Opslaan</button>
+                </div>
+            </div>
+
+            <!-- POS INVOER KAART -->
             <div class="controls-card">
                 <div class="section-title">1. Selecteer Drank (Zonder hoeveelheid)</div>
                 <div class="pos-grid" id="drankGrid"></div>
@@ -165,6 +189,7 @@
 
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'luuk';
         let vochtSessies = [];
+        let dagelijksDoelMl = 1000;
         
         let drankenLijst = ["Water", "Koffie", "Thee", "Melk", "Soep", "Frisdrank"];
         let hoeveelhedenLijst = [100, 150, 200, 250, 330, 500];
@@ -191,6 +216,44 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tab === 'pos' ? 'posPane' : 'historiePane').classList.add('active');
             document.getElementById(tab === 'pos' ? 'btnPos' : 'btnHistorie').classList.add('active');
+        }
+
+        function toggleDoelBewerken() {
+            let row = document.getElementById('goalSettingsRow');
+            row.style.display = row.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function slaDoelOp() {
+            let val = parseInt(document.getElementById('inputDoelMl').value);
+            if (!isNaN(val) && val > 0) {
+                dagelijksDoelMl = val;
+                document.getElementById('goalSettingsRow').style.display = 'none';
+                updateProgressBalk();
+                slaNaarBin();
+            }
+        }
+
+        function updateProgressBalk() {
+            let vandaagStr = new Date().toISOString().split('T')[0];
+            let totaalVandaag = vochtSessies
+                .filter(s => s.datum === vandaagStr && s.persoon.toLowerCase() === actieveGebruiker.toLowerCase())
+                .reduce((som, item) => som + (parseInt(item.hoeveelheid) || 0), 0);
+
+            document.getElementById('totaalVochtVandaag').innerText = totaalVandaag + " ml";
+            document.getElementById('doelMlTekst').innerText = dagelijksDoelMl + " ml";
+            document.getElementById('inputDoelMl').value = dagelijksDoelMl;
+
+            let percentage = Math.min((totaalVandaag / dagelijksDoelMl) * 100, 100);
+            let fill = document.getElementById('progressBarFill');
+            fill.style.width = percentage + "%";
+
+            if (totaalVandaag >= dagelijksDoelMl) {
+                fill.style.backgroundColor = 'var(--red-alert)';
+            } else if (percentage >= 75) {
+                fill.style.backgroundColor = 'var(--dialysis-yellow)';
+            } else {
+                fill.style.backgroundColor = 'var(--green-ok)';
+            }
         }
 
         function renderPosGrids() {
@@ -281,6 +344,7 @@
             renderPosGrids();
             updateSelectieTekst();
             vulHistorieTabel();
+            updateProgressBalk();
         }
 
         function laadData(showAlert) {
@@ -291,9 +355,11 @@
                 vochtSessies = rec.vochtSessies || [];
                 if (rec.vochtDranken) drankenLijst = rec.vochtDranken;
                 if (rec.vochtHoeveelheden) hoeveelhedenLijst = rec.vochtHoeveelheden;
+                if (rec.vochtDoelMl) dagelijksDoelMl = rec.vochtDoelMl;
 
                 renderPosGrids();
                 vulHistorieTabel();
+                updateProgressBalk();
                 if (showAlert) alert('Gegevens bijgewerkt!');
             }).catch(err => console.error(err));
         }
@@ -306,6 +372,7 @@
                 rec.vochtSessies = vochtSessies;
                 rec.vochtDranken = drankenLijst;
                 rec.vochtHoeveelheden = hoeveelhedenLijst;
+                rec.vochtDoelMl = dagelijksDoelMl;
 
                 return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
                     method: 'PUT',
@@ -334,6 +401,7 @@
                 vochtSessies = vochtSessies.filter(s => s.id !== id);
                 slaNaarBin();
                 vulHistorieTabel();
+                updateProgressBalk();
             }
         }
     </script>
