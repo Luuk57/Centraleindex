@@ -13,6 +13,7 @@
             --android-text: #202124;
             --android-subtext: #5f6368;
             --green-ok: #188038;
+            --red-alert: #d93025;
             --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
             --dialysis-yellow: #fbbc04;
         }
@@ -39,7 +40,7 @@
         .icon-btn { background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .icon-btn:hover { background: rgba(255,255,255,0.1); }
 
-        /* USER BANNER / INLOG BEHEER */
+        /* USER BANNER */
         .user-banner {
             max-width: 900px; width: 95%; margin: 16px auto 0 auto; background: var(--android-card-bg);
             border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
@@ -49,8 +50,25 @@
         .user-info .name { font-size: 14px; font-weight: 700; color: var(--android-text); }
         .user-actions { display: flex; gap: 8px; align-items: center; }
         .user-select { padding: 6px 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 12px; font-weight: 600; outline: none; background: #fff; cursor: pointer; }
-        .btn-beheer { text-decoration: none; background: #f1f3f4; color: var(--android-primary); padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid #dadce0; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-beheer { text-decoration: none; background: #f1f3f4; color: var(--android-primary); padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid #dadce0; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
         .btn-beheer:hover { background: #e8f0fe; }
+
+        /* PIN MODAL OVERLAY */
+        .pin-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px);
+        }
+        .pin-card {
+            background: #fff; border-radius: 16px; padding: 24px; width: 90%; max-width: 320px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .pin-title { font-size: 15px; font-weight: 700; color: var(--android-primary); margin-bottom: 4px; }
+        .pin-subtitle { font-size: 11px; color: var(--android-subtext); margin-bottom: 16px; }
+        .pin-input { width: 100%; padding: 12px; font-size: 18px; text-align: center; letter-spacing: 6px; border: 1px solid #dadce0; border-radius: 8px; margin-bottom: 14px; outline: none; }
+        .pin-actions { display: flex; gap: 8px; }
+        .btn-pin { flex: 1; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; }
+        .btn-pin-ok { background: var(--green-ok); color: #fff; }
+        .btn-pin-cancel { background: #f1f3f4; color: var(--android-text); }
 
         /* GRID MODULES */
         .modules-grid {
@@ -68,6 +86,19 @@
     </style>
 </head>
 <body>
+
+    <!-- PIN INLOG MODAL -->
+    <div class="pin-modal" id="pinModal">
+        <div class="pin-card">
+            <div class="pin-title" id="pinModalTitel">Pincode Vereist</div>
+            <div class="pin-subtitle" id="pinModalSub">Voer de 4-cijferige pincode in</div>
+            <input type="password" id="pinInputVeld" maxlength="6" class="pin-input" placeholder="••••">
+            <div class="pin-actions">
+                <button type="button" class="btn-pin btn-pin-cancel" onclick="sluitPinModal()">Annuleren</button>
+                <button type="button" class="btn-pin btn-pin-ok" onclick="verifieerPin()">Inloggen</button>
+            </div>
+        </div>
+    </div>
 
     <div class="android-appbar">
         <div class="appbar-title">
@@ -88,8 +119,8 @@
         </div>
         <div class="user-actions">
             <span style="font-size: 14px;">🔒</span>
-            <select id="gebruikerDropdown" class="user-select" onchange="wijzigGebruiker(this.value)"></select>
-            <a href="profielen.html" class="btn-beheer">⚙️ Beheer</a>
+            <select id="gebruikerDropdown" class="user-select" onchange="vraagPinVoorGebruiker(this.value)"></select>
+            <button type="button" class="btn-beheer" onclick="controleerBeheerToegang()">⚙️ Beheer</button>
         </div>
     </div>
 
@@ -114,6 +145,9 @@
         const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
 
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'luuk';
+        let profielenData = {};
+        let pendingGebruiker = '';
+        let pinDoelType = 'login'; // 'login' of 'beheer'
 
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('rollodex_fullscreen') === 'true') {
@@ -131,11 +165,11 @@
             .then(res => res.json())
             .then(data => {
                 let rec = data.record || {};
-                let profielen = rec.profielen || { "luuk": { rol: "admin" } };
+                profielenData = rec.profielen || { "luuk": { rol: "admin", pin: "1234" } };
                 
                 let dropdown = document.getElementById('gebruikerDropdown');
                 dropdown.innerHTML = '';
-                Object.keys(profielen).forEach(p => {
+                Object.keys(profielenData).forEach(p => {
                     let opt = document.createElement('option');
                     opt.value = p;
                     opt.textContent = p.charAt(0).toUpperCase() + p.slice(1);
@@ -147,10 +181,71 @@
             }).catch(err => console.error(err));
         }
 
-        function wijzigGebruiker(naam) {
-            actieveGebruiker = naam;
-            localStorage.setItem('actieve_gebruiker', naam);
-            document.getElementById('actieveGebruikerLabel').innerText = `Actief profiel: ${naam}`;
+        function vraagPinVoorGebruiker(naam) {
+            if (naam === actieveGebruiker) return;
+            pendingGebruiker = naam;
+            pinDoelType = 'login';
+            document.getElementById('pinModalTitel').innerText = `Inloggen als ${naam.charAt(0).toUpperCase() + naam.slice(1)}`;
+            document.getElementById('pinModalSub').innerText = 'Voer de pincode van dit profiel in';
+            document.getElementById('pinInputVeld').value = '';
+            document.getElementById('pinModal').style.display = 'flex';
+            document.getElementById('pinInputVeld').focus();
+        }
+
+        function controleerBeheerToegang() {
+            pinDoelType = 'beheer';
+            document.getElementById('pinModalTitel').innerText = 'Beveiligd Beheer';
+            document.getElementById('pinModalSub').innerText = 'Voer de beheerder pincode in';
+            document.getElementById('pinInputVeld').value = '';
+            document.getElementById('pinModal').style.display = 'flex';
+            document.getElementById('pinInputVeld').focus();
+        }
+
+        function sluitPinModal() {
+            document.getElementById('pinModal').style.display = 'none';
+            vulGebruikerDropdown(); // Reset select naar actieve gebruiker
+        }
+
+        function vulGebruikerDropdown() {
+            let dropdown = document.getElementById('gebruikerDropdown');
+            for (let i = 0; i < dropdown.options.length; i++) {
+                if (dropdown.options[i].value.toLowerCase() === actieveGebruiker.toLowerCase()) {
+                    dropdown.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        function verifieerPin() {
+            let ingevoerdePin = document.getElementById('pinInputVeld').value.trim();
+
+            if (pinDoelType === 'login') {
+                let profiel = profielenData[pendingGebruiker];
+                let juistePin = profiel && profiel.pin ? profiel.pin : "1234"; // Standaard pin indien niet ingesteld
+
+                if (ingevoerdePin === juistePin) {
+                    actieveGebruiker = pendingGebruiker;
+                    localStorage.setItem('actieve_gebruiker', actieveGebruiker);
+                    localStorage.setItem('gebruiker_rol', profiel.rol || 'gebruiker');
+                    document.getElementById('actieveGebruikerLabel').innerText = `Actief profiel: ${actieveGebruiker}`;
+                    sluitPinModal();
+                    alert(`Succesvol ingelogd als ${actieveGebruiker}!`);
+                } else {
+                    alert('Onjuiste pincode!');
+                    document.getElementById('pinInputVeld').value = '';
+                }
+            } else if (pinDoelType === 'beheer') {
+                // Check of de ingevoerde pin klopt bij de actieve admin of de algemene beheerpin (bijv. "1234" of admin profiel)
+                let actueelProfiel = profielenData[actieveGebruiker];
+                let adminPin = (actueelProfiel && actueelProfiel.pin) ? actueelProfiel.pin : "1234";
+
+                if (ingevoerdePin === adminPin || ingevoerdePin === "1234") {
+                    window.location.href = 'profielen.html';
+                } else {
+                    alert('Onjuiste beheerder pincode!');
+                    document.getElementById('pinInputVeld').value = '';
+                }
+            }
         }
 
         function toggleFullscreen() {
