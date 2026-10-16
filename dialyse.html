@@ -715,12 +715,19 @@
 
             genereerUurStrepen();
             startKlokLus();
-            laadData();
+            laadData(false);
 
-            // Automatische cloud-synchronisatie elke 5 seconden voor Tablet B
+            // 1. Automatische achtergrond-sync elke 3 seconden
             setInterval(() => {
                 laadData(false);
-            }, 5000);
+            }, 3000);
+
+            // 2. Direct hervatten/herberekenen zodra scherm weer geopend of actief wordt!
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) {
+                    laadData(false);
+                }
+            });
         });
 
         function gaNaarHoofdm(e) {
@@ -977,9 +984,11 @@
         }
 
         function startKlokLus() { setInterval(updateKlok, 1000); }
+        
         function updateKlok() {
             let nu = new Date();
-            document.getElementById('liveClock').innerText = `${nu.toLocaleDateString()} ${nu.toLocaleTimeString()}`;
+            let clockHeaderEl = document.getElementById('liveClock');
+            if (clockHeaderEl) clockHeaderEl.innerText = `${nu.toLocaleDateString()} ${nu.toLocaleTimeString()}`;
 
             let countdownEl = document.getElementById('countdownDisplay');
             let clockEl = document.getElementById('analogueClock');
@@ -1002,6 +1011,7 @@
                     countdownEl.innerText = `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
                 }
             } else {
+                // Als er GEEN actieve countdown is, pas dan de gewone klok op de ronde meter tonen
                 countdownEl.innerText = nu.toTimeString().slice(0, 8);
             }
         }
@@ -1077,12 +1087,11 @@
                         if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
                         if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
                     }
-                } else if (!rec.actieveTimerCloud && isTimerRunning) {
-                    // Als timer op een ander apparaat is stopgezet
+                } else if (!rec.actieveTimerCloud) {
                     isTimerRunning = false;
                 }
 
-                herstelLokaalOp(); vulHistorieTabel();
+                herstelLokaalOp(); vulHistorieTabel(); updateKlok();
                 if (showAlert) alert('Gevuld vanuit cloud!');
             }).catch(err => console.error(err));
         }
