@@ -39,7 +39,7 @@
         .icon-btn { background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .icon-btn:hover { background: rgba(255,255,255,0.1); }
 
-        /* USER BANNER */
+        /* USER BANNER / INLOG BEHEER */
         .user-banner {
             max-width: 900px; width: 95%; margin: 16px auto 0 auto; background: var(--android-card-bg);
             border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
@@ -49,6 +49,8 @@
         .user-info .name { font-size: 14px; font-weight: 700; color: var(--android-text); }
         .user-actions { display: flex; gap: 8px; align-items: center; }
         .user-select { padding: 6px 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 12px; font-weight: 600; outline: none; background: #fff; cursor: pointer; }
+        .btn-beheer { text-decoration: none; background: #f1f3f4; color: var(--android-primary); padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid #dadce0; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-beheer:hover { background: #e8f0fe; }
 
         /* GRID MODULES */
         .modules-grid {
@@ -78,16 +80,16 @@
         </div>
     </div>
 
+    <!-- INLOG & GEBRUIKER BEHEER BALK -->
     <div class="user-banner">
         <div class="user-info">
             <div class="label">Actieve Gebruiker</div>
             <div class="name" id="actieveGebruikerLabel">Actief profiel: ...</div>
         </div>
         <div class="user-actions">
-            <select id="gebruikerDropdown" class="user-select" onchange="wijzigGebruiker(this.value)">
-                <option value="luuk">Luuk</option>
-            </select>
-            <a href="profielen.html" class="user-select" style="text-decoration: none; background: #f1f3f4; color: var(--android-primary); display: inline-flex; align-items: center; gap: 4px;">⚙️ Beheer</a>
+            <span style="font-size: 14px;">🔒</span>
+            <select id="gebruikerDropdown" class="user-select" onchange="wijzigGebruiker(this.value)"></select>
+            <a href="profielen.html" class="btn-beheer">⚙️ Beheer</a>
         </div>
     </div>
 
@@ -99,7 +101,7 @@
             <div class="module-desc">UF berekeningen, timer & bloeddruk</div>
         </a>
 
-        <!-- Vocht Monitor (Aangepast van Consumptie Monitor) -->
+        <!-- Vocht Monitor -->
         <a href="vocht.html" class="module-card">
             <div class="module-icon">🥤</div>
             <div class="module-title">Vocht Monitor</div>
