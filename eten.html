@@ -59,16 +59,33 @@
         .user-switch-bar { background: #fff; border: 1px solid #dadce0; border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .user-switch-bar select { padding: 6px 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 12px; font-weight: 600; outline: none; background: #fff; }
 
+        /* MAALTIJD CATEGORIEEN & PORTIES */
+        .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
+        .cat-btn {
+            background: #f1f3f4; border: 1px solid #dadce0; border-radius: 10px; padding: 8px 4px;
+            font-size: 11px; font-weight: 700; color: var(--android-text); cursor: pointer; text-align: center;
+            transition: all 0.15s;
+        }
+        .cat-btn.active { background: var(--android-primary); color: #ffffff; border-color: var(--android-primary-dark); }
+
+        .portie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+        .portie-btn {
+            background: #f1f3f4; border: 1px solid #dadce0; border-radius: 10px; padding: 10px 4px;
+            font-size: 11px; font-weight: 700; color: var(--android-text); cursor: pointer; text-align: center;
+            transition: all 0.15s;
+        }
+        .portie-btn.active { background: var(--green-ok); color: #ffffff; border-color: #137333; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+
         /* POS GRID LAYOUT */
         .pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 6px; margin-bottom: 8px; }
         .pos-btn {
-            background: #f1f3f4; border: 1px solid #dadce0; border-radius: 10px; padding: 10px 6px;
+            background: #f1f3f4; border: 1px solid #dadce0; border-radius: 10px; padding: 12px 6px;
             font-size: 12px; font-weight: 600; color: var(--android-text); cursor: pointer; text-align: center;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: all 0.15s;
             position: relative;
         }
         .pos-btn:hover { background: #e6f4ea; border-color: var(--green-ok); color: var(--green-ok); }
-        .pos-btn.selected { background: var(--green-ok); color: #fff; border-color: #137333; }
+        .pos-btn:active { transform: scale(0.96); }
         
         .pos-btn-del {
             position: absolute; top: 2px; right: 4px; font-size: 9px; color: var(--red-alert); background: rgba(255,255,255,0.9);
@@ -76,14 +93,16 @@
         }
         .pos-btn-del:hover { background: var(--red-alert); color: #fff; }
 
-        .pos-add-row { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; }
+        .pos-add-row { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
         .pos-add-row input { flex: 1; padding: 8px; border: 1px solid #dadce0; border-radius: 8px; font-size: 12px; outline: none; }
         .btn-pos-add { background: var(--green-ok); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        .btn-pos-add:hover { background: #137333; }
 
-        .total-display-box { background: #e6f4ea; border-radius: 12px; padding: 10px; text-align: center; margin: 8px 0; border: 1px solid #ceead6; }
-        .total-display-box .label { font-size: 10px; font-weight: 700; color: var(--green-ok); text-transform: uppercase; }
-        .total-display-box .value { font-size: 18px; font-weight: 900; color: #137333; margin-top: 2px; }
+        /* BON / KASSA OVERZICHT */
+        .bon-card { background: #fffde7; border: 1px dashed #fbc02d; border-radius: 12px; padding: 12px; margin: 10px 0; }
+        .bon-header { font-size: 12px; font-weight: 800; color: #f57f17; border-bottom: 1px dashed #fbc02d; padding-bottom: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .bon-list { list-style: none; margin: 0; padding: 0; }
+        .bon-item { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 4px 0; border-bottom: 1px dotted #fff59d; }
+        .bon-item-del { color: var(--red-alert); cursor: pointer; font-weight: bold; font-size: 12px; padding: 0 4px; }
 
         /* FILTER BALK */
         .filter-bar { background: #f1f3f4; border: 1px solid #dadce0; border-radius: 8px; padding: 8px; margin-bottom: 10px; display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
@@ -128,7 +147,7 @@
     </div>
 
     <div class="tab-bar">
-        <button type="button" class="tab-btn active" id="btnPos" onclick="toonTab('pos')">🧮 POS Invoer</button>
+        <button type="button" class="tab-btn active" id="btnPos" onclick="toonTab('pos')">🧮 POS Kassa Invoer</button>
         <button type="button" class="tab-btn" id="btnHistorie" onclick="toonTab('historie')">📊 Voedingshistorie</button>
     </div>
 
@@ -146,28 +165,42 @@
                 </div>
             </div>
 
-            <!-- POS ETEN -->
+            <!-- POS ETEN KAART -->
             <div class="controls-card">
-                <div class="section-title">1. Selecteer Maaltijd / Eten</div>
+                <div class="section-title">1. Selecteer Type Maaltijd</div>
+                <div class="category-grid">
+                    <button type="button" class="cat-btn active" id="catBtnOntbijt" onclick="selecteerCategorie('Ontbijt')">🥐 Ontbijt</button>
+                    <button type="button" class="cat-btn" id="catBtnMiddag" onclick="selecteerCategorie('Middageten')">🥪 Middageten</button>
+                    <button type="button" class="cat-btn" id="catBtnAvond" onclick="selecteerCategorie('Avondeten')">🍲 Avondeten</button>
+                    <button type="button" class="cat-btn" id="catBtnSnack" onclick="selecteerCategorie('Tussendoortje')">🍎 Snack</button>
+                </div>
+
+                <div class="section-title" style="margin-top:6px;">2. Selecteer Portiegrootte</div>
+                <div class="portie-grid">
+                    <button type="button" class="portie-btn" id="portieBtnKlein" onclick="selecteerPortie('Kleine portie')">🔹 Kleine portie</button>
+                    <button type="button" class="portie-btn active" id="portieBtnNormaal" onclick="selecteerPortie('Normale portie')">🔸 Normale portie</button>
+                    <button type="button" class="portie-btn" id="portieBtnGroot" onclick="selecteerPortie('Grote portie')">🔺 Grote portie</button>
+                </div>
+
+                <div class="section-title">3. Tik Items aan voor op de Bon</div>
                 <div class="pos-grid" id="etenGrid"></div>
                 <div class="pos-add-row">
-                    <input type="text" id="nieuwEtenInput" placeholder="Nieuw eten toevoegen (bijv. Brood)...">
-                    <button type="button" class="btn-pos-add" onclick="voegEtenToe()">+ Eten</button>
+                    <input type="text" id="nieuwEtenInput" placeholder="Nieuwe snelkeuze toevoegen...">
+                    <button type="button" class="btn-pos-add" onclick="voegEtenToe()">+ Toevoegen</button>
                 </div>
 
-                <div class="section-title" style="margin-top:10px;">2. Selecteer Gewicht / Portie (gram)</div>
-                <div class="pos-grid" id="gramGrid"></div>
-                <div class="pos-add-row">
-                    <input type="number" id="nieuwGramInput" placeholder="Nieuw gewicht in gram (bijv. 150)...">
-                    <button type="button" class="btn-pos-add" onclick="voegGramToe()">+ Gram</button>
+                <!-- DE BON OVERZICHT -->
+                <div class="bon-card">
+                    <div class="bon-header">
+                        <span>🧾 HUIDIGE BON / SELECTIE</span>
+                        <span id="bonAantalItems">0 items</span>
+                    </div>
+                    <ul class="bon-list" id="bonLijstContainer">
+                        <li style="color:#999; text-align:center; padding:8px 0;">Nog geen items op de bon. Tik hierboven op snelkeuzes.</li>
+                    </ul>
                 </div>
 
-                <div class="total-display-box">
-                    <div class="label">Geselecteerde Inname</div>
-                    <div class="value" id="huidigeSelectieTekst">Kies eten & gram</div>
-                </div>
-
-                <button type="button" class="btn-pos-add" style="width:100%; padding:12px; font-size:12px; background:var(--green-ok); margin-top:4px;" onclick="registreerInname()">💾 Maaltijd Opslaan</button>
+                <button type="button" class="btn-pos-add" style="width:100%; padding:14px; font-size:13px; background:var(--green-ok); margin-top:6px;" onclick="verstuurBonNaarOpslag()">💾 Verstuur Bon naar Opslag</button>
             </div>
         </div>
 
@@ -210,13 +243,14 @@
                         <tr>
                             <th>Datum & Tijd</th>
                             <th>Gebruiker</th>
-                            <th>Omschrijving Maaltijd</th>
-                            <th>Gewicht / Portie</th>
+                            <th>Type Maaltijd</th>
+                            <th>Gerecht / Item</th>
+                            <th>Portie</th>
                             <th style="width: 50px; text-align: center;">Actie</th>
                         </tr>
                     </thead>
                     <tbody id="historieTabelBody">
-                        <tr><td colspan="5" style="text-align: center;">Laden...</td></tr>
+                        <tr><td colspan="6" style="text-align: center;">Laden...</td></tr>
                     </tbody>
                 </table>
 
@@ -240,12 +274,17 @@
         let gebruikerRol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
         let gebruikerProfielen = {};
         let etenSessies = [];
-        
-        let etenLijst = ["Brood", "Yoghurt", "Fruit", "Warm Eten", "Pap", "Koek"];
-        let gramLijst = [50, 100, 150, 200, 250, 300];
 
-        let geselecteerdEten = "";
-        let geselecteerdGram = 0;
+        let actieveCategorie = "Ontbijt"; 
+        let actievePortie = "Normale portie";
+        let huidigeBon = []; // De tijdelijke verzamellijst van items
+
+        // Sneltoetsen per categorie
+        let sneltoetsenLijsten = {
+            ontbijtMiddag: ["Brood", "Beschuit", "Yoghurt", "Kwark", "Fruit", "Eitje", "Kaas", "Ham"],
+            avondeten: ["Warm Eten", "Soep", "Salade", "Aardappelen", "Rijst", "Pasta", "Vlees/Vis"],
+            tussendoortje: ["Fruit", "Koek", "Nootjes", "Snoep", "Snack", "Cracker"]
+        };
 
         window.addEventListener('DOMContentLoaded', () => {
             let pNaam = actieveGebruiker.charAt(0).toUpperCase() + actieveGebruiker.slice(1);
@@ -296,38 +335,89 @@
             });
         }
 
+        function selecteerCategorie(cat) {
+            actieveCategorie = cat;
+            document.getElementById('catBtnOntbijt').classList.toggle('active', cat === 'Ontbijt');
+            document.getElementById('catBtnMiddag').classList.toggle('active', cat === 'Middageten');
+            document.getElementById('catBtnAvond').classList.toggle('active', cat === 'Avondeten');
+            document.getElementById('catBtnSnack').classList.toggle('active', cat === 'Tussendoortje');
+            renderPosGrids();
+        }
+
+        function selecteerPortie(portie) {
+            actievePortie = portie;
+            document.getElementById('portieBtnKlein').classList.toggle('active', portie === 'Kleine portie');
+            document.getElementById('portieBtnNormaal').classList.toggle('active', portie === 'Normale portie');
+            document.getElementById('portieBtnGroot').classList.toggle('active', portie === 'Grote portie');
+        }
+
+        function getActieveSneltoetsLijstKey() {
+            if (actieveCategorie === 'Ontbijt' || actieveCategorie === 'Middageten') {
+                return 'ontbijtMiddag';
+            } else if (actieveCategorie === 'Avondeten') {
+                return 'avondeten';
+            } else {
+                return 'tussendoortje';
+            }
+        }
+
         function renderPosGrids() {
+            let key = getActieveSneltoetsLijstKey();
+            let actueleLijst = sneltoetsenLijsten[key] || [];
+
             let eGrid = document.getElementById('etenGrid');
             eGrid.innerHTML = '';
-            etenLijst.forEach((e, idx) => {
+            actueleLijst.forEach((item, idx) => {
                 let btn = document.createElement('div');
-                btn.className = `pos-btn ${geselecteerdEten === e ? 'selected' : ''}`;
-                btn.innerHTML = `<span>🍽️ ${e}</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderEten(${idx})">✕</div>`;
-                btn.onclick = () => { geselecteerdEten = e; renderPosGrids(); updateSelectieTekst(); };
+                btn.className = 'pos-btn';
+                btn.innerHTML = `<span>🍽️ ${item}</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderEten(${idx})">✕</div>`;
+                btn.onclick = () => voegItemToeAanBon(item);
                 eGrid.appendChild(btn);
-            });
-
-            let gGrid = document.getElementById('gramGrid');
-            gGrid.innerHTML = '';
-            gramLijst.forEach((gram, idx) => {
-                let btn = document.createElement('div');
-                btn.className = `pos-btn ${geselecteerdGram === gram ? 'selected' : ''}`;
-                btn.innerHTML = `<span>⚖️ ${gram} g</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderGram(${idx})">✕</div>`;
-                btn.onclick = () => { geselecteerdGram = gram; renderPosGrids(); updateSelectieTekst(); };
-                gGrid.appendChild(btn);
             });
         }
 
-        function updateSelectieTekst() {
-            let tekst = `${geselecteerdEten || 'Geen eten'} — ${geselecteerdGram > 0 ? geselecteerdGram + ' gram' : 'Geen gram'}`;
-            document.getElementById('huidigeSelectieTekst').innerText = tekst;
+        function voegItemToeAanBon(gerechtNaam) {
+            huidigeBon.push({
+                categorie: actieveCategorie,
+                portie: actievePortie,
+                gerecht: gerechtNaam
+            });
+            renderBonLijst();
+        }
+
+        function verwijderItemVanBon(index) {
+            huidigeBon.splice(index, 1);
+            renderBonLijst();
+        }
+
+        function renderBonLijst() {
+            let container = document.getElementById('bonLijstContainer');
+            container.innerHTML = '';
+            document.getElementById('bonAantalItems').innerText = `${huidigeBon.length} item(s)`;
+
+            if (huidigeBon.length === 0) {
+                container.innerHTML = '<li style="color:#999; text-align:center; padding:8px 0;">Nog geen items op de bon. Tik hierboven op snelkeuzes.</li>';
+                return;
+            }
+
+            huidigeBon.forEach((item, idx) => {
+                let li = document.createElement('li');
+                li.className = 'bon-item';
+                li.innerHTML = `
+                    <span><b>[${item.categorie}]</b> ${item.gerecht} <small style="color:#666;">(${item.portie})</small></span>
+                    <span class="bon-item-del" onclick="verwijderItemVanBon(${idx})">🗑️</span>
+                `;
+                container.appendChild(li);
+            });
         }
 
         function voegEtenToe() {
             let input = document.getElementById('nieuwEtenInput');
             let val = input.value.trim();
-            if (val && !etenLijst.includes(val)) {
-                etenLijst.push(val);
+            let key = getActieveSneltoetsLijstKey();
+
+            if (val && !sneltoetsenLijsten[key].includes(val)) {
+                sneltoetsenLijsten[key].push(val);
                 input.value = '';
                 renderPosGrids();
                 slaNaarBin();
@@ -335,54 +425,40 @@
         }
 
         function verwijderEten(index) {
-            if (confirm(`Verwijder eten sneltoets '${etenLijst[index]}'?`)) {
-                etenLijst.splice(index, 1);
+            let key = getActieveSneltoetsLijstKey();
+            if (confirm(`Verwijder '${sneltoetsenLijsten[key][index]}' uit snelkeuzes?`)) {
+                sneltoetsenLijsten[key].splice(index, 1);
                 renderPosGrids();
                 slaNaarBin();
             }
         }
 
-        function voegGramToe() {
-            let input = document.getElementById('nieuwGramInput');
-            let val = parseInt(input.value);
-            if (!isNaN(val) && val > 0 && !gramLijst.includes(val)) {
-                gramLijst.push(val);
-                gramLijst.sort((a,b) => a - b);
-                input.value = '';
-                renderPosGrids();
-                slaNaarBin();
+        function verstuurBonNaarOpslag() {
+            if (huidigeBon.length === 0) {
+                alert('Je bon is leeg! Klik eerst op de snelkeuze knoppen om items toe te voegen.');
+                return;
             }
-        }
 
-        function verwijderGram(index) {
-            if (confirm(`Verwijder gram sneltoets '${gramLijst[index]} g'?`)) {
-                gramLijst.splice(index, 1);
-                renderPosGrids();
-                slaNaarBin();
-            }
-        }
+            let nuDatum = new Date().toISOString().split('T')[0];
+            let nuTijd = new Date().toTimeString().slice(0, 5);
 
-        function registreerInname() {
-            if (!geselecteerdEten) { alert('Selecteer alstublieft een maaltijd/eten.'); return; }
-            if (geselecteerdGram <= 0) { alert('Selecteer een gewicht in gram.'); return; }
+            huidigeBon.forEach(item => {
+                etenSessies.unshift({
+                    id: Date.now() + Math.random(),
+                    persoon: actieveGebruiker,
+                    datum: nuDatum,
+                    tijd: nuTijd,
+                    categorie: item.categorie,
+                    eten: item.gerecht,
+                    portie: item.portie
+                });
+            });
 
-            let item = {
-                id: Date.now(),
-                persoon: actieveGebruiker,
-                datum: new Date().toISOString().split('T')[0],
-                tijd: new Date().toTimeString().slice(0, 5),
-                eten: geselecteerdEten,
-                hoeveelheid: geselecteerdGram + ' gram'
-            };
-
-            etenSessies.unshift(item);
             slaNaarBin();
-            alert(`Opgeslagen: ${geselecteerdEten} (${geselecteerdGram} gram)`);
+            alert(`Bon met ${huidigeBon.length} item(s) succesvol opgeslagen!`);
             
-            geselecteerdEten = "";
-            geselecteerdGram = 0;
-            renderPosGrids();
-            updateSelectieTekst();
+            huidigeBon = []; // Maak bon leeg
+            renderBonLijst();
             vulHistorieTabel();
         }
 
@@ -393,8 +469,7 @@
                 let rec = data.record || {};
                 etenSessies = rec.etenSessies || [];
                 gebruikerProfielen = rec.profielen || { "luuk": { rol: "admin" } };
-                if (rec.etenLijst) etenLijst = rec.etenLijst;
-                if (rec.gramLijst) gramLijst = rec.gramLijst;
+                if (rec.sneltoetsenLijsten) sneltoetsenLijsten = rec.sneltoetsenLijsten;
 
                 vulGebruikerDropdown();
                 renderPosGrids();
@@ -410,8 +485,7 @@
                 let rec = data.record || {};
                 rec.etenSessies = etenSessies;
                 rec.profielen = gebruikerProfielen;
-                rec.etenLijst = etenLijst;
-                rec.gramLijst = gramLijst;
+                rec.sneltoetsenLijsten = sneltoetsenLijsten;
 
                 return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
                     method: 'PUT',
@@ -444,19 +518,19 @@
             if (tot) gefilterd = gefilterd.filter(s => s.datum <= tot);
 
             if (gefilterd.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color:#888;">Nog geen voedingsinname geregistreerd voor deze periode.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color:#888;">Nog geen voedingsinname geregistreerd voor deze periode.</td></tr>';
                 return;
             }
             gefilterd.forEach(s => {
                 let tr = document.createElement('tr');
-                tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td>${s.eten}</td><td><b>${s.hoeveelheid}</b></td><td style="text-align: center;"><button class="btn-small-del" onclick="verwijderSessie(${s.id})">🗑️</button></td>`;
+                tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td><span style="background:#e6f4ea; color:var(--green-ok); padding:2px 6px; border-radius:4px; font-weight:bold;">${s.categorie || 'Eten'}</span></td><td>${s.eten}</td><td><b>${s.portie || 'Normale portie'}</b></td><td style="text-align: center;"><button class="btn-small-del" onclick="verwijderSessie('${s.id}')">🗑️</button></td>`;
                 tbody.appendChild(tr);
             });
         }
 
         function verwijderSessie(id) {
-            if (confirm('Deze maaltijd verwijderen?')) {
-                etenSessies = etenSessies.filter(s => s.id !== id);
+            if (confirm('Deze maaltijd uit de historie verwijderen?')) {
+                etenSessies = etenSessies.filter(s => String(s.id) !== String(id));
                 slaNaarBin();
                 vulHistorieTabel();
             }
