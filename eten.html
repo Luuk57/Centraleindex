@@ -243,6 +243,7 @@
                         <tr>
                             <th>Datum & Tijd</th>
                             <th>Gebruiker</th>
+                            <th>Bon / Groep</th>
                             <th>Type Maaltijd</th>
                             <th>Gerecht / Item</th>
                             <th>Portie</th>
@@ -250,7 +251,7 @@
                         </tr>
                     </thead>
                     <tbody id="historieTabelBody">
-                        <tr><td colspan="6" style="text-align: center;">Laden...</td></tr>
+                        <tr><td colspan="7" style="text-align: center;">Laden...</td></tr>
                     </tbody>
                 </table>
 
@@ -277,9 +278,8 @@
 
         let actieveCategorie = "Ontbijt"; 
         let actievePortie = "Normale portie";
-        let huidigeBon = []; // De tijdelijke verzamellijst van items
+        let huidigeBon = []; 
 
-        // Sneltoetsen per categorie
         let sneltoetsenLijsten = {
             ontbijtMiddag: ["Brood", "Beschuit", "Yoghurt", "Kwark", "Fruit", "Eitje", "Kaas", "Ham"],
             avondeten: ["Warm Eten", "Soep", "Salade", "Aardappelen", "Rijst", "Pasta", "Vlees/Vis"],
@@ -441,10 +441,12 @@
 
             let nuDatum = new Date().toISOString().split('T')[0];
             let nuTijd = new Date().toTimeString().slice(0, 5);
+            let uniekeBonId = 'BON-' + Date.now().toString().slice(-6); // Genereer een herkenbaar bon-nummer
 
             huidigeBon.forEach(item => {
                 etenSessies.unshift({
                     id: Date.now() + Math.random(),
+                    bonId: uniekeBonId,
                     persoon: actieveGebruiker,
                     datum: nuDatum,
                     tijd: nuTijd,
@@ -455,9 +457,9 @@
             });
 
             slaNaarBin();
-            alert(`Bon met ${huidigeBon.length} item(s) succesvol opgeslagen!`);
+            alert(`Bon ${uniekeBonId} met ${huidigeBon.length} item(s) succesvol opgeslagen!`);
             
-            huidigeBon = []; // Maak bon leeg
+            huidigeBon = []; 
             renderBonLijst();
             vulHistorieTabel();
         }
@@ -518,18 +520,19 @@
             if (tot) gefilterd = gefilterd.filter(s => s.datum <= tot);
 
             if (gefilterd.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color:#888;">Nog geen voedingsinname geregistreerd voor deze periode.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color:#888;">Nog geen voedingsinname geregistreerd voor deze periode.</td></tr>';
                 return;
             }
             gefilterd.forEach(s => {
+                let bonLabel = s.bonId ? `<span style="background:#fff3e0; color:#e65100; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:9px;">${s.bonId}</span>` : '<span style="color:gray;">—</span>';
                 let tr = document.createElement('tr');
-                tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td><span style="background:#e6f4ea; color:var(--green-ok); padding:2px 6px; border-radius:4px; font-weight:bold;">${s.categorie || 'Eten'}</span></td><td>${s.eten}</td><td><b>${s.portie || 'Normale portie'}</b></td><td style="text-align: center;"><button class="btn-small-del" onclick="verwijderSessie('${s.id}')">🗑️</button></td>`;
+                tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td>${bonLabel}</td><td><span style="background:#e6f4ea; color:var(--green-ok); padding:2px 6px; border-radius:4px; font-weight:bold;">${s.categorie || 'Eten'}</span></td><td>${s.eten}</td><td><b>${s.portie || 'Normale portie'}</b></td><td style="text-align: center;"><button class="btn-small-del" onclick="verwijderSessie('${s.id}')">🗑️</button></td>`;
                 tbody.appendChild(tr);
             });
         }
 
         function verwijderSessie(id) {
-            if (confirm('Deze maaltijd uit de historie verwijderen?')) {
+            if (confirm('Dit item uit de historie verwijderen?')) {
                 etenSessies = etenSessies.filter(s => String(s.id) !== String(id));
                 slaNaarBin();
                 vulHistorieTabel();
