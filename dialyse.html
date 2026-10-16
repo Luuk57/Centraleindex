@@ -485,20 +485,20 @@
                     <div class="row-inputs">
                         <div class="form-group">
                             <label>Duur (Uur)</label>
-                            <input type="text" inputmode="none" maxlength="2" id="valDuurUur" value="4" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp(); updateActieveTimerInCloud();">
+                            <input type="text" inputmode="none" maxlength="2" id="valDuurUur" value="4" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalEnSync();">
                         </div>
                         <div class="form-group">
                             <label>Duur (Minuten)</label>
-                            <input type="text" inputmode="none" maxlength="2" id="valDuurMin" value="0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalOp(); updateActieveTimerInCloud();">
+                            <input type="text" inputmode="none" maxlength="2" id="valDuurMin" value="0" onfocus="activeerTouchpad(this)" oninput="berekenAutomatischeEindtijd(); bepaalTotaalDoelVanIngesteld(); slaLokaalEnSync();">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Start Datum & Tijd</label>
-                        <input type="datetime-local" id="valStartTijd" oninput="slaLokaalOp(); updateActieveTimerInCloud();">
+                        <input type="datetime-local" id="valStartTijd" oninput="slaLokaalEnSync();">
                     </div>
                     <div class="form-group">
                         <label>Stop Datum & Tijd (Start + Duur)</label>
-                        <input type="datetime-local" id="valStopTijd" oninput="slaLokaalOp(); updateActieveTimerInCloud();">
+                        <input type="datetime-local" id="valStopTijd" oninput="slaLokaalEnSync();">
                     </div>
                 </div>
 
@@ -514,7 +514,7 @@
                     <div class="row-inputs">
                         <div class="form-group">
                             <label>UF Ingesteld (l)</label>
-                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="bepaalTotaalDoelVanIngesteld(); slaLokaalOp(); updateActieveTimerInCloud();">
+                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="bepaalTotaalDoelVanIngesteld(); slaLokaalEnSync();">
                         </div>
                         <div class="form-group">
                             <label>Werkelijke UF (kg)</label>
@@ -535,15 +535,15 @@
                 <div class="sub-section-box" id="gewichtBox">
                     <div class="form-group">
                         <label>Pre Gewicht (kg)</label>
-                        <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF(); slaLokaalOp(); updateActieveTimerInCloud();">
+                        <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF(); slaLokaalEnSync();">
                     </div>
                     <div class="form-group">
                         <label>Post Gewicht (kg)</label>
-                        <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF(); slaLokaalOp(); updateActieveTimerInCloud();">
+                        <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF(); slaLokaalEnSync();">
                     </div>
                     <div class="form-group">
                         <label>Droog Gewicht (kg)</label>
-                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); slaLokaalOp(); updateActieveTimerInCloud();">
+                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); slaLokaalEnSync();">
                     </div>
                 </div>
 
@@ -597,21 +597,21 @@
                     <div class="row-inputs" style="margin-bottom: 6px;">
                         <div class="form-group">
                             <label>Fragmin 2500</label>
-                            <input type="text" inputmode="none" maxlength="1" id="valFragmin2500" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalOp(); updateActieveTimerInCloud();">
+                            <input type="text" inputmode="none" maxlength="1" id="valFragmin2500" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalEnSync();">
                         </div>
                         <div class="form-group">
                             <label>Fragmin 5000</label>
-                            <input type="text" inputmode="none" maxlength="1" id="valFragmin5000" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalOp(); updateActieveTimerInCloud();">
+                            <input type="text" inputmode="none" maxlength="1" id="valFragmin5000" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalEnSync();">
                         </div>
                     </div>
 
                     <div style="border-top: 1px solid #dadce0; padding-top: 6px; margin-top: 6px;">
                         <div class="row-inputs">
                             <label class="checkbox-group" style="flex:1;">
-                                <input type="checkbox" id="checkEpo" onchange="slaLokaalOp(); updateActieveTimerInCloud();"> Epo
+                                <input type="checkbox" id="checkEpo" onchange="slaLokaalEnSync();"> Epo
                             </label>
                             <label class="checkbox-group" style="flex:1;">
-                                <input type="checkbox" id="checkIjzer" onchange="slaLokaalOp(); updateActieveTimerInCloud();"> IJzer
+                                <input type="checkbox" id="checkIjzer" onchange="slaLokaalEnSync();"> IJzer
                             </label>
                         </div>
                     </div>
@@ -619,11 +619,11 @@
                     <div style="border-top: 1px solid #dadce0; padding-top: 6px; margin-top: 6px;">
                         <div class="row-inputs" style="align-items: flex-end;">
                             <label class="checkbox-group" style="flex:1; padding-bottom: 6px;">
-                                <input type="checkbox" id="checkShuntflowMeting" onchange="slaLokaalOp(); updateActieveTimerInCloud();"> Shuntflow meting
+                                <input type="checkbox" id="checkShuntflowMeting" onchange="slaLokaalEnSync();"> Shuntflow meting
                             </label>
                             <div class="form-group" style="flex:1;">
                                 <label>Shuntflow resultaat</label>
-                                <input type="text" inputmode="none" id="valShuntflowResultaat" placeholder="Bijv. 850 ml/min" onfocus="activeerTouchpad(this)" oninput="slaLokaalOp(); updateActieveTimerInCloud();">
+                                <input type="text" inputmode="none" id="valShuntflowResultaat" placeholder="Bijv. 850 ml/min" onfocus="activeerTouchpad(this)" oninput="slaLokaalEnSync();">
                             </div>
                         </div>
                     </div>
@@ -645,7 +645,7 @@
 
                 <div class="form-group" style="margin-top: 8px;">
                     <label>Notitie / Bijzonderheden</label>
-                    <input type="text" inputmode="none" id="valNotitie" placeholder="Bijv. bijzonderheden" onfocus="activeerAlphaPad(this)" oninput="slaLokaalOp(); updateActieveTimerInCloud();">
+                    <input type="text" inputmode="none" id="valNotitie" placeholder="Bijv. bijzonderheden" onfocus="activeerAlphaPad(this)" oninput="slaLokaalEnSync();">
                 </div>
             </div>
         </div>
@@ -716,23 +716,18 @@
     </div>
 
     <script>
-        // GITHUB GIST CONFIGURATIE
-        const GIST_ID = "45078f25441f8cc69f3adfb7091a3c58";
-        const GITHUB_TOKEN = "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";
-        const GIST_FILENAME = "rollodex_data.json";
+        // LOKALE SYNCHRONISATIE VIA BROADCASTCHANNEL & LOCALSTORAGE
+        const syncChannel = new BroadcastChannel('rollodex_dialyse_sync');
 
         let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'Gast';
         let gebruikerRol = localStorage.getItem('gebruiker_rol') || 'gebruiker';
         let actieveSoortDialyse = 'nacht'; 
-        let sessies = [];
-        let gebruikerProfielen = {};
-        let actieveTimerCloud = null;
+        let sessies = JSON.parse(localStorage.getItem('rollodex_sessies') || '[]');
+        let beschikbareVerpleging = JSON.parse(localStorage.getItem('rollodex_verpleging') || '["Jan Jansen", "Marie de Vries", "Ahmed el Amrani", "Lisa Bakker"]');
+        let geselecteerdeVerpleging = [];
         let huidigeBewerkingSessieId = null;
 
         let bloeddrukMetingen = [];
-        let beschikbareVerpleging = ["Jan Jansen", "Marie de Vries", "Ahmed el Amrani", "Lisa Bakker"];
-        let geselecteerdeVerpleging = [];
-
         let isTimerRunning = false;
         let timerTargetTime = null;
         let isDoorgaanGekozen = false;
@@ -754,12 +749,14 @@
 
             genereerUurStrepen();
             startKlokLus();
-            laadDataUitGist(false);
+            herstelLokaalOp();
 
-            // Regelmatige polling (elke 8 seconden) om wijzigingen van andere schermen op te halen
-            setInterval(() => {
-                laadDataUitGist(false);
-            }, 8000);
+            // Luister direct naar andere tabbladen/schermen
+            syncChannel.onmessage = (event) => {
+                if (event.data && event.data.type === 'UPDATE_STATE') {
+                    laadStaatVanData(event.data.payload, false);
+                }
+            };
         });
 
         function gaNaarHoofdm(e) {
@@ -807,12 +804,13 @@
             bloeddrukMetingen.push({ tijd: new Date().toTimeString().slice(0, 5), sys, dia, hart: hart || '-' });
             document.getElementById('valBpSys').value = ''; document.getElementById('valBpDia').value = ''; document.getElementById('valBpHart').value = '';
             updateBloeddrukLijstEnScherm(); 
-            slaLokaalOp(); updateActieveTimerInCloud();
+            slaLokaalEnSync();
         }
 
         function verwijderBloeddrukMeting(index) {
             bloeddrukMetingen.splice(index, 1);
-            updateBloeddrukLijstEnScherm(); slaLokaalOp(); updateActieveTimerInCloud();
+            updateBloeddrukLijstEnScherm(); 
+            slaLokaalEnSync();
         }
 
         function updateBloeddrukLijstEnScherm() {
@@ -836,8 +834,8 @@
             document.getElementById('dispClockBp').innerText = `${toonText} (${laatste.hart} bpm)`;
         }
 
-        function slaLokaalOp() {
-            let data = {
+        function verzamelHuidigeStaat() {
+            return {
                 duurUur: document.getElementById('valDuurUur').value,
                 duurMin: document.getElementById('valDuurMin').value,
                 start: document.getElementById('valStartTijd').value,
@@ -852,45 +850,78 @@
                 ijzer: document.getElementById('checkIjzer').checked,
                 shuntMeting: document.getElementById('checkShuntflowMeting').checked,
                 shuntRes: document.getElementById('valShuntflowResultaat').value,
+                notitie: document.getElementById('valNotitie').value,
                 bloeddrukMetingen: bloeddrukMetingen,
-                soortDialyse: actieveSoortDialyse
+                soortDialyse: actieveSoortDialyse,
+                geselecteerdeVerpleging: geselecteerdeVerpleging,
+                isTimerRunning: isTimerRunning,
+                timerTargetTime: timerTargetTime,
+                timerStartTimestamp: timerStartTimestamp,
+                totaalUfDoelMl: totaalUfDoelMl
             };
-            localStorage.setItem('dialyse_form_concept', JSON.stringify(data));
+        }
+
+        function slaLokaalEnSync() {
+            let staat = verzamelHuidigeStaat();
+            localStorage.setItem('rollodex_dialyse_actief', JSON.stringify(staat));
+            localStorage.setItem('rollodex_sessies', JSON.stringify(sessies));
+            localStorage.setItem('rollodex_verpleging', JSON.stringify(beschikbareVerpleging));
+            
+            syncChannel.postMessage({ type: 'UPDATE_STATE', payload: staat });
+        }
+
+        function laadStaatVanData(d, updateHistorie) {
+            if (!d) return;
+            if (d.duurUur !== undefined) document.getElementById('valDuurUur').value = d.duurUur;
+            if (d.duurMin !== undefined) document.getElementById('valDuurMin').value = d.duurMin;
+            if (d.start) document.getElementById('valStartTijd').value = d.start;
+            if (d.stop) document.getElementById('valStopTijd').value = d.stop;
+            if (d.pre) document.getElementById('valPreGewicht').value = d.pre;
+            if (d.post) document.getElementById('valPostGewicht').value = d.post;
+            if (d.droog) document.getElementById('valDroogGewicht').value = d.droog;
+            if (d.ufIngesteld) document.getElementById('valUfIngesteld').value = d.ufIngesteld;
+            if (d.frag25) document.getElementById('valFragmin2500').value = d.frag25;
+            if (d.frag50) document.getElementById('valFragmin5000').value = d.frag50;
+            if (d.epo !== undefined) document.getElementById('checkEpo').checked = d.epo;
+            if (d.ijzer !== undefined) document.getElementById('checkIjzer').checked = d.ijzer;
+            if (d.shuntMeting !== undefined) document.getElementById('checkShuntflowMeting').checked = d.shuntMeting;
+            if (d.shuntRes) document.getElementById('valShuntflowResultaat').value = d.shuntRes;
+            if (d.notitie !== undefined) document.getElementById('valNotitie').value = d.notitie;
+            if (d.bloeddrukMetingen) { bloeddrukMetingen = d.bloeddrukMetingen; updateBloeddrukLijstEnScherm(); }
+            if (d.soortDialyse) setSoortDialyse(d.soortDialyse);
+            if (d.geselecteerdeVerpleging) { geselecteerdeVerpleging = d.geselecteerdeVerpleging; updateVerplegingTags(); }
+            
+            isTimerRunning = d.isTimerRunning;
+            timerTargetTime = d.timerTargetTime;
+            timerStartTimestamp = d.timerStartTimestamp;
+            totaalUfDoelMl = d.totaalUfDoelMl || 0;
+
+            if (isTimerRunning) {
+                document.getElementById('analogueClock').style.backgroundColor = '#fbbc04';
+            } else {
+                document.getElementById('analogueClock').style.backgroundColor = '#282c34';
+            }
+
+            berekenUF(); berekenWerkelijkeUF();
+            if (updateHistorie) vulHistorieTabel();
         }
 
         function herstelLokaalOp() {
-            let saved = localStorage.getItem('dialyse_form_concept');
-            if (!saved) return;
-            try {
-                let d = JSON.parse(saved);
-                if (d.duurUur !== undefined) document.getElementById('valDuurUur').value = d.duurUur;
-                if (d.duurMin !== undefined) document.getElementById('valDuurMin').value = d.duurMin;
-                if (d.start) document.getElementById('valStartTijd').value = d.start;
-                if (d.stop) document.getElementById('valStopTijd').value = d.stop;
-                if (d.pre) document.getElementById('valPreGewicht').value = d.pre;
-                if (d.post) document.getElementById('valPostGewicht').value = d.post;
-                if (d.droog) document.getElementById('valDroogGewicht').value = d.droog;
-                if (d.ufIngesteld) document.getElementById('valUfIngesteld').value = d.ufIngesteld;
-                if (d.frag25) document.getElementById('valFragmin2500').value = d.frag25;
-                if (d.frag50) document.getElementById('valFragmin5000').value = d.frag50;
-                if (d.epo !== undefined) document.getElementById('checkEpo').checked = d.epo;
-                if (d.ijzer !== undefined) document.getElementById('checkIjzer').checked = d.ijzer;
-                if (d.shuntMeting !== undefined) document.getElementById('checkShuntflowMeting').checked = d.shuntMeting;
-                if (d.shuntRes) document.getElementById('valShuntflowResultaat').value = d.shuntRes;
-                if (d.bloeddrukMetingen) { bloeddrukMetingen = d.bloeddrukMetingen; updateBloeddrukLijstEnScherm(); }
-                if (d.soortDialyse) setSoortDialyse(d.soortDialyse);
-                berekenUF(); berekenWerkelijkeUF();
-            } catch (e) {}
+            let saved = localStorage.getItem('rollodex_dialyse_actief');
+            if (saved) {
+                try { laadStaatVanData(JSON.parse(saved), true); } catch (e) {}
+            }
+            vulHistorieTabel();
         }
 
         function wisLokaalConcept() {
-            localStorage.removeItem('dialyse_form_concept');
+            localStorage.removeItem('rollodex_dialyse_actief');
             bloeddrukMetingen = [];
             huidigUfGeweestMl = 0;
             isTimerRunning = false;
-            actieveTimerCloud = null;
             document.getElementById('analogueClock').style.backgroundColor = '#282c34';
             updateBloeddrukLijstEnScherm();
+            slaLokaalEnSync();
         }
 
         function toggleFullscreen() {
@@ -910,7 +941,7 @@
 
         function voegVerplegingToe() {
             let naam = document.getElementById('selectVerplegingDropdown').value;
-            if (naam && !geselecteerdeVerpleging.includes(naam)) { geselecteerdeVerpleging.push(naam); updateVerplegingTags(); slaLokaalOp(); updateActieveTimerInCloud(); }
+            if (naam && !geselecteerdeVerpleging.includes(naam)) { geselecteerdeVerpleging.push(naam); updateVerplegingTags(); slaLokaalEnSync(); }
         }
 
         function updateVerplegingTags() {
@@ -918,14 +949,19 @@
             container.innerHTML = geselecteerdeVerpleging.length === 0 ? '<span style="font-size:11px; color:#888;">Geen selectie</span>' : '';
             geselecteerdeVerpleging.forEach(n => {
                 let tag = document.createElement('div'); tag.className = 'nurse-tag';
-                tag.innerHTML = `${n} <span onclick="geselecteerdeVerpleging=geselecteerdeVerpleging.filter(x=>x!='${n}');updateVerplegingTags();slaLokaalOp();updateActieveTimerInCloud();">✕</span>`;
+                tag.innerHTML = `${n} <span onclick="geselecteerdeVerpleging=geselecteerdeVerpleging.filter(x=>x!='${n}');updateVerplegingTags();slaLokaalEnSync();">✕</span>`;
                 container.appendChild(tag);
             });
         }
 
         function registreerNieuweVerpleging() {
             let naam = document.getElementById('newNurseNameInput').value.trim();
-            if (naam && !beschikbareVerpleging.includes(naam)) { beschikbareVerpleging.push(naam); document.getElementById('newNurseNameInput').value=''; vulVerplegingDropdown(); slaNaarGist(); }
+            if (naam && !beschikbareVerpleging.includes(naam)) { 
+                beschikbareVerpleging.push(naam); 
+                document.getElementById('newNurseNameInput').value=''; 
+                vulVerplegingDropdown(); 
+                slaLokaalEnSync(); 
+            }
         }
 
         function verwijderGeselecteerdeNaamUitLijst() {
@@ -933,7 +969,8 @@
             if (naam && confirm(`Verwijder ${naam}?`)) {
                 beschikbareVerpleging = beschikbareVerpleging.filter(n => n !== naam);
                 geselecteerdeVerpleging = geselecteerdeVerpleging.filter(n => n !== naam);
-                vulVerplegingDropdown(); slaNaarGist();
+                vulVerplegingDropdown(); 
+                slaLokaalEnSync();
             }
         }
 
@@ -953,7 +990,7 @@
             actieveSoortDialyse = soort;
             document.getElementById('btnDialyseDag').classList.toggle('active', soort === 'dag');
             document.getElementById('btnDialyseNacht').classList.toggle('active', soort === 'nacht');
-            berekenUF(); slaLokaalOp(); updateActieveTimerInCloud();
+            berekenUF(); slaLokaalEnSync();
         }
 
         function berekenWerkelijkeUF() {
@@ -964,28 +1001,6 @@
 
         function formatDatetimeLocal(d) {
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        }
-
-        function updateActieveTimerInCloud() {
-            bepaalTotaalDoelVanIngesteld();
-            actieveTimerCloud = {
-                gebruiker: actieveGebruiker,
-                isTimerRunning: isTimerRunning,
-                timerStartTimestamp: timerStartTimestamp,
-                timerTargetTime: timerTargetTime,
-                totaalUfDoelMl: totaalUfDoelMl,
-                duurUur: document.getElementById('valDuurUur').value,
-                duurMin: document.getElementById('valDuurMin').value,
-                startTijdStr: document.getElementById('valStartTijd').value,
-                stopTijdStr: document.getElementById('valStopTijd').value,
-                bloeddrukken: bloeddrukMetingen,
-                preGewicht: document.getElementById('valPreGewicht').value,
-                postGewicht: document.getElementById('valPostGewicht').value,
-                droogGewicht: document.getElementById('valDroogGewicht').value,
-                ufIngesteld: document.getElementById('valUfIngesteld').value,
-                verpleging: geselecteerdeVerpleging
-            };
-            slaNaarGist();
         }
 
         function startSessieTijd() {
@@ -1019,19 +1034,18 @@
                 document.getElementById('alarmModal').style.display = 'none';
                 clockEl.style.backgroundColor = '#fbbc04';
                 
-                updateActieveTimerInCloud();
+                slaLokaalEnSync();
             }
         }
 
         function stopSessieTijd() {
             document.getElementById('valStopTijd').value = formatDatetimeLocal(new Date());
             isTimerRunning = false;
-            actieveTimerCloud = null;
             let clockEl = document.getElementById('analogueClock');
             clockEl.classList.remove('alarm-state');
             clockEl.style.backgroundColor = '#282c34';
             document.getElementById('alarmModal').style.display = 'none';
-            slaNaarGist();
+            slaLokaalEnSync();
         }
 
         function berekenAutomatischeEindtijd() {
@@ -1125,85 +1139,10 @@
 
         function getUfKleurBadge(v) {
             let val = parseFloat(v);
-            return isNaN(val) ? `<span>${v}</span>` : val >= 4.5 ? `<span class="badge-red">${v} (≥4.5)</span>` : val >= 4.0 ? `<span class="badge-orange">${v} (≥4.0)</span>` : `<span class="badge-green">${v} (<4.0)</span>`;
+            return isNaN(val) ? `<span>${v}</span>` : val >= 4.5 ? `<span class="badge-red">${v} (≥4.5)</span>` : val >= 4.0 ? `<span class="badge-orange">${v} (≥4.0)</span>` : `<span class="badge-green ${v} (<4.0)</span>`;
         }
 
-        function verversPagina() { laadDataUitGist(true); }
-
-        // DATA INLADEN VANAF GITHUB GIST
-        function laadDataUitGist(showAlert) {
-            fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.files && data.files[GIST_FILENAME]) {
-                    let content = JSON.parse(data.files[GIST_FILENAME].content);
-                    sessies = content.sessies || [];
-                    gebruikerProfielen = content.profielen || {};
-                    if (content.verplegingLijst) beschikbareVerpleging = content.verplegingLijst;
-                    
-                    if (content.actieveTimerCloud && content.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
-                        let tc = content.actieveTimerCloud;
-                        isTimerRunning = tc.isTimerRunning;
-                        timerStartTimestamp = tc.timerStartTimestamp;
-                        timerTargetTime = tc.timerTargetTime;
-                        totaalUfDoelMl = tc.totaalUfDoelMl || 0;
-                        
-                        if (tc.duurUur) document.getElementById('valDuurUur').value = tc.duurUur;
-                        if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
-                        if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
-                        if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
-                        
-                        if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
-                        if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
-                        if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
-                        if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
-                        if (tc.ufIngesteld) document.getElementById('valUfIngesteld').value = tc.ufIngesteld;
-                        if (tc.verpleging) { geselecteerdeVerpleging = tc.verpleging; updateVerplegingTags(); }
-                        
-                        berekenUF(); berekenWerkelijkeUF();
-                    } else {
-                        herstelLokaalOp();
-                    }
-                } else {
-                    herstelLokaalOp();
-                }
-
-                vulHistorieTabel(); updateKlok();
-                if (showAlert) alert('Gegevens uit Gist geladen!');
-            })
-            .catch(err => console.error("Fout bij laden Gist:", err));
-        }
-
-        // DATA OPSLAAN NAAR GITHUB GIST
-        function slaNaarGist() {
-            let payloadData = {
-                sessies: sessies,
-                profielen: gebruikerProfielen,
-                verplegingLijst: beschikbareVerpleging,
-                actieveTimerCloud: actieveTimerCloud
-            };
-
-            fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    files: {
-                        [GIST_FILENAME]: {
-                            content: JSON.stringify(payloadData, null, 2)
-                        }
-                    }
-                })
-            })
-            .then(res => {
-                if (!res.ok) console.error("Fout bij opslaan naar Gist");
-            })
-            .catch(err => console.error(err));
-        }
+        function verversPagina() { herstelLokaalOp(); alert('Gegevens herladen!'); }
 
         function slaDialyseOp() {
             sluitTouchpad(); sluitAlphaPad();
@@ -1240,9 +1179,13 @@
                 if (idx !== -1) sessies[idx] = sessie;
             } else { sessies.unshift(sessie); }
             
-            actieveTimerCloud = null;
+            isTimerRunning = false;
             document.getElementById('analogueClock').style.backgroundColor = '#282c34';
-            slaNaarGist(); wisLokaalConcept(); vulHistorieTabel(); alert('Sessie succesvol opgeslagen!'); toonTab('historie');
+            localStorage.removeItem('rollodex_dialyse_actief');
+            slaLokaalEnSync();
+            vulHistorieTabel(); 
+            alert('Sessie succesvol opgeslagen!'); 
+            toonTab('historie');
         }
 
         window.bewerkSessie = function(id) {
@@ -1266,12 +1209,12 @@
             updateVerplegingTags();
             if (s.bloeddrukken) { bloeddrukMetingen = s.bloeddrukken; updateBloeddrukLijstEnScherm(); }
             if (s.soortDialyse) setSoortDialyse(s.soortDialyse);
-            berekenUF(); berekenWerkelijkeUF(); slaLokaalOp();
+            berekenUF(); berekenWerkelijkeUF(); slaLokaalEnSync();
             toonTab('invoer');
         };
 
         window.verwijderSessie = function(id) {
-            if (confirm('Sessie verwijderen?')) { sessies = sessies.filter(s => s.id !== id); slaNaarGist(); vulHistorieTabel(); }
+            if (confirm('Sessie verwijderen?')) { sessies = sessies.filter(s => s.id !== id); slaLokaalEnSync(); vulHistorieTabel(); }
         };
 
         function resetteerDatumFilter() { document.getElementById('filterVanDatum').value = ''; document.getElementById('filterTotDatum').value = ''; vulHistorieTabel(); }
@@ -1286,7 +1229,6 @@
 
             if (gefilterd.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color:#888;">Geen historie gevonden.</td></tr>'; return; }
             gefilterd.forEach(s => {
-                let bpStr = s.bloeddrukken?.map(b => `${b.tijd}: ${b.sys}/${b.dia}`).join('<br>') || '-';
                 let toedStr = `Frag25: ${s.fragmin2500 || 0} | Frag50: ${s.fragmin5000 || 0}<br>Epo: ${s.epo || 'Nee'} | IJzer: ${s.ijzer || 'Nee'}<br>Shunt: ${s.shuntMeting || 'Nee'} (${s.shuntRes || '-'})`;
                 let tr = document.createElement('tr');
                 tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td>${s.verpleging}</td><td><small>${toedStr}</small></td><td>Pre: ${s.preGewicht}kg<br>Post: ${s.postGewicht}kg</td><td><b>${getUfKleurBadge(s.ufAdvies)}</b></td><td>${s.notitie}</td><td>${s.duurUur}</td><td style="text-align: center;"><button class="btn-small-edit" onclick="bewerkSessie(${s.id})">✏️</button><button class="btn-small-del" onclick="verwijderSessie(${s.id})">🗑️</button></td>`;
