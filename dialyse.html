@@ -252,26 +252,6 @@
 
         .nurse-actions-row { display: flex; gap: 5px; margin-top: 6px; }
 
-        /* POS SYSTEM VOOR DRINKEN STYLES */
-        .pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 5px; margin-bottom: 8px; }
-        .pos-btn {
-            background: #ffffff; border: 1px solid #dadce0; border-radius: 8px; padding: 8px 4px;
-            font-size: 11px; font-weight: 600; color: var(--android-text); cursor: pointer; text-align: center;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: all 0.15s;
-            position: relative;
-        }
-        .pos-btn:hover { background: #e8f0fe; border-color: var(--android-primary); color: var(--android-primary); }
-        .pos-btn.selected { background: var(--android-primary); color: #fff; border-color: var(--android-primary-dark); }
-        .pos-btn-del {
-            position: absolute; top: 1px; right: 3px; font-size: 9px; color: var(--red-alert); background: rgba(255,255,255,0.9);
-            border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-        .pos-btn-del:hover { background: var(--red-alert); color: #fff; }
-        .pos-add-row { display: flex; gap: 5px; margin-bottom: 8px; align-items: center; }
-        .pos-add-row input { flex: 1; padding: 7px; border: 1px solid #dadce0; border-radius: 8px; font-size: 11px; outline: none; }
-        .btn-pos-add { background: var(--green-ok); color: #fff; border: none; padding: 7px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .btn-pos-add:hover { background: #137333; }
-
         /* TOUCHPADS */
         .numeric-pad-container, .alpha-pad-container { background: #202020; border-radius: 12px; padding: 8px; margin-top: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none; }
         .pad-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 10px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; }
@@ -461,7 +441,7 @@
                     </div>
                     <div class="med-box interactive" onclick="springNaarToedieningenVeld()">
                         <div class="label">KNOP 5</div>
-                        <div class="value">💊 TOED./VOCHT</div>
+                        <div class="value">💊 TOEDIENINGEN</div>
                     </div>
                 </div>
 
@@ -612,7 +592,7 @@
                     </div>
                 </div>
 
-                <!-- 5. TOEDIENINGEN & VOCHT (POS) BOX -->
+                <!-- 5. TOEDIENINGEN BOX (EXCLUSIEF MEDICATIE & SHUNTFLOW) -->
                 <div class="sub-section-box" id="toedieningenBox">
                     <div class="row-inputs" style="margin-bottom: 6px;">
                         <div class="form-group">
@@ -636,34 +616,15 @@
                         </div>
                     </div>
 
-                    <!-- POS DRINKEN INVOER -->
                     <div style="border-top: 1px solid #dadce0; padding-top: 6px; margin-top: 6px;">
-                        <div style="font-size: 11px; font-weight: bold; color: var(--android-primary); margin-bottom: 4px;">🥤 Vocht / Drinken (POS)</div>
-                        
-                        <div style="font-size: 10px; font-weight: 700; color: var(--android-subtext); margin-bottom: 2px;">Kies Drank (zonder hoeveelheid):</div>
-                        <div class="pos-grid" id="drankGrid"></div>
-                        <div class="pos-add-row">
-                            <input type="text" id="nieuweDrankInput" placeholder="Nieuwe drank (bijv. Thee)...">
-                            <button type="button" class="btn-pos-add" onclick="voegDrankSneltoetsToe()">+ Drank</button>
-                        </div>
-
-                        <div style="font-size: 10px; font-weight: 700; color: var(--android-subtext); margin-bottom: 2px;">Kies Hoeveelheid (ml):</div>
-                        <div class="pos-grid" id="hoeveelheidGrid"></div>
-                        <div class="pos-add-row">
-                            <input type="number" id="nieuweMlInput" placeholder="Nieuwe ml (bijv. 300)...">
-                            <button type="button" class="btn-pos-add" onclick="voegMlSneltoetsToe()">+ Hoeveelheid</button>
-                        </div>
-
-                        <div style="background: #e8f0fe; padding: 6px; border-radius: 6px; text-align: center; font-size: 11px; font-weight: bold; color: var(--android-primary); margin-top: 4px;" id="posGeselecteerdTekst">
-                            Selecteer drank & ml...
-                        </div>
-                        <button type="button" class="btn-pos-add" style="width:100%; margin-top: 4px; background:var(--android-primary); padding:8px;" onclick="voegVochtInnameToe()">+ Drinken Toevoegen aan Sessie</button>
-                    </div>
-
-                    <div class="form-group" style="margin-top: 6px;">
-                        <label>Geregistreerde Vocht / Drinken deze sessie:</label>
-                        <div class="bp-list-container" id="vochtListContainer">
-                            <span style="font-size:11px; color:#888;">Nog geen vocht ingevoerd.</span>
+                        <div class="row-inputs" style="align-items: flex-end;">
+                            <label class="checkbox-group" style="flex:1; padding-bottom: 6px;">
+                                <input type="checkbox" id="checkShuntflowMeting" onchange="slaLokaalOp(); updateActieveTimerInCloud();"> Shuntflow meting
+                            </label>
+                            <div class="form-group" style="flex:1;">
+                                <label>Shuntflow resultaat</label>
+                                <input type="text" inputmode="none" id="valShuntflowResultaat" placeholder="Bijv. 850 ml/min" onfocus="activeerTouchpad(this)" oninput="slaLokaalOp(); updateActieveTimerInCloud();">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -729,10 +690,10 @@
                             <th>Datum & Tijd</th>
                             <th>Gebruiker</th>
                             <th>Verpleging</th>
-                            <th>Bloeddruk</th>
+                            <th>Toedieningen / Shunt</th>
                             <th>Pre / Post / Droog</th>
                             <th>UF Advies / Ingesteld</th>
-                            <th>Drinken / Vocht</th>
+                            <th>Notitie</th>
                             <th>Duur</th>
                             <th style="width: 75px; text-align: center;">Actie</th>
                         </tr>
@@ -767,15 +728,8 @@
         let huidigeBewerkingSessieId = null;
 
         let bloeddrukMetingen = [];
-        let vochtInnameMetingen = [];
         let beschikbareVerpleging = ["Jan Jansen", "Marie de Vries", "Ahmed el Amrani", "Lisa Bakker"];
         let geselecteerdeVerpleging = [];
-
-        // POS Drinken lijsten
-        let drankenSneltoetsen = ["Water", "Koffie", "Thee", "Melk", "Soep", "Frisdrank"];
-        let mlSneltoetsen = [100, 150, 200, 250, 330, 500];
-        let gekozenPosDrank = "";
-        let gekozenPosMl = 0;
 
         let isTimerRunning = false;
         let timerTargetTime = null;
@@ -840,103 +794,7 @@
         function springNaarUfVeld() { toonExclusiefMenu('ufBox', '💧 UF & INSTELLINGEN'); activeerTouchpad(document.getElementById('valUfIngesteld')); }
         function springNaarGewichtVeld() { toonExclusiefMenu('gewichtBox', '⚖️ GEWICHTSREGISTRATIE'); activeerTouchpad(document.getElementById('valPreGewicht')); }
         function springNaarVerplegingVeld() { toonExclusiefMenu('verplegingBox', '👩‍⚕️ VERPLEGING'); sluitTouchpad(); vulVerplegingDropdown(); }
-        function springNaarToedieningenVeld() { toonExclusiefMenu('toedieningenBox', '💊 TOEDIENINGEN & VOCHT'); sluitTouchpad(); renderPosGrids(); }
-
-        // --- POS DRINKEN FUNCTIES ---
-        function renderPosGrids() {
-            let dGrid = document.getElementById('drankGrid');
-            dGrid.innerHTML = '';
-            drankenSneltoetsen.forEach((d, idx) => {
-                let btn = document.createElement('div');
-                btn.className = `pos-btn ${gekozenPosDrank === d ? 'selected' : ''}`;
-                btn.innerHTML = `<span>🥤 ${d}</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderDrankSneltoets(${idx})">✕</div>`;
-                btn.onclick = () => { gekozenPosDrank = d; renderPosGrids(); updatePosTekst(); };
-                dGrid.appendChild(btn);
-            });
-
-            let mGrid = document.getElementById('hoeveelheidGrid');
-            mGrid.innerHTML = '';
-            mlSneltoetsen.forEach((ml, idx) => {
-                let btn = document.createElement('div');
-                btn.className = `pos-btn ${gekozenPosMl === ml ? 'selected' : ''}`;
-                btn.innerHTML = `<span>💧 ${ml} ml</span><div class="pos-btn-del" onclick="event.stopPropagation(); verwijderMlSneltoets(${idx})">✕</div>`;
-                btn.onclick = () => { gekozenPosMl = ml; renderPosGrids(); updatePosTekst(); };
-                mGrid.appendChild(btn);
-            });
-        }
-
-        function updatePosTekst() {
-            document.getElementById('posGeselecteerdTekst').innerText = `${gekozenPosDrank || 'Geen drank'} — ${gekozenPosMl ? gekozenPosMl + ' ml' : 'Geen ml'}`;
-        }
-
-        function voegDrankSneltoetsToe() {
-            let input = document.getElementById('nieuweDrankInput');
-            let val = input.value.trim();
-            if (val && !drankenSneltoetsen.includes(val)) {
-                drankenSneltoetsen.push(val);
-                input.value = '';
-                renderPosGrids();
-                slaNaarBin();
-            }
-        }
-
-        function verwijderDrankSneltoets(index) {
-            if (confirm(`Verwijder drank '${drankenSneltoetsen[index]}'?`)) {
-                drankenSneltoetsen.splice(index, 1);
-                renderPosGrids();
-                slaNaarBin();
-            }
-        }
-
-        function voegMlSneltoetsToe() {
-            let input = document.getElementById('nieuweMlInput');
-            let val = parseInt(input.value);
-            if (!isNaN(val) && val > 0 && !mlSneltoetsen.includes(val)) {
-                mlSneltoetsen.push(val);
-                mlSneltoetsen.sort((a,b)=>a-b);
-                input.value = '';
-                renderPosGrids();
-                slaNaarBin();
-            }
-        }
-
-        function verwijderMlSneltoets(index) {
-            if (confirm(`Verwijder hoeveelheid '${mlSneltoetsen[index]} ml'?`)) {
-                mlSneltoetsen.splice(index, 1);
-                renderPosGrids();
-                slaNaarBin();
-            }
-        }
-
-        function voegVochtInnameToe() {
-            if (!gekozenPosDrank) { alert('Selecteer eerst een drankje.'); return; }
-            if (!gekozenPosMl) { alert('Selecteer een hoeveelheid in ml.'); return; }
-
-            vochtInnameMetingen.push({ tijd: new Date().toTimeString().slice(0, 5), drank: gekozenPosDrank, hoeveelheid: gekozenPosMl });
-            gekozenPosDrank = ""; gekozenPosMl = 0;
-            renderPosGrids(); updatePosTekst(); updateVochtLijst();
-            slaLokaalOp(); updateActieveTimerInCloud();
-        }
-
-        function verwijderVochtInname(index) {
-            vochtInnameMetingen.splice(index, 1);
-            updateVochtLijst(); slaLokaalOp(); updateActieveTimerInCloud();
-        }
-
-        function updateVochtLijst() {
-            let container = document.getElementById('vochtListContainer');
-            container.innerHTML = '';
-            if (vochtInnameMetingen.length === 0) {
-                container.innerHTML = '<span style="font-size:11px; color:#888;">Nog geen vocht ingevoerd.</span>';
-                return;
-            }
-            vochtInnameMetingen.forEach((v, idx) => {
-                let div = document.createElement('div');
-                div.className = 'bp-item';
-                div.innerHTML = `<span>⏱️ ${v.tijd} → <b>${v.drank}</b> (${v.hoeveelheid} ml)</span><button type="button" class="btn-small-del" onclick="verwijderVochtInname(${idx})">Wis</button>`;
-                container.appendChild(div);
-            });
-        }
+        function springNaarToedieningenVeld() { toonExclusiefMenu('toedieningenBox', '💊 TOEDIENINGEN'); sluitTouchpad(); }
 
         function voegBloeddrukMetingToe() {
             let sys = document.getElementById('valBpSys').value.trim();
@@ -989,8 +847,9 @@
                 frag50: document.getElementById('valFragmin5000').value,
                 epo: document.getElementById('checkEpo').checked,
                 ijzer: document.getElementById('checkIjzer').checked,
+                shuntMeting: document.getElementById('checkShuntflowMeting').checked,
+                shuntRes: document.getElementById('valShuntflowResultaat').value,
                 bloeddrukMetingen: bloeddrukMetingen,
-                vochtInnameMetingen: vochtInnameMetingen,
                 soortDialyse: actieveSoortDialyse
             };
             localStorage.setItem('dialyse_form_concept', JSON.stringify(data));
@@ -1009,8 +868,13 @@
                 if (d.post) document.getElementById('valPostGewicht').value = d.post;
                 if (d.droog) document.getElementById('valDroogGewicht').value = d.droog;
                 if (d.ufIngesteld) document.getElementById('valUfIngesteld').value = d.ufIngesteld;
+                if (d.frag25) document.getElementById('valFragmin2500').value = d.frag25;
+                if (d.frag50) document.getElementById('valFragmin5000').value = d.frag50;
+                if (d.epo !== undefined) document.getElementById('checkEpo').checked = d.epo;
+                if (d.ijzer !== undefined) document.getElementById('checkIjzer').checked = d.ijzer;
+                if (d.shuntMeting !== undefined) document.getElementById('checkShuntflowMeting').checked = d.shuntMeting;
+                if (d.shuntRes) document.getElementById('valShuntflowResultaat').value = d.shuntRes;
                 if (d.bloeddrukMetingen) { bloeddrukMetingen = d.bloeddrukMetingen; updateBloeddrukLijstEnScherm(); }
-                if (d.vochtInnameMetingen) { vochtInnameMetingen = d.vochtInnameMetingen; updateVochtLijst(); }
                 if (d.soortDialyse) setSoortDialyse(d.soortDialyse);
                 berekenUF(); berekenWerkelijkeUF();
             } catch (e) {}
@@ -1019,13 +883,11 @@
         function wisLokaalConcept() {
             localStorage.removeItem('dialyse_form_concept');
             bloeddrukMetingen = [];
-            vochtInnameMetingen = [];
             huidigUfGeweestMl = 0;
             isTimerRunning = false;
             actieveTimerCloud = null;
             document.getElementById('analogueClock').style.backgroundColor = '#282c34';
             updateBloeddrukLijstEnScherm();
-            updateVochtLijst();
         }
 
         function toggleFullscreen() {
@@ -1114,7 +976,6 @@
                 startTijdStr: document.getElementById('valStartTijd').value,
                 stopTijdStr: document.getElementById('valStopTijd').value,
                 bloeddrukken: bloeddrukMetingen,
-                vochtMetingen: vochtInnameMetingen,
                 preGewicht: document.getElementById('valPreGewicht').value,
                 postGewicht: document.getElementById('valPostGewicht').value,
                 droogGewicht: document.getElementById('valDroogGewicht').value,
@@ -1258,8 +1119,6 @@
                 sessies = rec.sessies || [];
                 gebruikerProfielen = rec.profielen || {};
                 if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
-                if (rec.drankenSneltoetsen) drankenSneltoetsen = rec.drankenSneltoetsen;
-                if (rec.mlSneltoetsen) mlSneltoetsen = rec.mlSneltoetsen;
                 
                 if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
                     let tc = rec.actieveTimerCloud;
@@ -1274,7 +1133,6 @@
                     if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
                     
                     if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
-                    if (tc.vochtMetingen) { vochtInnameMetingen = tc.vochtMetingen; updateVochtLijst(); }
                     if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
                     if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
                     if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
@@ -1299,8 +1157,6 @@
                 rec.sessies = sessies;
                 rec.profielen = gebruikerProfielen;
                 rec.verplegingLijst = beschikbareVerpleging;
-                rec.drankenSneltoetsen = drankenSneltoetsen;
-                rec.mlSneltoetsen = mlSneltoetsen;
                 rec.actieveTimerCloud = actieveTimerCloud;
 
                 return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
@@ -1321,7 +1177,6 @@
                 persoon: actieveGebruiker,
                 verpleging: geselecteerdeVerpleging.join(', ') || '-',
                 bloeddrukken: bloeddrukMetingen,
-                vochtMetingen: vochtInnameMetingen,
                 datum: new Date().toISOString().split('T')[0],
                 tijd: new Date().toTimeString().slice(0, 5),
                 preGewicht: pre,
@@ -1336,6 +1191,8 @@
                 fragmin5000: document.getElementById('valFragmin5000').value || '0',
                 epo: document.getElementById('checkEpo').checked ? 'Ja' : 'Nee',
                 ijzer: document.getElementById('checkIjzer').checked ? 'Ja' : 'Nee',
+                shuntMeting: document.getElementById('checkShuntflowMeting').checked ? 'Ja' : 'Nee',
+                shuntRes: document.getElementById('valShuntflowResultaat').value || '-',
                 duurUur: `${document.getElementById('valDuurUur').value}u ${document.getElementById('valDuurMin').value}m`,
                 startTijd: document.getElementById('valStartTijd').value || '-',
                 stopTijd: document.getElementById('valStopTijd').value || '-',
@@ -1361,10 +1218,16 @@
             document.getElementById('valStartTijd').value = s.startTijd !== '-' ? s.startTijd : '';
             document.getElementById('valStopTijd').value = s.stopTijd !== '-' ? s.stopTijd : '';
             document.getElementById('valNotitie').value = s.notitie !== '-' ? s.notitie : '';
+            document.getElementById('valFragmin2500').value = s.fragmin2500 !== '0' ? s.fragmin2500 : '';
+            document.getElementById('valFragmin5000').value = s.fragmin5000 !== '0' ? s.fragmin5000 : '';
+            document.getElementById('checkEpo').checked = s.epo === 'Ja';
+            document.getElementById('checkIjzer').checked = s.ijzer === 'Ja';
+            document.getElementById('checkShuntflowMeting').checked = s.shuntMeting === 'Ja';
+            document.getElementById('valShuntflowResultaat').value = s.shuntRes !== '-' ? s.shuntRes : '';
+
             geselecteerdeVerpleging = s.verpleging && s.verpleging !== '-' ? s.verpleging.split(', ') : [];
             updateVerplegingTags();
             if (s.bloeddrukken) { bloeddrukMetingen = s.bloeddrukken; updateBloeddrukLijstEnScherm(); }
-            if (s.vochtMetingen) { vochtInnameMetingen = s.vochtMetingen; updateVochtLijst(); }
             if (s.soortDialyse) setSoortDialyse(s.soortDialyse);
             berekenUF(); berekenWerkelijkeUF(); slaLokaalOp();
             toonTab('invoer');
@@ -1387,9 +1250,9 @@
             if (gefilterd.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color:#888;">Geen historie gevonden.</td></tr>'; return; }
             gefilterd.forEach(s => {
                 let bpStr = s.bloeddrukken?.map(b => `${b.tijd}: ${b.sys}/${b.dia}`).join('<br>') || '-';
-                let vochtStr = s.vochtMetingen?.map(v => `${v.tijd}: ${v.drank} (${v.hoeveelheid}ml)`).join('<br>') || '-';
+                let toedStr = `Frag25: ${s.fragmin2500 || 0} | Frag50: ${s.fragmin5000 || 0}<br>Epo: ${s.epo || 'Nee'} | IJzer: ${s.ijzer || 'Nee'}<br>Shunt: ${s.shuntMeting || 'Nee'} (${s.shuntRes || '-'})`;
                 let tr = document.createElement('tr');
-                tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td>${s.verpleging}</td><td><small>${bpStr}</small></td><td>Pre: ${s.preGewicht}kg<br>Post: ${s.postGewicht}kg</td><td><b>${getUfKleurBadge(s.ufAdvies)}</b></td><td><small>${vochtStr}</small></td><td>${s.duurUur}</td><td style="text-align: center;"><button class="btn-small-edit" onclick="bewerkSessie(${s.id})">✏️</button><button class="btn-small-del" onclick="verwijderSessie(${s.id})">🗑️</button></td>`;
+                tr.innerHTML = `<td>${s.datum} ${s.tijd}</td><td><b>${s.persoon}</b></td><td>${s.verpleging}</td><td><small>${toedStr}</small></td><td>Pre: ${s.preGewicht}kg<br>Post: ${s.postGewicht}kg</td><td><b>${getUfKleurBadge(s.ufAdvies)}</b></td><td>${s.notitie}</td><td>${s.duurUur}</td><td style="text-align: center;"><button class="btn-small-edit" onclick="bewerkSessie(${s.id})">✏️</button><button class="btn-small-del" onclick="verwijderSessie(${s.id})">🗑️</button></td>`;
                 tbody.appendChild(tr);
             });
         }
