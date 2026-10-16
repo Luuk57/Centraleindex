@@ -687,6 +687,7 @@
         let actieveSoortDialyse = 'nacht'; 
         let sessies = [];
         let gebruikerProfielen = {};
+        let actieveTimerCloud = null;
         let huidigeBewerkingSessieId = null;
 
         let bloeddrukMetingen = [];
@@ -715,6 +716,11 @@
             genereerUurStrepen();
             startKlokLus();
             laadData();
+
+            // Automatische cloud-synchronisatie elke 5 seconden voor Tablet B
+            setInterval(() => {
+                laadData(false);
+            }, 5000);
         });
 
         function gaNaarHoofdm(e) {
@@ -761,12 +767,12 @@
             if (!sys || !dia) { alert('Vul minimaal bovendruk en onderdruk in.'); return; }
             bloeddrukMetingen.push({ tijd: new Date().toTimeString().slice(0, 5), sys, dia, hart: hart || '-' });
             document.getElementById('valBpSys').value = ''; document.getElementById('valBpDia').value = ''; document.getElementById('valBpHart').value = '';
-            updateBloeddrukLijstEnScherm(); slaLokaalOp();
+            updateBloeddrukLijstEnScherm(); slaLokaalOp(); slaNaarBin();
         }
 
         function verwijderBloeddrukMeting(index) {
             bloeddrukMetingen.splice(index, 1);
-            updateBloeddrukLijstEnScherm(); slaLokaalOp();
+            updateBloeddrukLijstEnScherm(); slaLokaalOp(); slaNaarBin();
         }
 
         function updateBloeddrukLijstEnScherm() {
@@ -843,6 +849,7 @@
             bloeddrukMetingen = [];
             huidigUfGeweestMl = 0;
             isTimerRunning = false;
+            actieveTimerCloud = null;
             updateBloeddrukLijstEnScherm();
         }
 
@@ -863,7 +870,7 @@
 
         function voegVerplegingToe() {
             let naam = document.getElementById('selectVerplegingDropdown').value;
-            if (naam && !geselecteerdeVerpleging.includes(naam)) { geselecteerdeVerpleging.push(naam); updateVerplegingTags(); slaLokaalOp(); }
+            if (naam && !geselecteerdeVerpleging.includes(naam)) { geselecteerdeVerpleging.push(naam); updateVerplegingTags(); slaLokaalOp(); slaNaarBin(); }
         }
 
         function updateVerplegingTags() {
@@ -871,7 +878,7 @@
             container.innerHTML = geselecteerdeVerpleging.length === 0 ? '<span style="font-size:11px; color:#888;">Geen selectie</span>' : '';
             geselecteerdeVerpleging.forEach(n => {
                 let tag = document.createElement('div'); tag.className = 'nurse-tag';
-                tag.innerHTML = `${n} <span onclick="geselecteerdeVerpleging=geselecteerdeVerpleging.filter(x=>x!='${n}');updateVerplegingTags();slaLokaalOp();">✕</span>`;
+                tag.innerHTML = `${n} <span onclick="geselecteerdeVerpleging=geselecteerdeVerpleging.filter(x=>x!='${n}');updateVerplegingTags();slaLokaalOp();slaNaarBin();">✕</span>`;
                 container.appendChild(tag);
             });
         }
@@ -906,7 +913,7 @@
             actieveSoortDialyse = soort;
             document.getElementById('btnDialyseDag').classList.toggle('active', soort === 'dag');
             document.getElementById('btnDialyseNacht').classList.toggle('active', soort === 'nacht');
-            berekenUF(); slaLokaalOp();
+            berekenUF(); slaLokaalOp(); slaNaarBin();
         }
 
         function berekenWerkelijkeUF() {
@@ -931,16 +938,33 @@
                 document.getElementById('analogueClock').classList.remove('alarm-state');
                 document.getElementById('alarmModal').style.display = 'none';
                 document.getElementById('analogueClock').style.backgroundColor = '#fbbc04';
+                
+                actieveTimerCloud = {
+                    gebruiker: actieveGebruiker,
+                    isTimerRunning: true,
+                    timerStartTimestamp: timerStartTimestamp,
+                    timerTargetTime: timerTargetTime,
+                    totaalUfDoelMl: totaalUfDoelMl,
+                    duurUur: document.getElementById('valDuurUur').value,
+                    duurMin: document.getElementById('valDuurMin').value,
+                    startTijdStr: document.getElementById('valStartTijd').value,
+                    stopTijdStr: document.getElementById('valStopTijd').value,
+                    bloeddrukken: bloeddrukMetingen
+                };
+
                 slaLokaalOp();
+                slaNaarBin();
             }
         }
 
         function stopSessieTijd() {
             document.getElementById('valStopTijd').value = formatDatetimeLocal(new Date());
             isTimerRunning = false;
+            actieveTimerCloud = null;
             document.getElementById('analogueClock').classList.remove('alarm-state');
             document.getElementById('alarmModal').style.display = 'none';
             slaLokaalOp();
+            slaNaarBin();
         }
 
         function berekenAutomatischeEindtijd() {
@@ -963,7 +987,8 @@
             if (isTimerRunning && timerTargetTime && timerStartTimestamp) {
                 let overms = timerTargetTime - nu.getTime();
                 let verlopen = nu.getTime() - timerStartTimestamp;
-                let fractie = Math.min(verlopen / (getTotaleDuurInUren() * 3600000), 1);
+                let totaleDuurMs = timerTargetTime - timerStartTimestamp;
+                let fractie = totaleDuurMs > 0 ? Math.min(verlopen / totaleDuurMs, 1) : 0;
 
                 huidigUfGeweestMl = Math.round(totaalUfDoelMl * fractie);
                 document.getElementById('dispUfVol').innerText = huidigUfGeweestMl;
@@ -1027,25 +1052,58 @@
             return isNaN(val) ? `<span>${v}</span>` : val >= 4.5 ? `<span class="badge-red">${v} (≥4.5)</span>` : val >= 4.0 ? `<span class="badge-orange">${v} (≥4.0)</span>` : `<span class="badge-green">${v} (<4.0)</span>`;
         }
 
-        function verversPagina() { laadData(); location.reload(); }
+        function verversPagina() { laadData(true); }
 
-        function laadData() {
+        function laadData(showAlert) {
             fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
             .then(res => res.json())
             .then(data => {
-                sessies = data.record?.sessies || [];
-                gebruikerProfielen = data.record?.profielen || {};
-                if (data.record?.verplegingLijst) beschikbareVerpleging = data.record.verplegingLijst;
+                let rec = data.record || {};
+                sessies = rec.sessies || [];
+                gebruikerProfielen = rec.profielen || {};
+                if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
+                
+                // Synchroniseer lopende timer via cloud
+                if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
+                    let tc = rec.actieveTimerCloud;
+                    if (tc.isTimerRunning) {
+                        isTimerRunning = true;
+                        timerStartTimestamp = tc.timerStartTimestamp;
+                        timerTargetTime = tc.timerTargetTime;
+                        totaalUfDoelMl = tc.totaalUfDoelMl || 0;
+                        if (tc.duurUur) document.getElementById('valDuurUur').value = tc.duurUur;
+                        if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
+                        if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
+                        if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
+                        if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
+                    }
+                } else if (!rec.actieveTimerCloud && isTimerRunning) {
+                    // Als timer op een ander apparaat is stopgezet
+                    isTimerRunning = false;
+                }
+
                 herstelLokaalOp(); vulHistorieTabel();
+                if (showAlert) alert('Gevuld vanuit cloud!');
             }).catch(err => console.error(err));
         }
 
         function slaNaarBin() {
-            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                body: JSON.stringify({ sessies, profielen: gebruikerProfielen, verplegingLijst: beschikbareVerpleging })
-            }).catch(err => console.error(err));
+            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
+            .then(res => res.json())
+            .then(data => {
+                let rec = data.record || {};
+                rec.sessies = sessies;
+                rec.profielen = gebruikerProfielen;
+                rec.verplegingLijst = beschikbareVerpleging;
+                rec.actieveTimerCloud = actieveTimerCloud;
+
+                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(rec)
+                });
+            })
+            .catch(err => console.error(err));
         }
 
         function slaDialyseOp() {
@@ -1082,7 +1140,9 @@
                 let idx = sessies.findIndex(s => s.id === huidigeBewerkingSessieId);
                 if (idx !== -1) sessies[idx] = sessie;
             } else { sessies.unshift(sessie); }
-            slaNaarBin(); wisLokaalConcept(); vulHistorieTabel(); alert('Opgeslagen!'); toonTab('historie');
+            
+            actieveTimerCloud = null;
+            slaNaarBin(); wisLokaalConcept(); vulHistorieTabel(); alert('Sessie succesvol opgeslagen!'); toonTab('historie');
         }
 
         window.bewerkSessie = function(id) {
