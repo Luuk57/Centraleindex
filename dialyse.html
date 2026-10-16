@@ -477,7 +477,7 @@
                     <div class="row-inputs">
                         <div class="form-group">
                             <label>UF Ingesteld (l)</label>
-                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="this.dataset.autoFilled='false'; bepaalTotaalDoelVanIngesteld(); slaLokaalOp();">
+                            <input type="text" inputmode="none" id="valUfIngesteld" placeholder="Bijv. 3.0" onfocus="activeerTouchpad(this)" oninput="this.dataset.autoFilled='false'; bepaalTotaalDoelVanIngesteld(); slaLokaalOp(); updateActieveTimerInCloud();">
                         </div>
                         <div class="form-group">
                             <label>Werkelijke UF (kg)</label>
@@ -498,15 +498,15 @@
                 <div class="sub-section-box" id="gewichtBox">
                     <div class="form-group">
                         <label>Pre Gewicht (kg)</label>
-                        <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF(); slaLokaalOp();">
+                        <input type="text" inputmode="none" id="valPreGewicht" placeholder="Bijv. 112.5" onfocus="activeerTouchpad(this)" oninput="berekenUF(); berekenWerkelijkeUF(); slaLokaalOp(); updateActieveTimerInCloud();">
                     </div>
                     <div class="form-group">
                         <label>Post Gewicht (kg)</label>
-                        <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF(); slaLokaalOp();">
+                        <input type="text" inputmode="none" id="valPostGewicht" placeholder="Bijv. 109.2" onfocus="activeerTouchpad(this)" oninput="berekenWerkelijkeUF(); slaLokaalOp(); updateActieveTimerInCloud();">
                     </div>
                     <div class="form-group">
                         <label>Droog Gewicht (kg)</label>
-                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); opslaanNieuwDroogGewichtBin(); slaLokaalOp();">
+                        <input type="text" inputmode="none" id="valDroogGewicht" value="109" onfocus="activeerTouchpad(this)" oninput="berekenUF(); slaLokaalOp(); updateActieveTimerInCloud();">
                     </div>
                 </div>
 
@@ -560,21 +560,21 @@
                     <div class="row-inputs" style="margin-bottom: 8px;">
                         <div class="form-group">
                             <label>Fragmin 2500</label>
-                            <input type="text" inputmode="none" maxlength="1" id="valFragmin2500" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalOp();">
+                            <input type="text" inputmode="none" maxlength="1" id="valFragmin2500" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalOp(); updateActieveTimerInCloud();">
                         </div>
                         <div class="form-group">
                             <label>Fragmin 5000</label>
-                            <input type="text" inputmode="none" maxlength="1" id="valFragmin5000" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalOp();">
+                            <input type="text" inputmode="none" maxlength="1" id="valFragmin5000" placeholder="0" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 1); slaLokaalOp(); updateActieveTimerInCloud();">
                         </div>
                     </div>
 
                     <div style="border-top: 1px solid #dadce0; padding-top: 8px; margin-top: 8px;">
                         <div class="row-inputs">
                             <label class="checkbox-group" style="flex:1;">
-                                <input type="checkbox" id="checkEpo" onchange="slaLokaalOp();"> Epo toegediend
+                                <input type="checkbox" id="checkEpo" onchange="slaLokaalOp(); updateActieveTimerInCloud();"> Epo toegediend
                             </label>
                             <label class="checkbox-group" style="flex:1;">
-                                <input type="checkbox" id="checkIjzer" onchange="slaLokaalOp();"> IJzer toegediend
+                                <input type="checkbox" id="checkIjzer" onchange="slaLokaalOp(); updateActieveTimerInCloud();"> IJzer toegediend
                             </label>
                         </div>
                     </div>
@@ -582,11 +582,11 @@
                     <div style="border-top: 1px solid #dadce0; padding-top: 8px; margin-top: 8px;">
                         <div class="row-inputs">
                             <label class="checkbox-group" style="flex: 1;">
-                                <input type="checkbox" id="checkShuntflow" onchange="slaLokaalOp();"> Shuntflow meting
+                                <input type="checkbox" id="checkShuntflow" onchange="slaLokaalOp(); updateActieveTimerInCloud();"> Shuntflow meting
                             </label>
                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                 <label>Waarde</label>
-                                <input type="text" inputmode="none" maxlength="4" id="valShuntflow" placeholder="Bijv. 1200" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 4); slaLokaalOp();">
+                                <input type="text" inputmode="none" maxlength="4" id="valShuntflow" placeholder="Bijv. 1200" onfocus="activeerTouchpad(this)" oninput="beperkCijfers(this, 4); slaLokaalOp(); updateActieveTimerInCloud();">
                             </div>
                         </div>
                     </div>
@@ -608,7 +608,7 @@
 
                 <div class="form-group" style="margin-top: 8px;">
                     <label>Notitie / Bijzonderheden</label>
-                    <input type="text" inputmode="none" id="valNotitie" placeholder="Bijv. bijzonderheden" onfocus="activeerAlphaPad(this)" oninput="slaLokaalOp();">
+                    <input type="text" inputmode="none" id="valNotitie" placeholder="Bijv. bijzonderheden" onfocus="activeerAlphaPad(this)" oninput="slaLokaalOp(); updateActieveTimerInCloud();">
                 </div>
             </div>
         </div>
@@ -718,12 +718,11 @@
             startKlokLus();
             laadData(false);
 
-            // Automatische achtergrond-sync elke 3 seconden
+            // Automatische achtergrond-sync elke 3 seconden (zodat B & C steeds de live status van A binnenkrijgen)
             setInterval(() => {
                 laadData(false);
             }, 3000);
 
-            // Direct herberekenen bij heropenen van het scherm
             document.addEventListener("visibilitychange", () => {
                 if (!document.hidden) {
                     herstelLokaalOp();
@@ -777,12 +776,16 @@
             if (!sys || !dia) { alert('Vul minimaal bovendruk en onderdruk in.'); return; }
             bloeddrukMetingen.push({ tijd: new Date().toTimeString().slice(0, 5), sys, dia, hart: hart || '-' });
             document.getElementById('valBpSys').value = ''; document.getElementById('valBpDia').value = ''; document.getElementById('valBpHart').value = '';
-            updateBloeddrukLijstEnScherm(); slaLokaalOp(); slaNaarBin();
+            updateBloeddrukLijstEnScherm(); 
+            slaLokaalOp(); 
+            updateActieveTimerInCloud(); // Direct naar cloud, zodat verpleegkundige op B/C het meteen ziet!
         }
 
         function verwijderBloeddrukMeting(index) {
             bloeddrukMetingen.splice(index, 1);
-            updateBloeddrukLijstEnScherm(); slaLokaalOp(); slaNaarBin();
+            updateBloeddrukLijstEnScherm(); 
+            slaLokaalOp(); 
+            updateActieveTimerInCloud();
         }
 
         function updateBloeddrukLijstEnScherm() {
@@ -886,7 +889,7 @@
 
         function voegVerplegingToe() {
             let naam = document.getElementById('selectVerplegingDropdown').value;
-            if (naam && !geselecteerdeVerpleging.includes(naam)) { geselecteerdeVerpleging.push(naam); updateVerplegingTags(); slaLokaalOp(); slaNaarBin(); }
+            if (naam && !geselecteerdeVerpleging.includes(naam)) { geselecteerdeVerpleging.push(naam); updateVerplegingTags(); slaLokaalOp(); updateActieveTimerInCloud(); }
         }
 
         function updateVerplegingTags() {
@@ -894,7 +897,7 @@
             container.innerHTML = geselecteerdeVerpleging.length === 0 ? '<span style="font-size:11px; color:#888;">Geen selectie</span>' : '';
             geselecteerdeVerpleging.forEach(n => {
                 let tag = document.createElement('div'); tag.className = 'nurse-tag';
-                tag.innerHTML = `${n} <span onclick="geselecteerdeVerpleging=geselecteerdeVerpleging.filter(x=>x!='${n}');updateVerplegingTags();slaLokaalOp();slaNaarBin();">✕</span>`;
+                tag.innerHTML = `${n} <span onclick="geselecteerdeVerpleging=geselecteerdeVerpleging.filter(x=>x!='${n}');updateVerplegingTags();slaLokaalOp();updateActieveTimerInCloud();">✕</span>`;
                 container.appendChild(tag);
             });
         }
@@ -929,7 +932,7 @@
             actieveSoortDialyse = soort;
             document.getElementById('btnDialyseDag').classList.toggle('active', soort === 'dag');
             document.getElementById('btnDialyseNacht').classList.toggle('active', soort === 'nacht');
-            berekenUF(); slaLokaalOp(); slaNaarBin();
+            berekenUF(); slaLokaalOp(); updateActieveTimerInCloud();
         }
 
         function berekenWerkelijkeUF() {
@@ -940,6 +943,28 @@
 
         function formatDatetimeLocal(d) {
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+
+        function updateActieveTimerInCloud() {
+            if (!isTimerRunning) return;
+            actieveTimerCloud = {
+                gebruiker: actieveGebruiker,
+                isTimerRunning: true,
+                timerStartTimestamp: timerStartTimestamp,
+                timerTargetTime: timerTargetTime,
+                totaalUfDoelMl: totaalUfDoelMl,
+                duurUur: document.getElementById('valDuurUur').value,
+                duurMin: document.getElementById('valDuurMin').value,
+                startTijdStr: document.getElementById('valStartTijd').value,
+                stopTijdStr: document.getElementById('valStopTijd').value,
+                bloeddrukken: bloeddrukMetingen,
+                preGewicht: document.getElementById('valPreGewicht').value,
+                postGewicht: document.getElementById('valPostGewicht').value,
+                droogGewicht: document.getElementById('valDroogGewicht').value,
+                ufIngesteld: document.getElementById('valUfIngesteld').value,
+                verpleging: geselecteerdeVerpleging
+            };
+            slaNaarBin();
         }
 
         function startSessieTijd() {
@@ -957,21 +982,8 @@
                 document.getElementById('alarmModal').style.display = 'none';
                 clockEl.style.backgroundColor = '#fbbc04';
                 
-                actieveTimerCloud = {
-                    gebruiker: actieveGebruiker,
-                    isTimerRunning: true,
-                    timerStartTimestamp: timerStartTimestamp,
-                    timerTargetTime: timerTargetTime,
-                    totaalUfDoelMl: totaalUfDoelMl,
-                    duurUur: document.getElementById('valDuurUur').value,
-                    duurMin: document.getElementById('valDuurMin').value,
-                    startTijdStr: document.getElementById('valStartTijd').value,
-                    stopTijdStr: document.getElementById('valStopTijd').value,
-                    bloeddrukken: bloeddrukMetingen
-                };
-
                 slaLokaalOp();
-                slaNaarBin();
+                updateActieveTimerInCloud();
             }
         }
 
@@ -1090,7 +1102,7 @@
                 gebruikerProfielen = rec.profielen || {};
                 if (rec.verplegingLijst) beschikbareVerpleging = rec.verplegingLijst;
                 
-                // Synchroniseer lopende timer via cloud voor de actieve gebruiker
+                // Live Synchronisatie van TIMER + BLOEDDRUK + INSTELLINGEN via Cloud
                 if (rec.actieveTimerCloud && rec.actieveTimerCloud.gebruiker?.toLowerCase() === actieveGebruiker.toLowerCase()) {
                     let tc = rec.actieveTimerCloud;
                     if (tc.isTimerRunning) {
@@ -1102,7 +1114,16 @@
                         if (tc.duurMin) document.getElementById('valDuurMin').value = tc.duurMin;
                         if (tc.startTijdStr) document.getElementById('valStartTijd').value = tc.startTijdStr;
                         if (tc.stopTijdStr) document.getElementById('valStopTijd').value = tc.stopTijdStr;
+                        
+                        // Overnemen live waarden ingevoerd op ander apparaat
                         if (tc.bloeddrukken) { bloeddrukMetingen = tc.bloeddrukken; updateBloeddrukLijstEnScherm(); }
+                        if (tc.preGewicht) document.getElementById('valPreGewicht').value = tc.preGewicht;
+                        if (tc.postGewicht) document.getElementById('valPostGewicht').value = tc.postGewicht;
+                        if (tc.droogGewicht) document.getElementById('valDroogGewicht').value = tc.droogGewicht;
+                        if (tc.ufIngesteld) document.getElementById('valUfIngesteld').value = tc.ufIngesteld;
+                        if (tc.verpleging) { geselecteerdeVerpleging = tc.verpleging; updateVerplegingTags(); }
+                        
+                        berekenUF(); berekenWerkelijkeUF();
                     }
                 } else if (!rec.actieveTimerCloud) {
                     isTimerRunning = false;
