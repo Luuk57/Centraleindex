@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rollodex • Gebruikersbeheer</title>
+    <title>Rollodex • Vocht Monitor</title>
     <style>
         :root {
             --android-bg: #f8f9fa;
@@ -15,11 +15,13 @@
             --red-alert: #d93025;
             --green-ok: #188038;
             --font-ui: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            --dialysis-yellow: #fbbc04;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-ui); }
         body, html { width: 100%; height: 100%; background: var(--android-bg); color: var(--android-text); display: flex; flex-direction: column; overflow: hidden; }
 
+        /* APPBAR */
         .android-appbar {
             background: var(--android-primary);
             color: #ffffff;
@@ -32,163 +34,88 @@
             flex-shrink: 0;
             z-index: 10;
         }
-        .appbar-title { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .appbar-title { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .appbar-actions { display: flex; align-items: center; gap: 6px; }
+        .android-clock { font-size: 11px; background: rgba(255,255,255,0.15); padding: 4px 8px; border-radius: 16px; font-weight: 500; }
+        .icon-btn { background: transparent; border: none; color: white; font-size: 15px; cursor: pointer; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
+
+        /* TAB BAR */
+        .tab-bar { display: flex; background: #e8eaed; border-bottom: 1px solid #dadce0; flex-shrink: 0; padding: 4px; gap: 4px; }
+        .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 500; background: transparent; border: none; cursor: pointer; text-align: center; color: var(--android-subtext); border-radius: 8px; }
+        .tab-btn.active { background: #ffffff; color: var(--android-primary); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* WORKSPACE */
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 10px; background: var(--android-bg); overflow-y: auto; position: relative; }
+        .tab-pane { display: none; width: 100%; max-width: 820px; }
+        .tab-pane.active { display: block; }
+
+        .controls-card { background: var(--android-card-bg); border-radius: 16px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e8eaed; margin-bottom: 10px; }
+        .section-title { font-size: 12px; font-weight: 700; color: var(--android-primary); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         
-        .workspace { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 16px; overflow-y: auto; }
-        .card { background: var(--android-card-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #dadce0; }
-        .section-title { font-size: 14px; font-weight: 700; color: var(--android-primary); text-transform: uppercase; margin-bottom: 12px; }
+        .back-link { display: inline-block; margin-bottom: 6px; font-size: 10px; font-weight: 500; color: #ffffff; text-decoration: none; background: rgba(0,0,0,0.4); padding: 3px 6px; border-radius: 6px; }
+
+        /* INLOG BAR */
+        .user-switch-bar { background: #fff; border: 1px solid #dadce0; border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .user-switch-bar select { padding: 6px 10px; border-radius: 8px; border: 1px solid #dadce0; font-size: 12px; font-weight: 600; outline: none; background: #fff; }
+
+        /* PROGRESS BAR STYLING */
+        .progress-card { background: var(--android-card-bg); border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e8eaed; margin-bottom: 10px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; color: var(--android-subtext); margin-bottom: 6px; }
+        .progress-header span b { color: var(--android-primary); }
+        .progress-bar-container { width: 100%; background: #e8eaed; border-radius: 10px; height: 14px; overflow: hidden; position: relative; }
+        .progress-bar-fill { height: 100%; background: var(--green-ok); width: 0%; transition: width 0.4s ease, background-color 0.4s ease; border-radius: 10px; }
+        .goal-settings-row { display: flex; gap: 6px; margin-top: 8px; align-items: center; display: none; }
+        .goal-settings-row input { flex: 1; padding: 6px; border: 1px solid #dadce0; border-radius: 6px; font-size: 11px; }
+
+        /* POS GRID LAYOUT */
+        .pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 6px; margin-bottom: 8px; }
+        .pos-btn {
+            background: #f1f3f4; border: 1px solid #dadce0; border-radius: 10px; padding: 10px 6px;
+            font-size: 12px; font-weight: 600; color: var(--android-text); cursor: pointer; text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: all 0.15s;
+            position: relative;
+        }
+        .pos-btn:hover { background: #e8f0fe; border-color: var(--android-primary); color: var(--android-primary); }
+        .pos-btn.selected { background: var(--android-primary); color: #fff; border-color: var(--android-primary-dark); }
         
-        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
-        .form-group label { font-size: 11px; font-weight: 600; color: var(--android-subtext); }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #dadce0; border-radius: 8px; font-size: 13px; outline: none; }
-        
-        .btn-primary { background: var(--android-primary); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; }
-        .btn-primary:hover { background: var(--android-primary-dark); }
-        
-        .back-link { display: inline-block; margin-bottom: 12px; font-size: 11px; font-weight: 600; color: var(--android-primary); text-decoration: none; }
-        
-        .profile-list { margin-top: 16px; border-top: 1px solid #dadce0; padding-top: 12px; }
-        .profile-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; margin-bottom: 6px; font-size: 12px; font-weight: 600; }
-        .btn-del { background: var(--red-alert); color: #fff; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; }
-        .btn-del:hover { background: #b31412; }
-    </style>
-</head>
-<body>
-
-    <div class="android-appbar">
-        <div class="appbar-title">
-            <span>⚙️ Rollodex • Gebruikersbeheer</span>
-        </div>
-    </div>
-
-    <div class="workspace">
-        <div class="card">
-            <a href="index.html" class="back-link">← Terug naar Hoofdmenu</a>
-            
-            <div class="section-title">Nieuw Profiel & Pincode Aanmaken</div>
-            <div class="form-group">
-                <label>Naam van de gebruiker</label>
-                <input type="text" id="nieuweGebruikerNaam" placeholder="Bijv. Jan of Maria...">
-            </div>
-            <div class="form-group">
-                <label>Pincode (4-6 cijfers)</label>
-                <input type="password" id="nieuweGebruikerPin" maxlength="6" placeholder="Bijv. 1234">
-            </div>
-            <div class="form-group">
-                <label>Rol</label>
-                <select id="nieuweGebruikerRol">
-                    <option value="gebruiker">Normale gebruiker</option>
-                    <option value="admin">Administrator (Beheer)</option>
-                </select>
-            </div>
-            <button type="button" class="btn-primary" onclick="voegProfielToe()">+ Profiel Opslaan</button>
-
-            <div class="profile-list">
-                <div class="section-title" style="margin-top: 10px;">Bestaande Profielen Verwijderen / Beheren</div>
-                <div id="profielenContainer">Laden...</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const JSONBIN_ID = "6acf500fac6210605a3048c1"; 
-        const API_KEY = "$2a$10$AAsaI9LebId4BAj60iBn3.V/Y3ayfLpT5qI5vhouztfHHUpgmuQdG";
-
-        let profielenData = {};
-        let actieveGebruiker = localStorage.getItem('actieve_gebruiker') || 'luuk';
-
-        window.addEventListener('DOMContentLoaded', () => {
-            laadProfielen();
-        });
-
-        function laadProfielen() {
-            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
-            .then(res => res.json())
-            .then(data => {
-                let rec = data.record || {};
-                profielenData = rec.profielen || { "luuk": { rol: "admin", pin: "1234" } };
-                renderProfielenLijst();
-            }).catch(err => console.error(err));
+        .pos-btn-del {
+            position: absolute; top: 2px; right: 4px; font-size: 9px; color: var(--red-alert); background: rgba(255,255,255,0.9);
+            border-radius: 50%; width: 15px; height: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
+        .pos-btn-del:hover { background: var(--red-alert); color: #fff; }
 
-        function renderProfielenLijst() {
-            let container = document.getElementById('profielenContainer');
-            container.innerHTML = '';
-            
-            let namen = Object.keys(profielenData);
-            if (namen.length === 0) {
-                container.innerHTML = '<span style="font-size:11px; color:gray;">Geen profielen gevonden.</span>';
-                return;
-            }
+        .pos-add-row { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; }
+        .pos-add-row input { flex: 1; padding: 8px; border: 1px solid #dadce0; border-radius: 8px; font-size: 12px; outline: none; }
+        .btn-pos-add { background: var(--green-ok); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .btn-pos-add:hover { background: #137333; }
 
-            namen.forEach(naam => {
-                let p = profielenData[naam];
-                let div = document.createElement('div');
-                div.className = 'profile-item';
-                div.innerHTML = `<span>👤 ${naam.charAt(0).toUpperCase() + naam.slice(1)} <small style="color:gray;">(${p.rol})</small></span>`;
-                
-                // Voorkom dat je de actieve hoofdgebruiker per ongeluk wist als er geen andere admin is
-                if (naam.toLowerCase() !== actieveGebruiker.toLowerCase() || namen.length > 1) {
-                    let btn = document.createElement('button');
-                    btn.className = 'btn-del';
-                    btn.innerText = '🗑️ Verwijder';
-                    btn.onclick = () => verwijderProfiel(naam);
-                    div.appendChild(btn);
-                } else {
-                    let span = document.createElement('span');
-                    span.style.fontSize = '10px';
-                    span.style.color = 'gray';
-                    span.innerText = '(Actief)';
-                    div.appendChild(span);
-                }
-                container.appendChild(div);
-            });
-        }
+        .total-display-box { background: #e8f0fe; border-radius: 12px; padding: 10px; text-align: center; margin: 8px 0; border: 1px solid #b3d1fc; }
+        .total-display-box .label { font-size: 10px; font-weight: 700; color: var(--android-primary); text-transform: uppercase; }
+        .total-display-box .value { font-size: 18px; font-weight: 900; color: var(--android-primary-dark); margin-top: 2px; }
 
-        function voegProfielToe() {
-            let input = document.getElementById('nieuweGebruikerNaam');
-            let pinInput = document.getElementById('nieuweGebruikerPin');
-            let rolSelect = document.getElementById('nieuweGebruikerRol');
-            let naam = input.value.trim().toLowerCase();
-            let pin = pinInput.value.trim();
-            
-            if (!naam) { alert('Vul een geldige naam in.'); return; }
-            if (!pin) { alert('Vul een pincode in.'); return; }
-            if (profielenData[naam]) { alert('Dit profiel bestaat al.'); return; }
+        /* FILTER BALK */
+        .filter-bar { background: #f1f3f4; border: 1px solid #dadce0; border-radius: 8px; padding: 8px; margin-bottom: 10px; display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+        .form-group { display: flex; flex-direction: column; gap: 3px; }
+        .form-group label { font-size: 10px; font-weight: 500; color: var(--android-subtext); }
+        .form-group input { padding: 6px; border: 1px solid #dadce0; border-radius: 6px; font-size: 11px; background: #fff; outline: none; }
 
-            profielenData[naam] = { rol: rolSelect.value, pin: pin };
-            input.value = '';
-            pinInput.value = '';
+        .btn-action-custom { padding: 7px 10px; font-size: 11px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; color: white; }
+        .btn-reset { background: #5c2d91; }
+        .btn-print { background: var(--green-ok); }
 
-            slaNaarBin();
-        }
+        table.dialyse-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 10px; background: #fff; }
+        table.dialyse-table th, table.dialyse-table td { border: 1px solid #dadce0; padding: 6px; text-align: left; }
+        table.dialyse-table th { background: #202124; color: white; font-weight: 500; }
+        .btn-small-del { padding: 3px 6px; font-size: 9px; border: none; border-radius: 4px; cursor: pointer; color: white; background: var(--red-alert); }
 
-        function verwijderProfiel(naam) {
-            if (confirm(`Weet je zeker dat je profiel '${naam}' volledig wilt verwijderen?`)) {
-                delete profielenData[naam];
-                slaNaarBin();
-            }
-        }
-
-        function slaNaarBin() {
-            fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: { 'X-Master-Key': API_KEY } })
-            .then(res => res.json())
-            .then(data => {
-                let rec = data.record || {};
-                rec.profielen = profielenData;
-
-                return fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                    body: JSON.stringify(rec)
-                });
-            })
-            .then(() => {
-                alert('Profielen succesvol bijgewerkt!');
-                laadProfielen();
-            })
-            .catch(err => console.error(err));
-        }
-    </script>
-</body>
-</html>
+        /* PRINT STYLING */
+        .print-only-header, .print-only-footer { display: none; }
+        @media print {
+            @page { size: A4 landscape; margin: 12mm 10mm; }
+            body, html { background: #fff !important; color: #000 !important; overflow: visible !important; }
+            .android-appbar, .tab-bar, .back-link, .filter-bar, .btn-small-del, #posPane, .section-title { display: none !important; }
+            .workspace { padding: 0 !important; background: none !important; }
+            #historiePane { display: block !important; width: 100% !important; max-width: 100% !important; }
+            .controls-card { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+            .print-only-header
